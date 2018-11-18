@@ -20,9 +20,9 @@ module.exports = `
             handler = counter()
             audio.play()
 
-            setInterval(() => {
-                feedback('alert', Date.now().toString())
-            }, 1000)
+            // setInterval(() => {
+            //     feedback('alert', Date.now().toString())
+            // }, 1000)
         }
         const vscode = acquireVsCodeApi()
 
@@ -34,7 +34,7 @@ module.exports = `
         }
 
         audio.addEventListener('timeupdate', () => {
-            feedback('alert', audio.currentTime + '/' + audio.duration)
+            feedback('log', audio.currentTime + '/' + audio.duration)
         }, false)
 
         window.addEventListener('message', event => {
@@ -42,12 +42,12 @@ module.exports = `
             clearInterval(handler)
             if(message.command == 'pause'){
                 audio.pause()
-                feedback('alert', 'ok i pause')
+                feedback('log', 'ok i pause')
             }
             else if(message.command == 'play'){
                 handler = counter()
                 audio.play()
-                feedback('alert','ok i play')
+                feedback('log','ok i play')
             }
         })
     </script>

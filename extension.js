@@ -22,7 +22,7 @@ const activate = context => {
     // const onDiskPath = vscode.Uri.file(path.join(context.extensionPath, 'media', 'a.mp3'))
     // const mp3Src = onDiskPath.with({ scheme: 'vscode-resource' })
 
-    const panel = vscode.window.createWebviewPanel('neteasemusic', "Netease Music", {viewColumn: 2}, {
+    const panel = vscode.window.createWebviewPanel('neteasemusic', "Netease Music", {preserveFocus: false, viewColumn: vscode.ViewColumn.One}, {
         enableScripts: true,
         retainContextWhenHidden: true
     })
@@ -32,6 +32,9 @@ const activate = context => {
         switch (message.command) {
             case 'alert':
                 vscode.window.showErrorMessage(message.text)
+                return
+            case 'log':
+                vscode.window.showInformationMessage(message.text)
                 return
         }
     }, undefined, context.subscriptions)
@@ -46,22 +49,32 @@ const activate = context => {
         const panel = e.webviewPanel
     }, null, context.subscriptions)
 
+    // vscode.window.onDidChangeWindowState(e => {
+    //     console.log(e)
+    // })
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.pause', () => {
         if (!panel) {
             return
         }
-        panel.reveal()
-        panel.webview.postMessage({ command: 'pause' })
+        postMessage(panel, { command: 'pause' })
     }))
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.play', () => {
         if (!panel) {
             return
         }
-        panel.reveal()
-        panel.webview.postMessage({ command: 'play' })
+        postMessage(panel, { command: 'play' })
     }))
+
+    const postMessage = (panel, message) => {
+        let activeTextEditor = vscode.window.activeTextEditor
+        if (activeTextEditor) {
+            panel.reveal()
+            vscode.window.showTextDocument(activeTextEditor.document, activeTextEditor.viewColumn, false)
+        }
+        panel.webview.postMessage(message)
+    }
 
 
 
