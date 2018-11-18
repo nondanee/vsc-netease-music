@@ -17,39 +17,18 @@
     "contributes": {
         "commands": [
             {
-                "command": "extension.play",
-                "title": "Netease-Music: Play"
+                "command": "neteasemusic.start",
+                "title": "NetEaseMusic: Start"
             },
             {
-                "command": "extension.pause",
-                "title": "Netease-Music: Pause"
+                "command": "neteasemusic.play",
+                "title": "NetEaseMusic: Play"
             },
             {
-                "command": "catCoding.start",
-                "title": "coding cat"
+                "command": "neteasemusic.pause",
+                "title": "NetEaseMusic: Pause"
             }
-        ],
-        "viewsContainers": {
-            "activitybar": [
-                {
-                    "id": "package-explorer",
-                    "title": "Package Explorer",
-                    "icon": "resources/package-explorer.svg"
-                }
-            ]
-        },
-        "views": {
-            "package-explorer": [
-                {
-                    "id": "package-dependencies",
-                    "name": "Dependencies"
-                },
-                {
-                    "id": "package-outline",
-                    "name": "Outline"
-                }
-            ]
-        }
+        ]
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",

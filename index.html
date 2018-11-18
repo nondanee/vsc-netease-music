@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    Please preserve this webview tab.
+    <script>
+        const audio = new Audio()
+        const vscode = acquireVsCodeApi()
+
+        const postMessage = (command, text) => {
+            vscode.postMessage({
+                command: command,
+                text: text
+            })
+        }
+
+        // audio.addEventListener('timeupdate', () => {
+        //     postMessage('log', audio.currentTime + '/' + audio.duration)
+        // }, false)
+
+        window.addEventListener('message', event => {
+            const message = event.data // The JSON data our extension sent
+            if(message.command === 'load'){
+                audio.src = message.data
+                audio.play()
+                postMessage('log',`ok i load ${message.data}`)
+            }
+            else if(message.command === 'play'){
+                if(audio.paused) audio.play()
+                postMessage('log','ok i play')
+            }
+            else if(message.command === 'pause'){
+                if(!audio.paused) audio.pause()
+                postMessage('log', 'ok i pause')
+            }
+            
+        })
+    </script>
+</html>

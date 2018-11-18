@@ -4,100 +4,86 @@ const vscode = require('vscode')
 // const axios = require('axios')
 // const player = require('./player')
 const path = require('path')
+const api = require('./api/main.js')
+const fs = require('fs')
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 const activate = context => {
-
-    // axios.get('http://baidu.com')
-    // .then(function(res){
-    //     console.log(res)
-    // })
-
-
+    
     // vscode.workspace.onDidChangeTextDocument(e => {
     //     console.log(e)
     // })
 
-    // const onDiskPath = vscode.Uri.file(path.join(context.extensionPath, 'media', 'a.mp3'))
-    // const mp3Src = onDiskPath.with({ scheme: 'vscode-resource' })
-
-    const panel = vscode.window.createWebviewPanel('neteasemusic', "Netease Music", {preserveFocus: false, viewColumn: vscode.ViewColumn.One}, {
-        enableScripts: true,
-        retainContextWhenHidden: true
-    })
-    panel.webview.html = require('./load.html')
-
-    panel.webview.onDidReceiveMessage(message => {
-        switch (message.command) {
-            case 'alert':
-                vscode.window.showErrorMessage(message.text)
-                return
-            case 'log':
-                vscode.window.showInformationMessage(message.text)
-                return
-        }
-    }, undefined, context.subscriptions)
-    
-    // // setTimeout(() => {
-    // //     panel.dispose()
-    // // }, 20000)
-
-    //     // And set its HTML content
-    
-    panel.onDidChangeViewState(e => {
-        const panel = e.webviewPanel
-    }, null, context.subscriptions)
+    const htmlPath = vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath
 
     // vscode.window.onDidChangeWindowState(e => {
     //     console.log(e)
     // })
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.pause', () => {
-        if (!panel) {
-            return
-        }
-        postMessage(panel, { command: 'pause' })
+    let panel
+
+    const addPanelListenr = panel => {
+        // panel.onDidChangeViewState(e => {
+        //     const panel = e.webviewPanel
+        // }, null, context.subscriptions)
+
+        panel.webview.onDidReceiveMessage(message => {
+            switch (message.command) {
+                case 'alert':
+                    vscode.window.showErrorMessage(message.text)
+                    return
+                case 'log':
+                    vscode.window.showInformationMessage(message.text)
+                    return
+            }
+        }, undefined, context.subscriptions)    
+    }
+
+    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.start', () => {
+        if (panel) return
+        let state = previousState()
+        panel = vscode.window.createWebviewPanel('neteasemusic', "NetEaseMusic", {preserveFocus: true, viewColumn: vscode.ViewColumn.One}, {
+            enableScripts: true,
+            retainContextWhenHidden: true
+        })
+        state()
+        panel.webview.html = fs.readFileSync(htmlPath)
+        addPanelListenr(panel)
+        
+        api.getResourcebyId(28138080)
+        .then((url) => {
+            postMessage(panel, {command: 'load', data: 'https://dev.aidoru.tk/a.mp3'})
+            postMessage(panel, {command: 'load', data: url})
+            console.log(url)
+        })
+        
     }))
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.play', () => {
-        if (!panel) {
-            return
-        }
-        postMessage(panel, { command: 'play' })
+    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.pause', () => {
+        if (!panel) return
+        postMessage(panel, {command: 'pause'})
+    }))
+
+    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.play', () => {
+        if (!panel) return
+        postMessage(panel, {command: 'play'})
     }))
 
     const postMessage = (panel, message) => {
-        let activeTextEditor = vscode.window.activeTextEditor
-        if (activeTextEditor) {
-            panel.reveal()
-            vscode.window.showTextDocument(activeTextEditor.document, activeTextEditor.viewColumn, false)
-        }
-        panel.webview.postMessage(message)
+        let state = previousState()
+        panel.reveal()
+        panel.webview.postMessage(message)     
+        state()   
     }
 
-
-
-    // player.load('C:\\Users\\Nzix\\Desktop\\a.mp3')
-    // player.pause()
-    // console.log('Congratulations, your extension "vs-netease-music" is now active!')
-
-    // let disposable = vscode.commands.registerCommand('extension.play', function () {
-    //     // The code you place here will be executed every time your command is executed
-    //     player.resume()
-    //     // Display a message box to the user
-    //     vscode.window.showInformationMessage('play now')
-    // })
-
-    // let disposable2 = vscode.commands.registerCommand('extension.pause', function () {
-    //     // The code you place here will be executed every time your command is executed
-    //     player.pause()
-    //     // Display a message box to the user
-    //     vscode.window.showInformationMessage('pause now')
-    // })
-
-    // context.subscriptions.push(disposable)
-    // context.subscriptions.push(disposable2)
+    const previousState = () => {
+        let activeTextEditor = vscode.window.activeTextEditor
+        if (activeTextEditor)
+            return () => vscode.window.showTextDocument(activeTextEditor.document, activeTextEditor.viewColumn, false)
+        else
+            return () => {}
+    }
 
 }
 exports.activate = activate
