@@ -68,7 +68,8 @@ const activate = context => {
         postMessage(panel, {command: 'play'})
     }))
 
-    let _statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+    let _statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left)
+    let timeoutHandler = 0
     let delta = (()=>{
         let lastTrigger = Date.now()
         let delta = 999999
@@ -76,9 +77,10 @@ const activate = context => {
                 let now = Date.now()
                 delta = now - lastTrigger
                 lastTrigger = now
-                return delta;
+                return delta
         }
     })()
+
     function sbi(delta){
         let apm = parseInt(60000/delta)
         _statusBarItem.text=`${apm} apm`
@@ -92,7 +94,11 @@ const activate = context => {
             }
             _statusBarItem.show()
             sbi(delta())
-            setTimeout(()=>{_statusBarItem.text='0 apm',postMessage(panel, { command: 'pause' })},5000)
+            clearTimeout(timeoutHandler)
+            timeoutHandler = setTimeout(() => {
+                _statusBarItem.text = '0 apm'
+                postMessage(panel, { command: 'pause' })
+            }, 5000)
         }
     ))
     
