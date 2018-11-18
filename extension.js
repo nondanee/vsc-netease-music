@@ -70,6 +70,57 @@ const activate = context => {
         postMessage(panel, {command: 'play'})
     }))
 
+    let _statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+    let delta = (()=>{
+        let lastTrigger = Date.now()
+        let delta = 999999
+        return function(){
+                let now = Date.now()
+                delta = now - lastTrigger
+                lastTrigger = now
+                return delta;
+        }
+    })()
+
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(
+        event => {
+            const key = event.contentChanges[0].text
+            if(!key){
+                return;
+            }
+            _statusBarItem.show()
+            sbi(delta())
+            setTimeout(()=>{_statusBarItem.text='0 apm',postMessage(panel, { command: 'pause' })},5000)
+        }
+    ))
+    
+    let bpCounter = (()=>{
+        let counter = 0
+        return function(type='p',len=0){
+            switch(type){
+                case 'a':
+                counter+=len
+                break;
+                case 's':
+                counter-=len
+                break;
+                default:
+                return counter;
+            }
+        }
+    })
+    vscode.debug.onDidChangeBreakpoints(
+        event=>{
+            if(event.added.length>0){
+                bpCounter('a',event.added.length)
+            }
+            if(event.removed.length>0){
+                bpCounter('s',event.removed.length)
+            }
+            console.log(bpCounter())
+        }
+    )
+
     const postMessage = (panel, message) => {
         let state = previousState()
         panel.reveal()
