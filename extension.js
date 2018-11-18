@@ -2,7 +2,6 @@
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode')
 // const axios = require('axios')
-// const player = require('./player')
 const path = require('path')
 const api = require('./api/main.js')
 const fs = require('fs')
@@ -53,9 +52,8 @@ const activate = context => {
         
         api.getResourcebyId(28138080)
         .then((url) => {
-            postMessage(panel, {command: 'load', data: 'https://dev.aidoru.tk/a.mp3'})
+            // postMessage(panel, {command: 'load', data: 'https://dev.aidoru.tk/a.mp3'})
             postMessage(panel, {command: 'load', data: url})
-            console.log(url)
         })
         
     }))
@@ -140,6 +138,5 @@ const activate = context => {
 exports.activate = activate
 
 // this method is called when your extension is deactivated
-function deactivate() {
-}
+const deactivate = () => {}
 exports.deactivate = deactivate
