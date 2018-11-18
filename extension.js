@@ -79,6 +79,10 @@ const activate = context => {
                 return delta;
         }
     })()
+    function sbi(delta){
+        let apm = parseInt(60000/delta)
+        _statusBarItem.text=`${apm} apm`
+    }
 
     context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(
         event => {
