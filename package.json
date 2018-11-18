@@ -1,0 +1,68 @@
+{
+    "name": "vs-netease-music",
+    "displayName": "vs-netease-music",
+    "description": "",
+    "version": "0.0.1",
+    "publisher": "vs-netease-music",
+    "engines": {
+        "vscode": "^1.28.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "*"
+    ],
+    "main": "./extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "extension.play",
+                "title": "Netease-Music: Play"
+            },
+            {
+                "command": "extension.pause",
+                "title": "Netease-Music: Pause"
+            },
+            {
+                "command": "catCoding.start",
+                "title": "coding cat"
+            }
+        ],
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "package-explorer",
+                    "title": "Package Explorer",
+                    "icon": "resources/package-explorer.svg"
+                }
+            ]
+        },
+        "views": {
+            "package-explorer": [
+                {
+                    "id": "package-dependencies",
+                    "name": "Dependencies"
+                },
+                {
+                    "id": "package-outline",
+                    "name": "Outline"
+                }
+            ]
+        }
+    },
+    "scripts": {
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.21",
+        "eslint": "^4.11.0",
+        "@types/node": "^8.10.25",
+        "@types/mocha": "^2.2.42"
+    },
+    "dependencies": {
+        "axios": "^0.18.0"
+    }
+}
