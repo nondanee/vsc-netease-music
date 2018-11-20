@@ -31,7 +31,20 @@
                 if(!audio.paused) audio.pause()
                 postMessage('log', 'ok i pause')
             }
-            
+            else if(message.command === 'help'){
+                postMessage('log', helpDocument())
+                // navigator.userAgent
+            }
         })
+
+        const helpDocument = () => {
+            let electronVersion = navigator.userAgent.match(/Electron\/(\S+)/)[1]
+            return `
+                [使用帮助]
+                您的 VS Code 所使用的 Electron 版本是 ${electronVersion}, 
+                请前往 [Electron Github Release Page](https://github.com/electron/electron/releases/tag/v${electronVersion}) 下载对应完整版,
+                用其中的 ffmpeg.dll 替换 VS Code 所使用的 ffmpeg.dll
+            `
+        }
     </script>
 </html>

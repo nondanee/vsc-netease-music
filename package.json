@@ -27,8 +27,13 @@
             {
                 "command": "neteasemusic.pause",
                 "title": "NetEaseMusic: Pause"
+            },
+            {
+                "command": "neteasemusic.playlist",
+                "title": "NetEaseMusic: Playlist"
             }
         ]
+
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",

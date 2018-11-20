@@ -1,26 +1,37 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-const vscode = require('vscode')
-// const axios = require('axios')
-const path = require('path')
-const api = require('./api/main.js')
 const fs = require('fs')
+const path = require('path')
+const vscode = require('vscode')
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 const activate = context => {
     
+    let panel
+
+    const postMessage = message => {
+        if (!panel) return
+        let state = previousState()
+        panel.reveal()
+        panel.webview.postMessage(message)
+        state()
+    }
+
+    const previousState = () => {
+        let activeTextEditor = vscode.window.activeTextEditor
+        if (activeTextEditor)
+            return () => vscode.window.showTextDocument(activeTextEditor.document, activeTextEditor.viewColumn, false)
+        else
+            return () => {}
+    }
+
+    const interaction = require('./interaction.js')({postMessage})
+    const htmlPath = vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath
+
+
     // vscode.workspace.onDidChangeTextDocument(e => {
     //     console.log(e)
     // })
-
-    const htmlPath = vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath
-
     // vscode.window.onDidChangeWindowState(e => {
     //     console.log(e)
     // })
-
-    let panel
 
     const addPanelListenr = panel => {
         // panel.onDidChangeViewState(e => {
@@ -36,39 +47,39 @@ const activate = context => {
                     vscode.window.showInformationMessage(message.text)
                     return
             }
-        }, undefined, context.subscriptions)    
+        }, undefined, context.subscriptions)
     }
 
     context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.start', () => {
         if (panel) return
         let state = previousState()
-        panel = vscode.window.createWebviewPanel('neteasemusic', "NetEaseMusic", {preserveFocus: true, viewColumn: vscode.ViewColumn.One}, {
-            enableScripts: true,
-            retainContextWhenHidden: true
-        })
+        panel = vscode.window.createWebviewPanel(
+            'neteasemusic', "NetEaseMusic", 
+            {preserveFocus: true, viewColumn: vscode.ViewColumn.One}, 
+            {enableScripts: true, retainContextWhenHidden: true}
+        )
         state()
         panel.webview.html = fs.readFileSync(htmlPath)
         addPanelListenr(panel)
-        
-        api.getResourcebyId(28138080)
-        .then((url) => {
-            // postMessage(panel, {command: 'load', data: 'https://dev.aidoru.tk/a.mp3'})
-            postMessage(panel, {command: 'load', data: url})
-        })
-        
+    }))
+
+    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.playlist',  () => {
+        interaction.user.playlist(38050391)
     }))
 
     context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.pause', () => {
-        if (!panel) return
-        postMessage(panel, {command: 'pause'})
+        postMessage({command: 'pause'})
     }))
 
     context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.play', () => {
-        if (!panel) return
-        postMessage(panel, {command: 'play'})
+        postMessage({command: 'play'})
     }))
 
-    let _statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left)
+    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.help', () => {
+        postMessage({command: 'help'})
+    }))
+
+
     let timeoutHandler = 0
     let delta = (()=>{
         let lastTrigger = Date.now()
@@ -81,26 +92,17 @@ const activate = context => {
         }
     })()
 
-    function sbi(delta){
-        let apm = parseInt(60000/delta)
-        _statusBarItem.text=`${apm} apm`
-    }
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
+        const key = event.contentChanges[0].text
+        if (!key) return
 
-    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(
-        event => {
-            const key = event.contentChanges[0].text
-            if(!key){
-                return;
-            }
-            _statusBarItem.show()
-            sbi(delta())
-            clearTimeout(timeoutHandler)
-            timeoutHandler = setTimeout(() => {
-                _statusBarItem.text = '0 apm'
-                postMessage(panel, { command: 'pause' })
-            }, 5000)
-        }
-    ))
+        let velocity = delta()
+        clearTimeout(timeoutHandler)
+        timeoutHandler = setTimeout(() => {
+            _statusBarItem.text = '0 apm'
+            postMessage({ command: 'pause' })
+        }, 5000)
+    }))
     
     let bpCounter = (()=>{
         let counter = 0
@@ -118,7 +120,7 @@ const activate = context => {
         }
     })
     vscode.debug.onDidChangeBreakpoints(
-        event=>{
+        event => {
             if(event.added.length>0){
                 bpCounter('a',event.added.length)
             }
@@ -129,24 +131,8 @@ const activate = context => {
         }
     )
 
-    const postMessage = (panel, message) => {
-        let state = previousState()
-        panel.reveal()
-        panel.webview.postMessage(message)     
-        state()   
-    }
-
-    const previousState = () => {
-        let activeTextEditor = vscode.window.activeTextEditor
-        if (activeTextEditor)
-            return () => vscode.window.showTextDocument(activeTextEditor.document, activeTextEditor.viewColumn, false)
-        else
-            return () => {}
-    }
-
 }
 exports.activate = activate
 
-// this method is called when your extension is deactivated
 const deactivate = () => {}
 exports.deactivate = deactivate
