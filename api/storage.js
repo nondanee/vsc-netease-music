@@ -14,6 +14,7 @@ const update = {
         if(!(id in cache.album)) cache.album[id] = {}
         set(cache.album[id], 'name', data.name)
         set(cache.album[id], 'cover', data.picUrl)
+        set(cache.album[id], 'publish', data.publishTime)
         if(data.artists)
             data.artists.forEach(artist => update.artist(artist))
         if(data.songs){
@@ -28,6 +29,7 @@ const update = {
         set(cache.playlist[id], 'description', data.description)
         set(cache.playlist[id], 'cover', data.coverImgUrl || data.picUrl)
         set(cache.playlist[id], 'plays', data.playCount)
+        set(cache.playlist[id], 'songs', data.trackCount)
         if(data.trackIds && data.tracks){
             set(cache.playlist[id], 'song', data.trackIds.map(song => song.id))
             data.tracks.forEach(song => update.song(song))
@@ -206,12 +208,21 @@ const obtain = {
                 }))
             })
         }
-        if(data.album){
+        if(data.album && !Array.isArray(data.album)){
             task.push(obtain.album(data.album).then(album => {
                 if(album.song) delete album.song
                 album.id = data.album
                 data.album = album
             }))
+        }
+        if(data.album && Array.isArray(data.album)){
+            data.album.forEach((id, index) => {
+                task.push(obtain.album(id).then(album => {
+                    album.id = id
+                    if(album.song) delete album.song
+                    data.album[index] = album
+                }))
+            })
         }
         return Promise.all(task).then(() => resolve(data))
     })

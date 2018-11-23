@@ -18,21 +18,149 @@
         "commands": [
             {
                 "command": "neteasemusic.start",
-                "title": "NetEaseMusic: Start"
+                "title": "启动",
+                "category": "网易云音乐"
             },
             {
                 "command": "neteasemusic.play",
-                "title": "NetEaseMusic: Play"
+                "title": "播放",
+                "category": "网易云音乐"
             },
             {
                 "command": "neteasemusic.pause",
-                "title": "NetEaseMusic: Pause"
+                "title": "暂停",
+                "category": "网易云音乐"
             },
             {
-                "command": "neteasemusic.playlist",
-                "title": "NetEaseMusic: Playlist"
+                "command": "neteasemusic.search",
+                "title": "搜索",
+                "category": "网易云音乐"
+            },
+            {
+                "command": "neteasemusic.login",
+                "title": "登录",
+                "category": "网易云音乐"
+            },
+            {
+                "command": "neteasemusic.logout",
+                "title": "登出",
+                "category": "网易云音乐"
+            },
+            {
+                "command": "neteasemusic.recommend.song",
+                "title": "每日歌单推荐",
+                "category": "网易云音乐 个性推荐"
+            },
+            {
+                "command": "neteasemusic.recommend.playlist",
+                "title": "推荐歌单",
+                "category": "网易云音乐 个性推荐"
+            },
+            {
+                "command": "neteasemusic.user.playlist",
+                "title": "歌单",
+                "category": "网易云音乐 我的音乐"
+            },
+            {
+                "command": "neteasemusic.user.artist",
+                "title": "歌手",
+                "category": "网易云音乐 我的音乐"
+            },
+            {
+                "command": "neteasemusic.user.album",
+                "title": "专辑",
+                "category": "网易云音乐 我的音乐"
+            },
+            {
+                "command": "neteasemusic.new.song",
+                "title": "新歌速递",
+                "category": "网易云音乐 发现音乐"
+            },
+            {
+                "command": "neteasemusic.new.album",
+                "title": "新碟上架",
+                "category": "网易云音乐 发现音乐"
+            },
+            {
+                "command": "neteasemusic.playlist.highquality",
+                "title": "精品歌单",
+                "category": "网易云音乐 发现音乐"
+            },
+            {
+                "command": "neteasemusic.playlist.hot",
+                "title": "热门歌单",
+                "category": "网易云音乐 发现音乐"
+            },
+            {
+                "command": "neteasemusic.toplist",
+                "title": "排行榜",
+                "category": "网易云音乐 发现音乐"
             }
-        ]
+        ],
+        "menus": {
+            "commandPalette": [
+                {
+                    "command": "neteasemusic.start",
+                    "when": "!neteasemusic.on"
+                },
+                {
+                    "command": "neteasemusic.login",
+                    "when": "neteasemusic.on && !neteasemusic.logged"
+                },
+                {
+                    "command": "neteasemusic.search",
+                    "when": "neteasemusic.on"
+                },
+                {
+                    "command": "neteasemusic.toplist",
+                    "when": "neteasemusic.on"
+                },
+                {
+                    "command": "neteasemusic.new.song",
+                    "when": "neteasemusic.on"
+                },
+                {
+                    "command": "neteasemusic.new.album",
+                    "when": "neteasemusic.on"
+                },
+                {
+                    "command": "neteasemusic.playlist.hot",
+                    "when": "neteasemusic.on"
+                },
+                {
+                    "command": "neteasemusic.playlist.highquality",
+                    "when": "neteasemusic.on"
+                },
+                {
+                    "command": "neteasemusic.recommend.song",
+                    "when": "neteasemusic.on && neteasemusic.logged"
+                },
+                {
+                    "command": "neteasemusic.recommend.playlist",
+                    "when": "neteasemusic.on && neteasemusic.logged"
+                },
+                {
+                    "command": "neteasemusic.user.artist",
+                    "when": "neteasemusic.on && neteasemusic.logged"
+                },
+                {
+                    "command": "neteasemusic.user.album",
+                    "when": "neteasemusic.on && neteasemusic.logged"
+                },
+                {
+                    "command": "neteasemusic.user.playlist",
+                    "when": "neteasemusic.on && neteasemusic.logged"
+                },
+                {
+                    "command": "neteasemusic.play",
+                    "when": "neteasemusic.on && neteasemusic.paused"
+                },
+                {
+                    "command": "neteasemusic.pause",
+                    "when": "neteasemusic.on && neteasemusic.playing"
+                }
+            ]
+        }
 
     },
     "scripts": {
