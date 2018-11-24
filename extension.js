@@ -2,10 +2,10 @@ const fs = require('fs')
 const path = require('path')
 const vscode = require('vscode')
 
-
 const activate = context => {
     
     let panel = null
+    let toolBar = null
 
     const postMessage = message => {
         if (!panel) return
@@ -36,12 +36,18 @@ const activate = context => {
             setContext('playing', false), setContext('paused', true)
     }
 
-    const api = require('./api/request.js')
+    const globalStorage = {
+        get: key => context.globalState.get(key),
+        set: (key, value) => context.globalState.update(key, value)
+    }
+
+    console.log('global state', context.globalState.get('user'))
+
+    const api = require('./request.js')({globalStorage, setContext})
     const interaction = require('./interaction.js')({postMessage, setState, setContext, api})
     const indexHtmlPath = vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath
 
     setState('off')
-    setContext('logged', false)
 
     // vscode.workspace.onDidChangeTextDocument(e => {
     //     console.log(e)
@@ -50,7 +56,59 @@ const activate = context => {
     //     console.log(e)
     // })
 
+    const ToolBar = () => {
+        let buttons = {
+            previous: {
+                command: 'neteasemusic.previous',
+                icon: ' $(chevron-left) '
+            },
+            next: {
+                command: 'neteasemusic.next',
+                icon: ' $(chevron-right) '
+            },
+            play: {
+                command: 'neteasemusic.play',
+                icon: '▶'
+            },
+            pause: {
+                command: 'neteasemusic.pause',
+                icon: ' ❚❚ '
+            },
+            list: {
+                command: 'neteasemusic.list',
+                icon: ''
+            }
+        }
+
+        let order = ['previous', 'play', 'pause', 'next', 'list'].reverse()
+        
+        Object.keys(buttons).forEach(key => {
+            let item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 163)
+            item.text = buttons[key].icon
+            item.command = buttons[key].command
+            buttons[key].item = item
+        })
+        
+        return {
+            dispose: () => {
+                Object.keys(buttons).forEach(key => buttons[key].item.dispose())
+            },
+            play: () => {
+                order.forEach(key => buttons[key].item.show())
+                buttons.play.item.hide()
+            },
+            pause: () => {
+                order.forEach(key => buttons[key].item.show())
+                buttons.pause.item.hide()
+            },
+            playing: text => {
+                buttons.list.item.text = text
+            }
+        }
+    }
+
     const addPanelListenr = () => {
+        
         // panel.onDidChangeViewState(e => {
         //     const panel = e.webviewPanel
         // }, null, context.subscriptions)
@@ -58,16 +116,28 @@ const activate = context => {
         panel.onDidDispose(() => {
             panel = null
             setState('off')
+            toolBar.dispose()
+            toolBar = null
         })
 
         panel.webview.onDidReceiveMessage(message => {
-            switch (message.command) {
-                case 'alert':
-                    vscode.window.showErrorMessage(message.text)
-                    return
-                case 'log':
-                    vscode.window.showInformationMessage(message.text)
-                    return
+            const type = message.type
+            const body = message.body
+            if (type == 'event') {
+                if (body.name == 'ended') {
+                    interaction.next()
+                }
+                else if(body.name == 'play') {
+                    toolBar.playing(`${body.data.artist} - ${body.data.name}`)
+                    toolBar.play()
+                }
+                else if(body.name == 'pause') {
+                    toolBar.playing(`${body.data.artist} - ${body.data.name}`)
+                    toolBar.pause()
+                }
+            }
+            else if(type == 'echo') {
+                vscode.window.showInformationMessage(message.body)
             }
         }, undefined, context.subscriptions)
     }
@@ -76,6 +146,7 @@ const activate = context => {
         if (panel) return
         setState('on')
         let scene = previousScene()
+        toolBar = ToolBar()
         panel = vscode.window.createWebviewPanel(
             'neteasemusic', "NetEaseMusic", 
             {preserveFocus: true, viewColumn: vscode.ViewColumn.One}, 
@@ -86,32 +157,31 @@ const activate = context => {
         addPanelListenr()
     }))
 
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.toplist',  () => interaction.toplist()))
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.playlist.highquality',  () => interaction.playlist.highquality()))
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.playlist.hot',  () => interaction.playlist.hot()))
+    const commands = {
+        'neteasemusic.toplist': interaction.toplist,
+        'neteasemusic.playlist.highquality': interaction.playlist.highquality,
+        'neteasemusic.playlist.hot': interaction.playlist.hot,
+        'neteasemusic.new.song': interaction.new.song,
+        'neteasemusic.new.album': interaction.new.album,
 
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.new.song',  () => interaction.new.song()))
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.new.album',  () => interaction.new.album()))
+        'neteasemusic.user.playlist': interaction.user.playlist,
+        'neteasemusic.user.artist': interaction.user.artist,
+        'neteasemusic.user.album': interaction.user.album,
+        'neteasemusic.recommend.song': interaction.recommend.song,
+        'neteasemusic.recommend.playlist': interaction.recommend.playlist,
 
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.user.playlist',  () => interaction.user.playlist(38050391)))
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.user.artist',  () => interaction.user.artist()))
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.user.album',  () => interaction.user.album()))
+        'neteasemusic.login': interaction.login,
+        'neteasemusic.logout': interaction.logout,
 
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.recommend.song',  () => interaction.recommend.song()))
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.recommend.playlist',  () => interaction.recommend.playlist()))
+        'neteasemusic.list': interaction.list,
+        'neteasemusic.pause': interaction.pause,
+        'neteasemusic.play': interaction.resume,
+        'neteasemusic.previous': interaction.previous,
+        'neteasemusic.next': interaction.next
+    }
 
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.login',  () => interaction.login()))
+    Object.keys(commands).forEach(key => context.subscriptions.push(vscode.commands.registerCommand(key, commands[key])))
     
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.list',  () => interaction.list()))
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.pause', () => interaction.pause()))
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.play', () => interaction.resume()))
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.previous', () => interaction.previous()))
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.next', () => interaction.next()))
-
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.help', () => {
-        postMessage({command: 'help'})
-    }))
-
     // let timeoutHandler = 0
     // let delta = (()=>{
     //     let lastTrigger = Date.now()

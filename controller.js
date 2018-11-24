@@ -33,10 +33,12 @@ const controller = {
         controller.play()
     },
     resume: () => {
+        if (list.length == 0) return
         runtime.postMessage({command: 'play'})
         runtime.setState('playing')
     },
     pause: () => {
+        if (list.length == 0) return
         runtime.postMessage({command: 'pause'})
         runtime.setState('paused')
     },
@@ -47,15 +49,16 @@ const controller = {
         runtime.api.song.url(song.id).then(data => {
             let url = data.data[0].url
             if (!url) {
-                vscode.window.showWarningMessage(`该资源暂无版权  ${song.artist} - ${song.name}`)
+                vscode.window.showWarningMessage(`无法播放: ${song.artist} - ${song.name}`)
                 controller.remove(index)
                 controller.play()
             }
             else {
                 url = url.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net')
-                vscode.window.showInformationMessage(`正在播放  ${song.artist} - ${song.name}`)
+                song.url = url
+                vscode.window.showInformationMessage(`正在播放: ${song.artist} - ${song.name}`)
                 runtime.setState('playing')
-                runtime.postMessage({command: 'load', data: url})
+                runtime.postMessage({command: 'load', data: song})
             }
         })
     },

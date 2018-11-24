@@ -1,50 +1,41 @@
 <!DOCTYPE html>
 <html>
-    Please preserve this webview tab.
+    Please preserve this webview tab
     <script>
         const audio = new Audio()
         const vscode = acquireVsCodeApi()
+        let playing = {}
 
-        const postMessage = (command, text) => {
-            vscode.postMessage({
-                command: command,
-                text: text
-            })
+        const postMessage = (type, body) => {
+            vscode.postMessage({type, body})
         }
 
-        // audio.addEventListener('timeupdate', () => {
-        //     postMessage('log', audio.currentTime + '/' + audio.duration)
-        // }, false)
+        audio.addEventListener('play', () => {
+            postMessage('event', {name: 'play', data: playing})
+        }, false)
+
+        audio.addEventListener('pause', () => {
+            postMessage('event', {name: 'pause', data: playing})
+        }, false)
+
+        audio.addEventListener('ended', () => {
+            postMessage('event', {name: 'ended', data: playing})
+        }, false)        
 
         window.addEventListener('message', event => {
             const message = event.data // The JSON data our extension sent
             if(message.command === 'load'){
-                audio.src = message.data
+                audio.src = message.data.url
+                playing = message.data
                 audio.play()
-                postMessage('log',`ok i load ${message.data}`)
+                postMessage('log',`ok i load ${message.data.url}`)
             }
             else if(message.command === 'play'){
                 if(audio.paused) audio.play()
-                postMessage('log','ok i play')
             }
             else if(message.command === 'pause'){
                 if(!audio.paused) audio.pause()
-                postMessage('log', 'ok i pause')
-            }
-            else if(message.command === 'help'){
-                postMessage('log', helpDocument())
-                // navigator.userAgent
             }
         })
-
-        const helpDocument = () => {
-            let electronVersion = navigator.userAgent.match(/Electron\/(\S+)/)[1]
-            return `
-                [使用帮助]
-                您的 VS Code 所使用的 Electron 版本是 ${electronVersion}, 
-                请前往 [Electron Github Release Page](https://github.com/electron/electron/releases/tag/v${electronVersion}) 下载对应完整版,
-                用其中的 ffmpeg.dll 替换 VS Code 所使用的 ffmpeg.dll
-            `
-        }
     </script>
 </html>

@@ -25,7 +25,7 @@ const alignCenter = (string, space) => {
 const addIndex = (item, index, all) => {
     let space = all.length.toString().length * 2
     item.index = index
-    item.label = `${alignCenter(item.play ? '♬' : (index + 1), space)}  ${item.label}`
+    item.label = ` ${alignCenter(item.play ? '♬' : (index + 1), space)}   ${item.label}`
     return item
 }
 
@@ -247,11 +247,14 @@ const interaction = {
             })
             .then(password => {
                 if(account && password){
-                    console.log('got', account, password)
+                    runtime.api.login(account, password)
+                    .then(data => vscode.window.showInformationMessage(`登录成功: ${data.profile.nickname}(${data.account.id})`))
+                    .catch(e => vscode.window.showErrorMessage(`登录失败: ${e.code == 502 ? '账号或密码错误' : '未知错误'}(${e.code})`))
                 }
             })
         })
     },
+    logout: () => runtime.api.logout(),
     list: () => {
         quickPick.busy = false
         let track = controller.list().map(songDisplay).map(addIndex)
