@@ -2,6 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const vscode = require('vscode')
 
+
 const activate = context => {
     
     let panel = null
@@ -26,20 +27,17 @@ const activate = context => {
     
     const setState = (state) => {
         if(state == 'off')
-            setContext('on', false), setContext('playing', false), setContext('paused', false)
+            setContext('on', false), setContext('playing', false), setContext('paused', false), setContext('track', false)
         else if (state == 'on')
             setContext('on', true)
         else if (state == 'playing')
             setContext('playing', true), setContext('paused', false)
         else if (state == 'paused')
             setContext('playing', false), setContext('paused', true)
-            
-        
-        // vscode.commands.executeCommand('setContext', 'neteasemusic.playing', false)
-        // vscode.commands.executeCommand('setContext', 'neteasemusic.paused', false)
     }
 
-    const interaction = require('./interaction.js')({postMessage, setState})
+    const api = require('./api/request.js')
+    const interaction = require('./interaction.js')({postMessage, setState, setContext, api})
     const indexHtmlPath = vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath
 
     setState('off')
@@ -103,16 +101,12 @@ const activate = context => {
     context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.recommend.playlist',  () => interaction.recommend.playlist()))
 
     context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.login',  () => interaction.login()))
-
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.pause', () => {
-        postMessage({command: 'pause'})
-        setState('paused')
-    }))
-
-    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.play', () => {
-        postMessage({command: 'play'})
-        setState('playing')
-    }))
+    
+    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.list',  () => interaction.list()))
+    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.pause', () => interaction.pause()))
+    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.play', () => interaction.resume()))
+    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.previous', () => interaction.previous()))
+    context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.next', () => interaction.next()))
 
     context.subscriptions.push(vscode.commands.registerCommand('neteasemusic.help', () => {
         postMessage({command: 'help'})
