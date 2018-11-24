@@ -263,7 +263,7 @@ const interaction = {
         quickPick.activeItems = [quickPick.items[play]]
         onPickItem = item => {
             quickPick.busy = true
-            item.play ? controller.pause() : controller.play(item.index)
+            item.play ? (controller.pause() || controller.resume()) : controller.play(item.index)
             quickPick.hide()
         }
     },

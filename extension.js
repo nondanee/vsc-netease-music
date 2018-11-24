@@ -29,7 +29,7 @@ const activate = context => {
         if(state == 'off')
             setContext('on', false), setContext('playing', false), setContext('paused', false), setContext('track', false)
         else if (state == 'on')
-            setContext('on', true)
+            setContext('on', true), setContext('playing', false), setContext('paused', false), setContext('track', false)
         else if (state == 'playing')
             setContext('playing', true), setContext('paused', false)
         else if (state == 'paused')
@@ -68,11 +68,13 @@ const activate = context => {
             },
             play: {
                 command: 'neteasemusic.play',
-                icon: '▶'
+                // icon: '▶'
+                icon: ' $(triangle-right) '
             },
             pause: {
                 command: 'neteasemusic.pause',
-                icon: ' ❚❚ '
+                // icon: ' ❚❚ '
+                icon: ' $(primitive-square) '
             },
             list: {
                 command: 'neteasemusic.list',

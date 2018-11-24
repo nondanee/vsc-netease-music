@@ -2,6 +2,7 @@ const vscode = require('vscode')
 let runtime = {}
 let list = []
 let index = 0
+let paused = false
 
 const format = song => ({id: song.id, name: song.name, album: song.album, artist: song.artist})
 
@@ -33,14 +34,20 @@ const controller = {
         controller.play()
     },
     resume: () => {
-        if (list.length == 0) return
+        if (list.length == 0) return false
+        if (!paused) return false
+        paused = false
         runtime.postMessage({command: 'play'})
         runtime.setState('playing')
+        return true
     },
     pause: () => {
         if (list.length == 0) return
+        if (paused) return false
+        paused = true
         runtime.postMessage({command: 'pause'})
         runtime.setState('paused')
+        return true
     },
     play: target => {
         if (list.length == 0) return
@@ -56,9 +63,10 @@ const controller = {
             else {
                 url = url.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net')
                 song.url = url
-                vscode.window.showInformationMessage(`正在播放: ${song.artist} - ${song.name}`)
-                runtime.setState('playing')
                 runtime.postMessage({command: 'load', data: song})
+                paused = true
+                controller.resume()
+                vscode.window.showInformationMessage(`正在播放: ${song.artist} - ${song.name}`)
             }
         })
     },

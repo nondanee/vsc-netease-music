@@ -27,7 +27,6 @@
             if(message.command === 'load'){
                 audio.src = message.data.url
                 playing = message.data
-                audio.play()
                 postMessage('log',`ok i load ${message.data.url}`)
             }
             else if(message.command === 'play'){
