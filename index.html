@@ -23,7 +23,7 @@
         }, false)        
 
         window.addEventListener('message', event => {
-            const message = event.data // The JSON data our extension sent
+            const message = event.data
             if(message.command === 'load'){
                 audio.src = message.data.url
                 playing = message.data

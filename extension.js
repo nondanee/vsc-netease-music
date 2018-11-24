@@ -41,7 +41,7 @@ const activate = context => {
         set: (key, value) => context.globalState.update(key, value)
     }
 
-    console.log('global state', context.globalState.get('user'))
+    // console.log('global state', context.globalState.get('user'))
 
     const api = require('./request.js')({globalStorage, setContext})
     const interaction = require('./interaction.js')({postMessage, setState, setContext, api})
