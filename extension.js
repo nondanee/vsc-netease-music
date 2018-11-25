@@ -84,8 +84,8 @@ const activate = context => {
 
         let order = ['previous', 'play', 'pause', 'next', 'list'].reverse()
         
-        Object.keys(buttons).forEach(key => {
-            let item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 163)
+        order.forEach((key, index) => {
+            let item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 163 + index)
             item.text = buttons[key].icon
             item.command = buttons[key].command
             buttons[key].item = item
@@ -126,15 +126,16 @@ const activate = context => {
             const type = message.type
             const body = message.body
             if (type == 'event') {
-                if (body.name == 'ended') {
+                if (body.name == 'end') {
                     interaction.next()
                 }
-                else if(body.name == 'play') {
+                else if(body.name == 'load') {
                     toolBar.playing(`${body.data.artist} - ${body.data.name}`)
+                }
+                else if(body.name == 'play') {
                     toolBar.play()
                 }
                 else if(body.name == 'pause') {
-                    toolBar.playing(`${body.data.artist} - ${body.data.name}`)
                     toolBar.pause()
                 }
             }
@@ -182,7 +183,7 @@ const activate = context => {
         'neteasemusic.next': interaction.next
     }
 
-    Object.keys(commands).forEach(key => context.subscriptions.push(vscode.commands.registerCommand(key, commands[key])))
+    Object.keys(commands).forEach(name => context.subscriptions.push(vscode.commands.registerCommand(name, commands[name])))
     
     // let timeoutHandler = 0
     // let delta = (()=>{

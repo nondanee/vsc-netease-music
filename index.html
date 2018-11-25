@@ -11,16 +11,20 @@
         }
 
         audio.addEventListener('play', () => {
-            postMessage('event', {name: 'play', data: playing})
+            postMessage('event', {name: 'play'})
         }, false)
 
         audio.addEventListener('pause', () => {
-            postMessage('event', {name: 'pause', data: playing})
+            postMessage('event', {name: 'pause'})
         }, false)
 
         audio.addEventListener('ended', () => {
-            postMessage('event', {name: 'ended', data: playing})
-        }, false)        
+            postMessage('event', {name: 'end'})
+        }, false)
+
+        audio.addEventListener('loadstart', () => {
+            postMessage('event', {name: 'load', data: playing})
+        }, false)
 
         window.addEventListener('message', event => {
             const message = event.data
