@@ -41,7 +41,7 @@ const activate = context => {
     const setState = state => {
         let field = {}
         if(state == 'off')
-            field = {on: false, playing: false, paused: false, track: false,type: false}  
+            field = {on: false, playing: false, paused: false, track: false, type: false}  
         else if (state == 'on')
             field = {on: true, playing: false, paused: false, track: false}
         else if (state == 'playing')
