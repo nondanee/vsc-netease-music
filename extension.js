@@ -41,7 +41,7 @@ const activate = context => {
     const setState = state => {
         let field = {}
         if(state == 'off')
-            field = {on: false, playing: false, paused: false, track: false}  
+            field = {on: false, playing: false, paused: false, track: false, type: false}  
         else if (state == 'on')
             field = {on: true, playing: false, paused: false, track: false}
         else if (state == 'playing')
@@ -55,6 +55,7 @@ const activate = context => {
 
     const api = require('./request.js')({globalStorage, contextState})
     const controller = require('./controller.js')({postMessage, contextState, api})
+    const coding = require('./coding.js')({postMessage, contextState, controller})
     const interaction = require('./interaction.js')({api, controller})
     const indexHtmlPath = vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath
 
@@ -193,10 +194,17 @@ const activate = context => {
         'neteasemusic.pause': controller.pause,
         'neteasemusic.play': controller.resume,
         'neteasemusic.previous': controller.previous,
-        'neteasemusic.next': controller.next
+        'neteasemusic.next': controller.next,
+
+        'neteasemusic.type.on': coding.on,
+        'neteasemusic.type.off': coding.off,
     }
 
     Object.keys(commands).forEach(name => context.subscriptions.push(vscode.commands.registerCommand(name, commands[name])))
+    
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(coding.onType))
+    context.subscriptions.push(vscode.debug.onDidStartDebugSession(coding.debugOn))
+    context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(coding.debugOff))
 
 }
 exports.activate = activate

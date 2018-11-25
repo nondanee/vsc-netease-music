@@ -110,6 +110,16 @@
                 "command": "neteasemusic.toplist",
                 "title": "排行榜",
                 "category": "网易云音乐 发现音乐"
+            },
+            {
+                "command": "neteasemusic.type.on",
+                "title": "跟随",
+                "category": "网易云音乐 设置"
+            },
+            {
+                "command": "neteasemusic.type.off",
+                "title": "取消跟随",
+                "category": "网易云音乐 设置"
             }
         ],
         "menus": {
@@ -189,6 +199,14 @@
                 {
                     "command": "neteasemusic.pause",
                     "when": "neteasemusic.on && neteasemusic.playing"
+                },
+                {
+                    "command": "neteasemusic.type.on",
+                    "when": "neteasemusic.on && !neteasemusic.type"
+                },
+                {
+                    "command": "neteasemusic.type.off",
+                    "when": "neteasemusic.on && neteasemusic.type"
                 }
             ]
         }
