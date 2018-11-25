@@ -56,7 +56,7 @@ const activate = context => {
     const api = require('./request.js')({globalStorage, contextState})
     const controller = require('./controller.js')({postMessage, contextState, api})
     const coding = require('./coding.js')({postMessage, contextState, controller})
-    const interaction = require('./interaction.js')({postMessage, api, controller})
+    const interaction = require('./interaction.js')({api, controller})
     const indexHtmlPath = vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath
 
     setState('off')
@@ -203,9 +203,7 @@ const activate = context => {
     Object.keys(commands).forEach(name => context.subscriptions.push(vscode.commands.registerCommand(name, commands[name])))
     
     context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(coding.onType))
-
     context.subscriptions.push(vscode.debug.onDidStartDebugSession(coding.debugOn))
- 
     context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(coding.debugOff))
 
 }
