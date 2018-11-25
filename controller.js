@@ -2,7 +2,6 @@ const vscode = require('vscode')
 let runtime = {}
 let list = []
 let index = 0
-let paused = false
 
 const format = song => ({id: song.id, name: song.name, album: song.album, artist: song.artist})
 
@@ -16,12 +15,12 @@ const controller = {
             index = list.length
             list.splice(index, 0, format(track))
         }
-        runtime.setContext('track', true)
+        runtime.contextState.set('track', true)
     },
     remove: target => {
         list.splice(target, 1)
         index = index < list.length ? index : 0
-        if(list.length == 0) runtime.setContext('track', false)
+        if(list.length == 0) runtime.contextState.set('track', false)
     },
     previous: () => {
         if (list.length == 0) return
@@ -34,20 +33,16 @@ const controller = {
         controller.play()
     },
     resume: () => {
-        if (list.length == 0) return false
-        if (!paused) return false
-        paused = false
-        runtime.postMessage({command: 'play'})
-        runtime.setState('playing')
-        return true
+        if (list.length == 0) return
+        let paused = !!runtime.contextState.get('paused')
+        if (paused) runtime.postMessage({command: 'play'})
+        return paused
     },
     pause: () => {
         if (list.length == 0) return
-        if (paused) return false
-        paused = true
-        runtime.postMessage({command: 'pause'})
-        runtime.setState('paused')
-        return true
+        let playing = !!runtime.contextState.get('playing')
+        if (playing) runtime.postMessage({command: 'pause'})
+        return playing
     },
     play: target => {
         if (list.length == 0) return
@@ -64,7 +59,7 @@ const controller = {
                 url = url.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net')
                 song.url = url
                 runtime.postMessage({command: 'load', data: song})
-                paused = true
+                runtime.contextState.set('paused', true)
                 controller.resume()
                 vscode.window.showInformationMessage(`正在播放: ${song.artist} - ${song.name}`)
             }

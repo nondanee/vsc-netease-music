@@ -6,10 +6,10 @@ const querystring = require('querystring')
 let runtime = {}
 
 const headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
     'Content-Type': 'application/x-www-form-urlencoded',
     'Referer': 'https://music.163.com',
-    'X-Real-IP': '118.88.88.88',
+    'X-Real-IP': '118.88.88.88'
 }
 
 let user = {}
@@ -79,7 +79,7 @@ const api = {
     },
     login: (account, password) => {
         let path = '', data = {password: crypto.createHash('md5').update(password).digest('hex'), rememberLogin: 'true'}
-        account.includes('@') ? (data.username = account, path = '/api/login') : (data.phone = account, path = '/api/login/cellphone')            
+        account.includes('@') ? (data.username = account, path = '/api/login') : (data.phone = account, path = '/api/login/cellphone')
         return apiRequest(path, data, false).then(response => {
             if (response.headers['set-cookie']) user.cookie = response.headers['set-cookie'].map(cookie => cookie.replace(/;.*/,'')).join('; ')
             return response
@@ -105,7 +105,7 @@ const api = {
 const sync = () => {
     headers['Cookie'] = ['os=linux', user.cookie].join('; ')
     runtime.globalStorage.set('user', JSON.stringify(user))
-    runtime.setContext('logged', user.cookie ? true : false)
+    runtime.contextState.set('logged', user.cookie ? true : false)
 }
 
 module.exports = handler => {

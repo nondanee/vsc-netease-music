@@ -1,9 +1,8 @@
 const vscode = require('vscode')
 let runtime = {}
-let controller = {}
 
 const quickPick = vscode.window.createQuickPick()
-let onPickItem = item => {}
+let onPickItem = () => {}
 quickPick.canSelectMany = false
 quickPick.matchOnDescription = true
 quickPick.matchOnDetail = true
@@ -132,8 +131,8 @@ const interaction = {
         fillQuickPick(track, data.album.name)
         onPickItem = item => {
             quickPick.busy = true
-            controller.add(track)
-            controller.play(item.index)
+            runtime.controller.add(track)
+            runtime.controller.play(item.index)
             quickPick.hide()
         }
     }),
@@ -156,8 +155,8 @@ const interaction = {
             fillQuickPick(track, `${data.playlist.name} by ${data.playlist.creator.nickname}`)
             onPickItem = item => {
                 quickPick.busy = true
-                controller.add(track)
-                controller.play(item.index)
+                runtime.controller.add(track)
+                runtime.controller.play(item.index)
                 quickPick.hide()
             }
         }),
@@ -193,8 +192,8 @@ const interaction = {
             fillQuickPick(track, '每日歌曲推荐')
             onPickItem = item => {
                 quickPick.busy = true
-                controller.add(track)
-                controller.play(item.index)
+                runtime.controller.add(track)
+                runtime.controller.play(item.index)
                 quickPick.hide()
             }
         }),
@@ -217,8 +216,8 @@ const interaction = {
             fillQuickPick(track, '新歌速递')
             onPickItem = item => {
                 quickPick.busy = true
-                controller.add(item)
-                controller.play()
+                runtime.controller.add(item)
+                runtime.controller.play()
                 quickPick.hide()
             }
         }),
@@ -257,24 +256,19 @@ const interaction = {
     logout: () => runtime.api.logout(),
     list: () => {
         quickPick.busy = false
-        let track = controller.list().map(songDisplay).map(addIndex)
-        let play = controller.list().findIndex(song => song.play)
+        let track = runtime.controller.list().map(songDisplay).map(addIndex)
+        let play = runtime.controller.list().findIndex(song => song.play)
         fillQuickPick(track, `播放列表 (${track.length})`)
         quickPick.activeItems = [quickPick.items[play]]
         onPickItem = item => {
             quickPick.busy = true
-            item.play ? (controller.pause() || controller.resume()) : controller.play(item.index)
+            item.play ? (runtime.controller.pause() || runtime.controller.resume()) : runtime.controller.play(item.index)
             quickPick.hide()
         }
-    },
-    resume: () => controller.resume(),
-    pause: () => controller.pause(),
-    previous: () => controller.previous(),
-    next: () => controller.next()
+    }
 }
 
 module.exports = handler => {
     runtime = handler
-    controller = require('./controller.js')(handler)
     return interaction
 }

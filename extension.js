@@ -23,28 +23,39 @@ const activate = context => {
             return () => {}
     }
 
-    const setContext = (key, state) => vscode.commands.executeCommand('setContext', `neteasemusic.${key}`, state)
-    
-    const setState = (state) => {
-        if(state == 'off')
-            setContext('on', false), setContext('playing', false), setContext('paused', false), setContext('track', false)
-        else if (state == 'on')
-            setContext('on', true), setContext('playing', false), setContext('paused', false), setContext('track', false)
-        else if (state == 'playing')
-            setContext('playing', true), setContext('paused', false)
-        else if (state == 'paused')
-            setContext('playing', false), setContext('paused', true)
-    }
-
     const globalStorage = {
         get: key => context.globalState.get(key),
         set: (key, value) => context.globalState.update(key, value)
     }
 
+    const ContextState = () => {
+        const state = {}
+        return {
+            get: key => state[key],
+            set: (key, value) => {state[key] = value, vscode.commands.executeCommand('setContext', `neteasemusic.${key}`, value)}
+        }
+    }
+
+    const contextState = ContextState()
+
+    const setState = state => {
+        let field = {}
+        if(state == 'off')
+            field = {on: false, playing: false, paused: false, track: false}  
+        else if (state == 'on')
+            field = {on: true, playing: false, paused: false, track: false}
+        else if (state == 'playing')
+            field = {playing: true, paused: false}
+        else if (state == 'paused')
+            field = {playing: false, paused: true}
+        Object.keys(field).forEach(key => contextState.set(key, field[key]))
+    }
+
     // console.log('global state', context.globalState.get('user'))
 
-    const api = require('./request.js')({globalStorage, setContext})
-    const interaction = require('./interaction.js')({postMessage, setState, setContext, api})
+    const api = require('./request.js')({globalStorage, contextState})
+    const controller = require('./controller.js')({postMessage, contextState, api})
+    const interaction = require('./interaction.js')({postMessage, api, controller})
     const indexHtmlPath = vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath
 
     setState('off')
@@ -127,15 +138,17 @@ const activate = context => {
             const body = message.body
             if (type == 'event') {
                 if (body.name == 'end') {
-                    interaction.next()
+                    controller.next()
                 }
                 else if(body.name == 'load') {
                     toolBar.playing(`${body.data.artist} - ${body.data.name}`)
                 }
                 else if(body.name == 'play') {
+                    setState('playing')
                     toolBar.play()
                 }
                 else if(body.name == 'pause') {
+                    setState('paused')
                     toolBar.pause()
                 }
             }
@@ -151,8 +164,8 @@ const activate = context => {
         let scene = previousScene()
         toolBar = ToolBar()
         panel = vscode.window.createWebviewPanel(
-            'neteasemusic', "NetEaseMusic", 
-            {preserveFocus: true, viewColumn: vscode.ViewColumn.One}, 
+            'neteasemusic', "NetEaseMusic",
+            {preserveFocus: true, viewColumn: vscode.ViewColumn.One},
             {enableScripts: true, retainContextWhenHidden: true}
         )
         scene()
@@ -177,10 +190,10 @@ const activate = context => {
         'neteasemusic.logout': interaction.logout,
 
         'neteasemusic.list': interaction.list,
-        'neteasemusic.pause': interaction.pause,
-        'neteasemusic.play': interaction.resume,
-        'neteasemusic.previous': interaction.previous,
-        'neteasemusic.next': interaction.next
+        'neteasemusic.pause': controller.pause,
+        'neteasemusic.play': controller.resume,
+        'neteasemusic.previous': controller.previous,
+        'neteasemusic.next': controller.next
     }
 
     Object.keys(commands).forEach(name => context.subscriptions.push(vscode.commands.registerCommand(name, commands[name])))

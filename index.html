@@ -4,11 +4,8 @@
     <script>
         const audio = new Audio()
         const vscode = acquireVsCodeApi()
+        const postMessage = (type, body) => vscode.postMessage({type, body})
         let playing = {}
-
-        const postMessage = (type, body) => {
-            vscode.postMessage({type, body})
-        }
 
         audio.addEventListener('play', () => {
             postMessage('event', {name: 'play'})
@@ -31,7 +28,7 @@
             if(message.command === 'load'){
                 audio.src = message.data.url
                 playing = message.data
-                postMessage('log',`ok i load ${message.data.url}`)
+                // postMessage('log',`ok i load ${message.data.url}`)
             }
             else if(message.command === 'play'){
                 if(audio.paused) audio.play()
