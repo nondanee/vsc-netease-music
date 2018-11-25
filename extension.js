@@ -41,7 +41,7 @@ const activate = context => {
     const setState = state => {
         let field = {}
         if(state == 'off')
-            field = {on: false, playing: false, paused: false, track: false}  
+            field = {on: false, playing: false, paused: false, track: false,type: false}  
         else if (state == 'on')
             field = {on: true, playing: false, paused: false, track: false}
         else if (state == 'playing')
@@ -55,6 +55,7 @@ const activate = context => {
 
     const api = require('./request.js')({globalStorage, contextState})
     const controller = require('./controller.js')({postMessage, contextState, api})
+    const coding = require('./coding.js')({postMessage,contextState,controller})
     const interaction = require('./interaction.js')({postMessage, api, controller})
     const indexHtmlPath = vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath
 
@@ -193,61 +194,19 @@ const activate = context => {
         'neteasemusic.pause': controller.pause,
         'neteasemusic.play': controller.resume,
         'neteasemusic.previous': controller.previous,
-        'neteasemusic.next': controller.next
+        'neteasemusic.next': controller.next,
+
+        'neteasemusic.type.on': coding.on,
+        'neteasemusic.type.off': coding.off,
     }
 
     Object.keys(commands).forEach(name => context.subscriptions.push(vscode.commands.registerCommand(name, commands[name])))
     
-    // let timeoutHandler = 0
-    // let delta = (()=>{
-    //     let lastTrigger = Date.now()
-    //     let delta = 999999
-    //     return function(){
-    //             let now = Date.now()
-    //             delta = now - lastTrigger
-    //             lastTrigger = now
-    //             return delta
-    //     }
-    // })()
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(coding.onType))
 
-    // context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
-    //     const key = event.contentChanges[0].text
-    //     if (!key) return
-
-    //     let velocity = delta()
-    //     clearTimeout(timeoutHandler)
-    //     timeoutHandler = setTimeout(() => {
-    //         _statusBarItem.text = '0 apm'
-    //         postMessage({ command: 'pause' })
-    //     }, 5000)
-    // }))
-    
-    // let bpCounter = (()=>{
-    //     let counter = 0
-    //     return function(type='p',len=0){
-    //         switch(type){
-    //             case 'a':
-    //             counter+=len
-    //             break;
-    //             case 's':
-    //             counter-=len
-    //             break;
-    //             default:
-    //             return counter;
-    //         }
-    //     }
-    // })
-    // vscode.debug.onDidChangeBreakpoints(
-    //     event => {
-    //         if(event.added.length>0){
-    //             bpCounter('a',event.added.length)
-    //         }
-    //         if(event.removed.length>0){
-    //             bpCounter('s',event.removed.length)
-    //         }
-    //         console.log(bpCounter())
-    //     }
-    // )
+    context.subscriptions.push(vscode.debug.onDidStartDebugSession(coding.debugOn))
+ 
+    context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(coding.debugOff))
 
 }
 exports.activate = activate
