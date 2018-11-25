@@ -55,7 +55,7 @@ const activate = context => {
 
     const api = require('./request.js')({globalStorage, contextState})
     const controller = require('./controller.js')({postMessage, contextState, api})
-    const coding = require('./coding.js')({postMessage,contextState,controller})
+    const coding = require('./coding.js')({postMessage, contextState, controller})
     const interaction = require('./interaction.js')({postMessage, api, controller})
     const indexHtmlPath = vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath
 

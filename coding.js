@@ -27,11 +27,11 @@ const speedUp = SpeedUp()
 
 
 const coding = {
-    on: ()=>{
+    on: () => {
         runtime.contextState.set("type",true)
         runtime.postMessage({ command: 'typeOn' })
     },
-    off: ()=>{
+    off: () => {
         runtime.contextState.set("type",false)
         runtime.postMessage({ command: 'typeOff' })
     },
