@@ -34,7 +34,7 @@ const json = response => {
 		let chunks = []
 		response
 		.on('data', chunk => chunks.push(chunk))
-		.on('end', () => resolve(JSON.parse(Buffer.concat(chunks))))
+        .on('end', () => {try{resolve(JSON.parse(Buffer.concat(chunks)))}catch(error){reject(error)}})
 		.on('error', error => reject(error))
 	})
 }
@@ -52,7 +52,8 @@ const api = {
         detail: id => apiRequest(`/api/v1/user/detail/${id}`, {}),
         artist: () => apiRequest(`/api/artist/sublist`, {limit: 1000, offset: 0}),
         album: () => apiRequest(`/api/album/sublist`, {limit: 1000, offset: 0}),
-        playlist: id => apiRequest('/api/user/playlist', {uid: id || user.id, limit: 100000})
+        playlist: id => apiRequest('/api/user/playlist', {uid: id || user.id, limit: 100000}),
+        likes: () => apiRequest('/api/song/like/get', {})
     },
     artist: {
         song: id => apiRequest(`/api/v1/artist/${id}`, {}),
@@ -67,7 +68,10 @@ const api = {
     toplist: () => apiRequest('/api/toplist', {}),
     song: {
         detail: id => apiRequest('/api/v3/song/detail', {c: `[{"id":'${id}'}]`, ids: `['${id}']`}),
-        url: id => apiRequest('/api/song/enhance/player/url', {ids: `['${id}']`, br: 999000})
+        url: id => apiRequest('/api/song/enhance/player/url', {ids: `['${id}']`, br: 999000}),
+        lyric: id => apiRequest('/api/song/lyric', {id: id, lv: -1, tv: -1, cp: false}),
+        like: id => apiRequest('/api/song/like', {trackId: id, like: true, time: 0, userid: 0}),
+        dislike: id => apiRequest('/api/song/like', {trackId: id, like: false, time: 0, userid: 0})
     },
     recommend: {
         song: () => apiRequest('/api/v1/discovery/recommend/songs', {limit: 30, offset: 0}),
@@ -105,12 +109,16 @@ const api = {
 const sync = () => {
     headers['Cookie'] = ['os=linux', user.cookie].join('; ')
     runtime.globalStorage.set('user', JSON.stringify(user))
-    runtime.contextState.set('logged', user.cookie ? true : false)
+    runtime.stateManager.set('logged', user.cookie ? true : false)
 }
 
-module.exports = handler => {
-    runtime = handler
-    user = JSON.parse(handler.globalStorage.get('user') || '{}')
+const init = () => {
+    user = JSON.parse(runtime.globalStorage.get('user') || '{}')
     sync()
+}
+
+module.exports = handle => {
+    runtime = handle
+    init()
     return api
 }

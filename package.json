@@ -1,9 +1,9 @@
 {
-    "name": "vs-netease-music",
-    "displayName": "vs-netease-music",
+    "name": "vsc-netease-music",
+    "displayName": "vsc-netease-music",
     "description": "",
     "version": "0.0.1",
-    "publisher": "vs-netease-music",
+    "publisher": "vsc-netease-music",
     "engines": {
         "vscode": "^1.28.0"
     },
@@ -11,7 +11,7 @@
         "Other"
     ],
     "activationEvents": [
-        "*"
+        "onCommand:neteasemusic.start"
     ],
     "main": "./extension",
     "contributes": {
@@ -22,8 +22,23 @@
                 "category": "网易云音乐"
             },
             {
+                "command": "neteasemusic.stop",
+                "title": "关闭",
+                "category": "网易云音乐"
+            },
+            {
                 "command": "neteasemusic.play",
                 "title": "播放",
+                "category": "网易云音乐"
+            },
+            {
+                "command": "neteasemusic.mute",
+                "title": "静音",
+                "category": "网易云音乐"
+            },
+            {
+                "command": "neteasemusic.unmute",
+                "title": "取消静音",
                 "category": "网易云音乐"
             },
             {
@@ -44,6 +59,16 @@
             {
                 "command": "neteasemusic.list",
                 "title": "播放列表",
+                "category": "网易云音乐"
+            },
+            {
+                "command": "neteasemusic.like",
+                "title": "红心",
+                "category": "网易云音乐"
+            },
+            {
+                "command": "neteasemusic.dislike",
+                "title": "取消红心",
                 "category": "网易云音乐"
             },
             {
@@ -110,16 +135,6 @@
                 "command": "neteasemusic.toplist",
                 "title": "排行榜",
                 "category": "网易云音乐 发现音乐"
-            },
-            {
-                "command": "neteasemusic.type.on",
-                "title": "跟随",
-                "category": "网易云音乐 设置"
-            },
-            {
-                "command": "neteasemusic.type.off",
-                "title": "取消跟随",
-                "category": "网易云音乐 设置"
             }
         ],
         "menus": {
@@ -127,6 +142,10 @@
                 {
                     "command": "neteasemusic.start",
                     "when": "!neteasemusic.on"
+                },
+                {
+                    "command": "neteasemusic.stop",
+                    "when": "neteasemusic.on"
                 },
                 {
                     "command": "neteasemusic.login",
@@ -181,6 +200,14 @@
                     "when": "neteasemusic.on && neteasemusic.logged"
                 },
                 {
+                    "command": "neteasemusic.like",
+                    "when": "neteasemusic.on && neteasemusic.logged && neteasemusic.track && !neteasemusic.liked"
+                },
+                {
+                    "command": "neteasemusic.dislike",
+                    "when": "neteasemusic.on && neteasemusic.logged && neteasemusic.track && neteasemusic.liked"
+                },
+                {
                     "command": "neteasemusic.list",
                     "when": "neteasemusic.on && neteasemusic.track"
                 },
@@ -193,24 +220,23 @@
                     "when": "neteasemusic.on && neteasemusic.track"
                 },
                 {
+                    "command": "neteasemusic.mute",
+                    "when": "neteasemusic.on && neteasemusic.track && !neteasemusic.muted"
+                },
+                {
+                    "command": "neteasemusic.unmute",
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.muted"
+                },
+                {
                     "command": "neteasemusic.play",
-                    "when": "neteasemusic.on && neteasemusic.paused"
+                    "when": "neteasemusic.on && neteasemusic.track && !neteasemusic.playing"
                 },
                 {
                     "command": "neteasemusic.pause",
-                    "when": "neteasemusic.on && neteasemusic.playing"
-                },
-                {
-                    "command": "neteasemusic.type.on",
-                    "when": "neteasemusic.on && !neteasemusic.type"
-                },
-                {
-                    "command": "neteasemusic.type.off",
-                    "when": "neteasemusic.on && neteasemusic.type"
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.playing"
                 }
             ]
         }
-
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",
@@ -223,7 +249,5 @@
         "@types/node": "^8.10.25",
         "@types/mocha": "^2.2.42"
     },
-    "dependencies": {
-        "axios": "^0.18.0"
-    }
+    "dependencies": {}
 }

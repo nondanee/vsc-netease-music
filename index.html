@@ -5,30 +5,31 @@
         const audio = new Audio()
         const vscode = acquireVsCodeApi()
         const postMessage = (type, body) => vscode.postMessage({type, body})
-        const AutoSlowDown = () => {
-            let intervalHandler
-            return {
-                on: () => {
-                    if (audio.paused) audio.play()
-                    intervalHandler = setInterval(() => {
-                        if (audio.paused || !audio.src)  return
-                        if (audio.playbackRate <= 0.5) {
-                            audio.pause()
-                        } 
-                        else {
-                            audio.playbackRate *= 0.9
-                            postMessage('echo', 'I\'m low ' + audio.playbackRate)
-                        }
-                    }, 5000)
-                },
-                off: () => {
-                    clearInterval(intervalHandler)
-                    audio.playbackRate = 1.0
+
+        const Lyric = () => {
+            const lyric = {}
+            const parse = lrc => lrc.trim().split('\n').forEach(line => {
+                let point = line.slice(1, line.indexOf(']')).split(':')
+                let text = line.slice(line.indexOf(']') + 1).trim()
+                if (isNaN(point[0])) return
+                point = (parseInt(point[0]) * 60 + parseFloat(point[1])).toFixed(2)
+                if (!(point in lyric)) lyric[point] = []
+                lyric[point].push(text)
+            })
+            playing.lyric.filter(lrc => lrc).forEach(parse)
+            const timeline = Object.keys(lyric).sort((x, y) => parseFloat(x) - parseFloat(y))
+            let cursor = 0
+            return second => {
+                if (second > timeline[cursor]) {
+                    cursor += 1
+                    return lyric[timeline[cursor - 1]].join('  ')
                 }
             }
         }
-        let playing = {}
-        const autoSlowDown = AutoSlowDown()
+
+        let playing = null
+        let lyric = null
+        
         audio.addEventListener('play', () => {
             postMessage('event', {name: 'play'})
         }, false)
@@ -41,33 +42,40 @@
             postMessage('event', {name: 'end'})
         }, false)
 
+        audio.addEventListener('timeupdate', () => {
+            let update = lyric(audio.currentTime)
+            if (update) postMessage('event', {name: 'lyric', data: update})
+        }, false)
+
+        audio.addEventListener('volumechange', () => {
+            postMessage('event', {name: audio.muted ? 'mute' : 'unmute'})
+        })
+
         audio.addEventListener('loadstart', () => {
             postMessage('event', {name: 'load', data: playing})
         }, false)
 
         window.addEventListener('message', event => {
-            const message = event.data
-            if(message.command === 'load'){
-                audio.src = message.data.url
-                playing = message.data
-                // postMessage('log',`ok i load ${message.data.url}`)
+            const command = event.data.command
+            const payload = event.data.data
+            if (command === 'load') {
+                let play = (!audio.src || !audio.paused || audio.ended)
+                audio.src = payload.url
+                if (play) audio.play()
+                playing = payload
+                lyric = Lyric()
             }
-            else if(message.command === 'play'){
-                if(audio.paused) audio.play()
-            }
-            else if(message.command === 'pause'){
-                if(!audio.paused) audio.pause()
-            }
-            else if (message.command === 'speedup') {
-                speed = audio.playbackRate
+            else if (command === 'play') {
                 if (audio.paused) audio.play()
-                if (speed < 2.0) audio.playbackRate += 0.1
             }
-            else if (message.command === 'typeOn'){
-                autoSlowDown.on()
+            else if (command === 'pause') {
+                if (!audio.paused) audio.pause()
             }
-            else if (message.command === 'typeOff'){
-                autoSlowDown.off()
+            else if (command === 'mute') {
+                if (!audio.muted) audio.muted = true
+            }
+            else if (command === 'unmute') {
+                if (audio.muted) audio.muted = false
             }
         })
     </script>

@@ -1,13 +1,14 @@
 const vscode = require('vscode')
 let runtime = {}
 let list = []
+let likes = []
 let index = 0
 
 const format = song => ({id: song.id, name: song.name, album: song.album, artist: song.artist})
 
 const controller = {
     add: track => {
-        if(Array.isArray(track)){
+        if (Array.isArray(track)){
             list = track.map(format)
             index = 0
         }
@@ -15,12 +16,12 @@ const controller = {
             index = list.length
             list.splice(index, 0, format(track))
         }
-        runtime.contextState.set('track', true)
+        runtime.playerBar.show()
     },
     remove: target => {
         list.splice(target, 1)
         index = index < list.length ? index : 0
-        if(list.length == 0) runtime.contextState.set('track', false)
+        if (list.length == 0) runtime.playerBar.hide()
     },
     previous: () => {
         if (list.length == 0) return
@@ -34,22 +35,23 @@ const controller = {
     },
     resume: () => {
         if (list.length == 0) return
-        let paused = !!runtime.contextState.get('paused')
-        if (paused) runtime.postMessage({command: 'play'})
+        let paused = !runtime.stateManager.get('playing')
+        if (paused) runtime.webviewPanel.postMessage('play')
         return paused
     },
     pause: () => {
         if (list.length == 0) return
-        let playing = !!runtime.contextState.get('playing')
-        if (playing) runtime.postMessage({command: 'pause'})
+        let playing = !!runtime.stateManager.get('playing')
+        if (playing) runtime.webviewPanel.postMessage('pause')
         return playing
     },
     play: target => {
         if (list.length == 0) return
         index = typeof(target) != 'undefined' ? target % list.length : index
         let song = list[index]
-        runtime.api.song.url(song.id).then(data => {
-            let url = data.data[0].url
+        Promise.all([runtime.api.song.url(song.id), runtime.api.song.lyric(song.id)])
+        .then(data => {
+            let url = data[0].data[0].url
             if (!url) {
                 vscode.window.showWarningMessage(`无法播放: ${song.artist} - ${song.name}`)
                 controller.remove(index)
@@ -58,9 +60,9 @@ const controller = {
             else {
                 url = url.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net')
                 song.url = url
-                runtime.postMessage({command: 'load', data: song})
-                runtime.contextState.set('paused', true)
-                controller.resume()
+                song.lyric = [data[1].lrc.lyric, data[1].tlyric.lyric]
+                runtime.webviewPanel.postMessage('load', song)
+                runtime.playerBar.state(likes.includes(song.id) ? 'like' : 'dislike')
                 vscode.window.showInformationMessage(`正在播放: ${song.artist} - ${song.name}`)
             }
         })
@@ -71,9 +73,48 @@ const controller = {
         copy[index].play = true
         return copy
     },
+    like: () => {
+        if (list.length == 0) return
+        let id = list[index].id
+        if (likes.includes(id)) return
+        runtime.api.song.like(id).then(data => {
+            if (data.code == 200) {
+                likes.push(id)
+                runtime.playerBar.state('like')
+            }
+        })
+    },
+    dislike: () => {
+        if (list.length == 0) return
+        let id = list[index].id
+        if (!likes.includes(id)) return
+        runtime.api.song.dislike(id).then(data => {
+            if (data.code == 200) {
+                likes.splice(likes.indexOf(id), 1)
+                runtime.playerBar.state('dislike')
+            }
+        })
+    },
+    mute: () => {
+        if (list.length == 0) return
+        let muted = !!runtime.stateManager.get('muted')
+        if (!muted) runtime.webviewPanel.postMessage('mute')
+    },
+    unmute: () => {
+        if (list.length == 0) return
+        let muted = !!runtime.stateManager.get('muted')
+        if (muted) runtime.webviewPanel.postMessage('unmute')
+    }
 }
 
-module.exports = handler => {
-    runtime = handler
+const init = () => {
+    runtime.api.user.likes().then(data => {
+        if (data.ids) likes = data.ids
+    })
+}
+
+module.exports = handle => {
+    runtime = handle
+    init()
     return controller
 }

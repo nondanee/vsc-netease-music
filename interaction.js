@@ -245,7 +245,7 @@ const interaction = {
                 prompt: "请输入密码"
             })
             .then(password => {
-                if(account && password){
+                if (account && password) {
                     runtime.api.login(account, password)
                     .then(data => vscode.window.showInformationMessage(`登录成功: ${data.profile.nickname}(${data.account.id})`))
                     .catch(e => vscode.window.showErrorMessage(`登录失败: ${e.code == 502 ? '账号或密码错误' : '未知错误'}(${e.code})`))
@@ -257,7 +257,7 @@ const interaction = {
     list: () => {
         quickPick.busy = false
         let track = runtime.controller.list().map(songDisplay).map(addIndex)
-        let play = runtime.controller.list().findIndex(song => song.play)
+        let play = track.findIndex(song => song.play)
         fillQuickPick(track, `播放列表 (${track.length})`)
         quickPick.activeItems = [quickPick.items[play]]
         onPickItem = item => {
@@ -268,7 +268,7 @@ const interaction = {
     }
 }
 
-module.exports = handler => {
-    runtime = handler
+module.exports = handle => {
+    runtime = handle
     return interaction
 }
