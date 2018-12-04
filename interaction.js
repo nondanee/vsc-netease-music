@@ -248,6 +248,7 @@ const interaction = {
                 if (account && password) {
                     runtime.api.login(account, password)
                     .then(data => vscode.window.showInformationMessage(`登录成功: ${data.profile.nickname}(${data.account.id})`))
+                    .then(() => runtime.controller.refresh())
                     .catch(e => vscode.window.showErrorMessage(`登录失败: ${e.code == 502 ? '账号或密码错误' : '未知错误'}(${e.code})`))
                 }
             })

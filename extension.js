@@ -109,6 +109,7 @@ const activate = context => {
                 },
                 state: state => {
                     if (!(state in buttons)) return
+                    if (state.includes('like')) stateManager.get('logged') ? items[buttons.like.index].show() : items[buttons.like.index].hide()
                     let index = buttons[state].index
                     let name = order[index].find(name => name != state)
                     bind(items[index], buttons[name])
@@ -119,7 +120,6 @@ const activate = context => {
                 show: () => {
                     stateManager.set('track', true)
                     items.forEach(item => item.show())
-                    if (!stateManager.get('logged')) items[buttons.like.index].hide()
                 },
                 hide: () => {
                     stateManager.set('track', false)

@@ -104,17 +104,16 @@ const controller = {
         if (list.length == 0) return
         let muted = !!runtime.stateManager.get('muted')
         if (muted) runtime.webviewPanel.postMessage('unmute')
+    },
+    refresh: () => {
+        runtime.api.user.likes().then(data => {
+            if (data.ids) likes = data.ids
+        })
     }
-}
-
-const init = () => {
-    runtime.api.user.likes().then(data => {
-        if (data.ids) likes = data.ids
-    })
 }
 
 module.exports = handle => {
     runtime = handle
-    init()
+    controller.refresh()
     return controller
 }

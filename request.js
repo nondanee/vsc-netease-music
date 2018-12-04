@@ -103,6 +103,10 @@ const api = {
     logout: () => {
         user = {}
         sync()
+    },
+    refresh : () => {
+        user = JSON.parse(runtime.globalStorage.get('user') || '{}')
+        sync()
     }
 }
 
@@ -112,13 +116,8 @@ const sync = () => {
     runtime.stateManager.set('logged', user.cookie ? true : false)
 }
 
-const init = () => {
-    user = JSON.parse(runtime.globalStorage.get('user') || '{}')
-    sync()
-}
-
 module.exports = handle => {
     runtime = handle
-    init()
+    api.refresh()
     return api
 }
