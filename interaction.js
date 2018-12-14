@@ -2,13 +2,18 @@ const vscode = require('vscode')
 let runtime = {}
 
 const quickPick = vscode.window.createQuickPick()
-let onPickItem = () => {}
+let onPickItem = null
+let onChangeValue = null
 quickPick.canSelectMany = false
 quickPick.matchOnDescription = true
 quickPick.matchOnDetail = true
 quickPick.onDidAccept(() => onPickItem(quickPick.selectedItems[0]))
+quickPick.onDidChangeValue(value => onChangeValue(value))
 
 const fillQuickPick = (items, title) => {
+    quickPick.value = ''
+    onPickItem = () => {}
+    onChangeValue = () => {}
     quickPick.items = items
     quickPick.placeholder = title
     quickPick.show()
@@ -266,6 +271,100 @@ const interaction = {
             item.play ? (runtime.controller.pause() || runtime.controller.resume()) : runtime.controller.play(item.index)
             quickPick.hide()
         }
+    },
+    comment: () => {
+        let song = runtime.controller.list().find(song => song.play)
+        runtime.api.song.comment(song.id).then(data => {
+            quickPick.busy = false
+            fillQuickPick(data.hotComments.map(comment => ({
+                id: comment.commentId,
+                label: `${numberReadable(comment.likedCount)} $(heart)`,
+                description: comment.content
+            })), `热门评论 (${data.hotComments.length})`)
+            onPickItem = item => {
+                // quickPick.busy = true
+                // interaction.reply(item.id)
+            }
+        })
+    },
+    search: () => {
+        let hot = []
+        let timer = 0
+        const suggest = () => {
+            const value = quickPick.value
+            if (!value) quickPick.items = hot
+            else runtime.api.search.keyword(value).then(data => {
+                let items = (data.result && data.result.allMatch) ? data.result.allMatch.map(item => ({label: item.keyword, alwaysShow: true})) : []
+                if (!items.length || items[0].label != value) items.unshift({label: value, alwaysShow: true})
+                quickPick.items = items
+            })
+        }
+        const search = (text, type) => {
+            let code = {song: 1, artist: 100, album: 10, playlist: 1000}[type]
+            if(!code) runtime.api.search.suggest(text).then(data => display(text, data))
+            else runtime.api.search.type(text, code).then(data => display(text, data, type))
+        }
+        const display = (text, data, type) => {
+            let songs = (data.result.songs || []).map(songFormat).map(songDisplay)
+            let artists = (data.result.artists || []).map(artist => ({
+                id: artist.id,
+                label: artist.name
+            }))
+            let albums = (data.result.albums || []).map(album => ({
+                id: album.id, 
+                label: album.name, 
+                description: `${album.artist.name} ${album.size}首`
+            }))
+            let playlists = (data.result.playlists || []).map(playlist => ({
+                id: playlist.id,
+                label: playlist.name,
+                description: `${numberReadable(playlist.playCount)}次播放 ${numberReadable(playlist.bookCount)}次收藏`
+            }))
+            songs.forEach(item => item.type = 'song')
+            artists.forEach(item => item.type = 'artist')
+            albums.forEach(item => item.type = 'album')
+            playlists.forEach(item => item.type = 'playlist')
+            let items = Array.from([]).concat(
+                [{label: `${songs.length ? '▿' : '▹'}  单曲`, type: 'song'}],
+                songs,
+                [{label: `${artists.length ? '▿' : '▹'}  歌手`, type: 'artist'}],
+                artists,
+                [{label: `${albums.length ? '▿' : '▹'}  专辑`, type: 'album'}],
+                albums,
+                [{label: `${playlists.length ? '▿' : '▹'}  歌单`, type: 'playlist'}],
+                playlists
+            )
+            items.filter(item => item.id).forEach(item => item.label = '     ' + item.label)
+            fillQuickPick(items, `“${text}”的${{song: '歌曲', artist: '歌手', album: '专辑', playlist: '歌单'}[type] || ''}搜索结果`)
+            quickPick.activeItems = [quickPick.items[{song: 0, artist: 1, album: 2, playlist: 3}[type] || 0]]
+            onPickItem = item => {
+                if(!item.id && item.type == type)
+                    return
+                else if(!item.id)
+                    search(text, item.type) 
+                else if(item.type == 'artist')
+                    interaction.artist(item.id)
+                else if(item.type == 'album')
+                    interaction.album(item.id)
+                else if(item.type == 'playlist')
+                    interaction.playlist.detail(item.id)
+                else if(item.type == 'song'){
+                    runtime.controller.add(item)
+                    runtime.controller.play()
+                }
+            }
+        }
+        runtime.api.search.hot().then(data => {
+            hot = data.result.hots.map(item => ({label: item.first}))
+            fillQuickPick(hot, `搜索歌曲、歌手、专辑、歌单`)
+            onPickItem = item => {
+                search(item.label)
+            }
+            onChangeValue = () => {
+                clearTimeout(timer)
+                timer = setTimeout(suggest, 250)
+            }
+        })
     }
 }
 

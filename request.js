@@ -41,7 +41,7 @@ const json = response => {
 
 const apiRequest = (path, data, load = true) => {
     let method = 'POST'
-    url = parse('https://music.163.com').resolve(path.replace(/\w*api/, 'api'))
+    url = parse('https://music.163.com').resolve(`/api/${path}`)
     data = querystring.stringify(encrypt({method: method, url: url, params: data}))
     url = 'https://music.163.com/api/linux/forward'
     return request(method, url, data).then(load ? json : response => response)
@@ -49,41 +49,48 @@ const apiRequest = (path, data, load = true) => {
 
 const api = {
     user: {
-        detail: id => apiRequest(`/api/v1/user/detail/${id}`, {}),
-        artist: () => apiRequest(`/api/artist/sublist`, {limit: 1000, offset: 0}),
-        album: () => apiRequest(`/api/album/sublist`, {limit: 1000, offset: 0}),
-        playlist: id => apiRequest('/api/user/playlist', {uid: id || user.id, limit: 100000}),
-        likes: () => apiRequest('/api/song/like/get', {})
+        detail: id => apiRequest(`v1/user/detail/${id}`, {}),
+        artist: () => apiRequest(`artist/sublist`, {limit: 1000, offset: 0}),
+        album: () => apiRequest(`album/sublist`, {limit: 1000, offset: 0}),
+        playlist: id => apiRequest('user/playlist', {uid: id || user.id, limit: 100000}),
+        likes: () => apiRequest('song/like/get', {})
     },
     artist: {
-        song: id => apiRequest(`/api/v1/artist/${id}`, {}),
-        album: id => apiRequest(`/api/artist/albums/${id}`, {limit: 1000, offset: 0}),
+        song: id => apiRequest(`v1/artist/${id}`, {}),
+        album: id => apiRequest(`artist/albums/${id}`, {limit: 1000, offset: 0}),
     },
-    album: id => apiRequest(`/api/v1/album/${id}`, {}),
+    album: id => apiRequest(`v1/album/${id}`, {}),
     playlist: {
-        detail: id => apiRequest('/api/v3/playlist/detail', {id: id, n: 100000}),
-        highquality: () => apiRequest('/api/playlist/highquality/list', {cat: '全部', limit: 50}),
-        hot: () => apiRequest('/api/playlist/list', {cat: '全部', limit: 50, offset: 0, order: 'hot'})
+        detail: id => apiRequest('v3/playlist/detail', {id: id, n: 100000}),
+        highquality: () => apiRequest('playlist/highquality/list', {cat: '全部', limit: 50}),
+        hot: () => apiRequest('playlist/list', {cat: '全部', limit: 50, offset: 0, order: 'hot'})
     },
-    toplist: () => apiRequest('/api/toplist', {}),
+    toplist: () => apiRequest('toplist', {}),
     song: {
-        detail: id => apiRequest('/api/v3/song/detail', {c: `[{"id":'${id}'}]`, ids: `['${id}']`}),
-        url: id => apiRequest('/api/song/enhance/player/url', {ids: `['${id}']`, br: 999000}),
-        lyric: id => apiRequest('/api/song/lyric', {id: id, lv: -1, tv: -1, cp: false}),
-        like: id => apiRequest('/api/song/like', {trackId: id, like: true, time: 0, userid: 0}),
-        dislike: id => apiRequest('/api/song/like', {trackId: id, like: false, time: 0, userid: 0})
+        detail: id => apiRequest('v3/song/detail', {c: `[{"id":'${id}'}]`, ids: `['${id}']`}),
+        url: id => apiRequest('song/enhance/player/url', {ids: `['${id}']`, br: 999000}),
+        lyric: id => apiRequest('song/lyric', {id: id, lv: -1, tv: -1, cp: false}),
+        like: id => apiRequest('song/like', {trackId: id, like: true, time: 0, userid: 0}),
+        dislike: id => apiRequest('song/like', {trackId: id, like: false, time: 0, userid: 0}),
+        comment: id => apiRequest(`v1/resource/hotcomments/R_SO_4_${id}`, {rid: id, limit: 50, offset: 0})
     },
     recommend: {
-        song: () => apiRequest('/api/v1/discovery/recommend/songs', {limit: 30, offset: 0}),
-        playlist: () => apiRequest('/api/personalized/playlist', {limit: 20, offset: 0, n: 1000})
+        song: () => apiRequest('v1/discovery/recommend/songs', {limit: 30, offset: 0}),
+        playlist: () => apiRequest('personalized/playlist', {limit: 20, offset: 0, n: 1000})
     },
     new: {
-        song: () => apiRequest('/api/v1/discovery/new/songs', {areaId: 0, limit: 50, offset: 0}),
-        album: () => apiRequest('/api/album/new', {area: 'ALL', limit: 50, offset: 0})
+        song: () => apiRequest('v1/discovery/new/songs', {areaId: 0, limit: 50, offset: 0}),
+        album: () => apiRequest('album/new', {area: 'ALL', limit: 50, offset: 0})
+    },
+    search: {
+        keyword: text => apiRequest('search/suggest/keyword', {s: text}),
+        suggest: text => apiRequest('search/suggest/web', {s: text}),
+        type: (text, type) => apiRequest('search/get', {s: text, type: type, limit: 20, offset: 0}),
+        hot: () => apiRequest('search/hot', {type: 1111})
     },
     login: (account, password) => {
         let path = '', data = {password: crypto.createHash('md5').update(password).digest('hex'), rememberLogin: 'true'}
-        account.includes('@') ? (data.username = account, path = '/api/login') : (data.phone = account, path = '/api/login/cellphone')
+        account.includes('@') ? (data.username = account, path = 'login') : (data.phone = account, path = 'login/cellphone')
         return apiRequest(path, data, false).then(response => {
             if (response.headers['set-cookie']) user.cookie = response.headers['set-cookie'].map(cookie => cookie.replace(/;.*/,'')).join('; ')
             return response

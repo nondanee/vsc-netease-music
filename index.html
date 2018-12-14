@@ -16,7 +16,7 @@
                 if (!(point in lyric)) lyric[point] = []
                 lyric[point].push(text)
             })
-            playing.lyric.filter(lrc => lrc).forEach(parse)
+            song.lyric.filter(lrc => lrc).forEach(parse)
             const timeline = Object.keys(lyric).sort((x, y) => parseFloat(x) - parseFloat(y))
             let cursor = 0
             return second => {
@@ -27,7 +27,7 @@
             }
         }
 
-        let playing = null
+        let song = null
         let lyric = null
         
         audio.addEventListener('play', () => {
@@ -52,7 +52,7 @@
         })
 
         audio.addEventListener('loadstart', () => {
-            postMessage('event', {name: 'load', data: playing})
+            postMessage('event', {name: 'load', data: song})
         }, false)
 
         window.addEventListener('message', event => {
@@ -62,7 +62,7 @@
                 let play = (!audio.src || !audio.paused || audio.ended)
                 audio.src = payload.url
                 if (play) audio.play()
-                playing = payload
+                song = payload
                 lyric = Lyric()
             }
             else if (command === 'play') {

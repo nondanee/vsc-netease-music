@@ -81,6 +81,10 @@ const activate = context => {
                     color: 'rgba(255,255,255,0.5)',
                     state: {muted: true}
                 },
+                comment: {
+                    command: 'neteasemusic.comment',
+                    icon: '$(comment-discussion)'
+                },
                 list: {
                     command: 'neteasemusic.list',
                     icon: ''
@@ -94,7 +98,7 @@ const activate = context => {
                 if (preset.state) Object.keys(preset.state).forEach(key => stateManager.set(key, preset.state[key]))
             }
     
-            const order = [['list'], ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['mute', 'unmute']].reverse()
+            const order = [['list'], /*['comment'],*/ ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['mute', 'unmute']].reverse()
             
             const items = order.map((group, index) => {
                 group.forEach(name => buttons[name].index = index)
@@ -195,6 +199,7 @@ const activate = context => {
                 'playlist.hot': interaction.playlist.hot,
                 'new.song': interaction.new.song,
                 'new.album': interaction.new.album,
+                'search': interaction.search,
 
                 'user.playlist': interaction.user.playlist,
                 'user.artist': interaction.user.artist,
@@ -205,6 +210,7 @@ const activate = context => {
                 'login': interaction.login,
                 'logout': interaction.logout,
 
+                'comment': interaction.comment,
                 'list': interaction.list,
                 'pause': controller.pause,
                 'play': controller.resume,

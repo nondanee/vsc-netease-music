@@ -62,6 +62,11 @@
                 "category": "网易云音乐"
             },
             {
+                "command": "neteasemusic.comment",
+                "title": "热门评论",
+                "category": "网易云音乐"
+            },
+            {
                 "command": "neteasemusic.like",
                 "title": "红心",
                 "category": "网易云音乐"
@@ -83,7 +88,7 @@
             },
             {
                 "command": "neteasemusic.logout",
-                "title": "登出",
+                "title": "退出登录",
                 "category": "网易云音乐"
             },
             {
@@ -209,6 +214,10 @@
                 },
                 {
                     "command": "neteasemusic.list",
+                    "when": "neteasemusic.on && neteasemusic.track"
+                },
+                {
+                    "command": "neteasemusic.comment",
                     "when": "neteasemusic.on && neteasemusic.track"
                 },
                 {
