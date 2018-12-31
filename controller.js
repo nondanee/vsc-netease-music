@@ -1,7 +1,7 @@
 const vscode = require('vscode')
-let runtime = {}
-let list = []
+
 let likes = []
+let list = []
 let index = 0
 
 const format = song => ({id: song.id, name: song.name, album: song.album, artist: song.artist})
@@ -49,7 +49,7 @@ const controller = {
         if (list.length == 0) return
         index = typeof(target) != 'undefined' ? target % list.length : index
         let song = list[index]
-        Promise.all([runtime.api.song.url(song.id), runtime.api.song.lyric(song.id)])
+        Promise.all([api.song.url(song.id), api.song.lyric(song.id)])
         .then(data => {
             let url = data[0].data[0].url
             if (!url) {
@@ -77,7 +77,7 @@ const controller = {
         if (list.length == 0) return
         let id = list[index].id
         if (likes.includes(id)) return
-        runtime.api.song.like(id).then(data => {
+        api.song.like(id).then(data => {
             if (data.code == 200) {
                 likes.push(id)
                 runtime.playerBar.state('like')
@@ -88,7 +88,7 @@ const controller = {
         if (list.length == 0) return
         let id = list[index].id
         if (!likes.includes(id)) return
-        runtime.api.song.dislike(id).then(data => {
+        api.song.dislike(id).then(data => {
             if (data.code == 200) {
                 likes.splice(likes.indexOf(id), 1)
                 runtime.playerBar.state('dislike')
@@ -106,14 +106,12 @@ const controller = {
         if (muted) runtime.webviewPanel.postMessage('unmute')
     },
     refresh: () => {
-        runtime.api.user.likes().then(data => {
+        api.user.likes().then(data => {
             if (data.ids) likes = data.ids
         })
     }
 }
 
-module.exports = handle => {
-    runtime = handle
-    controller.refresh()
-    return controller
-}
+module.exports = controller
+const api = require('./request.js')
+const runtime = require('./runtime.js')

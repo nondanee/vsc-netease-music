@@ -1,5 +1,4 @@
 const vscode = require('vscode')
-let runtime = {}
 
 const quickPick = vscode.window.createQuickPick()
 let onPickItem = null
@@ -81,7 +80,7 @@ const dateFriendly = timestamp => {
 
 const interaction = {
     user: {
-        playlist: id => runtime.api.user.playlist(id).then(data => {
+        playlist: id => api.user.playlist(id).then(data => {
             quickPick.busy = false
             fillQuickPick(data.playlist.map(playlist => ({
                 id: playlist.id,
@@ -93,7 +92,7 @@ const interaction = {
                 interaction.playlist.detail(item.id)
             }
         }),
-        artist: () => runtime.api.user.artist().then(data => {
+        artist: () => api.user.artist().then(data => {
             quickPick.busy = false
             fillQuickPick(data.data.map(artist => ({
                 id: artist.id,
@@ -105,7 +104,7 @@ const interaction = {
                 interaction.artist(item.id)
             }
         }),
-        album: () => runtime.api.user.album().then(data => {
+        album: () => api.user.album().then(data => {
             quickPick.busy = false
             fillQuickPick(data.data.map(album => ({
                 id: album.id,
@@ -118,7 +117,7 @@ const interaction = {
             }
         })
     },
-    artist: id => runtime.api.artist.album(id).then(data => {
+    artist: id => api.artist.album(id).then(data => {
         quickPick.busy = false
         fillQuickPick(data.hotAlbums.map(album => ({
             id: album.id,
@@ -130,18 +129,18 @@ const interaction = {
             interaction.album(item.id)
         }
     }),
-    album: id => runtime.api.album(id).then(data => {
+    album: id => api.album(id).then(data => {
         quickPick.busy = false
         let track = data.songs.map(songFormat).map(songDisplay).map(addIndex)
         fillQuickPick(track, data.album.name)
         onPickItem = item => {
             quickPick.busy = true
-            runtime.controller.add(track)
-            runtime.controller.play(item.index)
+            controller.add(track)
+            controller.play(item.index)
             quickPick.hide()
         }
     }),
-    toplist: () => runtime.api.toplist().then(data => {
+    toplist: () => api.toplist().then(data => {
         quickPick.busy = false
         fillQuickPick(data.list.map(playlist => ({
             id: playlist.id,
@@ -154,18 +153,18 @@ const interaction = {
         }
     }),
     playlist: {
-        detail: id => runtime.api.playlist.detail(id).then(data => {
+        detail: id => api.playlist.detail(id).then(data => {
             quickPick.busy = false
             let track = data.playlist.tracks.map(songFormat).map(songDisplay).map(addIndex)
             fillQuickPick(track, `${data.playlist.name} by ${data.playlist.creator.nickname}`)
             onPickItem = item => {
                 quickPick.busy = true
-                runtime.controller.add(track)
-                runtime.controller.play(item.index)
+                controller.add(track)
+                controller.play(item.index)
                 quickPick.hide()
             }
         }),
-        hot: () => runtime.api.playlist.hot().then(data => {
+        hot: () => api.playlist.hot().then(data => {
             quickPick.busy = false
             fillQuickPick(data.playlists.map(playlist => ({
                 id: playlist.id,
@@ -177,7 +176,7 @@ const interaction = {
                 interaction.playlist.detail(item.id)
             }
         }),
-        highquality: () => runtime.api.playlist.highquality().then(data => {
+        highquality: () => api.playlist.highquality().then(data => {
             quickPick.busy = false
             fillQuickPick(data.playlists.map(playlist => ({
                 id: playlist.id,
@@ -191,18 +190,18 @@ const interaction = {
         })
     },
     recommend: {
-        song: () => runtime.api.recommend.song().then(data => {
+        song: () => api.recommend.song().then(data => {
             quickPick.busy = false
             let track = data.recommend.map(songFormat).map(songDisplay).map(addIndex)
             fillQuickPick(track, '每日歌曲推荐')
             onPickItem = item => {
                 quickPick.busy = true
-                runtime.controller.add(track)
-                runtime.controller.play(item.index)
+                controller.add(track)
+                controller.play(item.index)
                 quickPick.hide()
             }
         }),
-        playlist: () => runtime.api.recommend.playlist().then(data => {
+        playlist: () => api.recommend.playlist().then(data => {
             quickPick.busy = false
             fillQuickPick(data.result.map(playlist => ({
                 id: playlist.id,
@@ -216,17 +215,17 @@ const interaction = {
         })
     },
     new: {
-        song: () => runtime.api.new.song().then(data => {
+        song: () => api.new.song().then(data => {
             let track = data.data.map(songFormat).map(songDisplay)
             fillQuickPick(track, '新歌速递')
             onPickItem = item => {
                 quickPick.busy = true
-                runtime.controller.add(item)
-                runtime.controller.play()
+                controller.add(item)
+                controller.play()
                 quickPick.hide()
             }
         }),
-        album: () => runtime.api.new.album().then(data => {
+        album: () => api.new.album().then(data => {
             quickPick.busy = false
             fillQuickPick(data.albums.map(album => ({
                 id: album.id,
@@ -251,30 +250,30 @@ const interaction = {
             })
             .then(password => {
                 if (account && password) {
-                    runtime.api.login(account, password)
+                    api.login(account, password)
                     .then(data => vscode.window.showInformationMessage(`登录成功: ${data.profile.nickname}(${data.account.id})`))
-                    .then(() => runtime.controller.refresh())
+                    .then(() => controller.refresh())
                     .catch(e => vscode.window.showErrorMessage(`登录失败: ${e.code == 502 ? '账号或密码错误' : '未知错误'}(${e.code})`))
                 }
             })
         })
     },
-    logout: () => runtime.api.logout(),
+    logout: () => api.logout(),
     list: () => {
         quickPick.busy = false
-        let track = runtime.controller.list().map(songDisplay).map(addIndex)
+        let track = controller.list().map(songDisplay).map(addIndex)
         let play = track.findIndex(song => song.play)
         fillQuickPick(track, `播放列表 (${track.length})`)
         quickPick.activeItems = [quickPick.items[play]]
         onPickItem = item => {
             quickPick.busy = true
-            item.play ? (runtime.controller.pause() || runtime.controller.resume()) : runtime.controller.play(item.index)
+            item.play ? (controller.pause() || controller.resume()) : controller.play(item.index)
             quickPick.hide()
         }
     },
     comment: () => {
-        let song = runtime.controller.list().find(song => song.play)
-        runtime.api.song.comment(song.id).then(data => {
+        let song = controller.list().find(song => song.play)
+        api.song.comment(song.id).then(data => {
             quickPick.busy = false
             fillQuickPick(data.hotComments.map(comment => ({
                 id: comment.commentId,
@@ -293,7 +292,7 @@ const interaction = {
         const suggest = () => {
             const value = quickPick.value
             if (!value) quickPick.items = hot
-            else runtime.api.search.keyword(value).then(data => {
+            else api.search.keyword(value).then(data => {
                 let items = (data.result && data.result.allMatch) ? data.result.allMatch.map(item => ({label: item.keyword, alwaysShow: true})) : []
                 if (!items.length || items[0].label != value) items.unshift({label: value, alwaysShow: true})
                 quickPick.items = items
@@ -301,8 +300,8 @@ const interaction = {
         }
         const search = (text, type) => {
             let code = {song: 1, artist: 100, album: 10, playlist: 1000}[type]
-            if(!code) runtime.api.search.suggest(text).then(data => display(text, data))
-            else runtime.api.search.type(text, code).then(data => display(text, data, type))
+            if(!code) api.search.suggest(text).then(data => display(text, data))
+            else api.search.type(text, code).then(data => display(text, data, type))
         }
         const display = (text, data, type) => {
             let songs = (data.result.songs || []).map(songFormat).map(songDisplay)
@@ -349,14 +348,14 @@ const interaction = {
                 else if(item.type == 'playlist')
                     interaction.playlist.detail(item.id)
                 else if(item.type == 'song'){
-                    runtime.controller.add(item)
-                    runtime.controller.play()
+                    controller.add(item)
+                    controller.play()
                 }
             }
         }
-        runtime.api.search.hot().then(data => {
+        api.search.hot().then(data => {
             hot = data.result.hots.map(item => ({label: item.first}))
-            fillQuickPick(hot, `搜索歌曲、歌手、专辑、歌单`)
+            fillQuickPick(hot, '搜索歌曲、歌手、专辑、歌单')
             onPickItem = item => {
                 search(item.label)
             }
@@ -368,7 +367,6 @@ const interaction = {
     }
 }
 
-module.exports = handle => {
-    runtime = handle
-    return interaction
-}
+module.exports = interaction
+const api = require('./request.js')
+const controller = require('./controller.js')

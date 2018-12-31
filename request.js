@@ -3,14 +3,6 @@ const https = require('https')
 const crypto = require('crypto')
 const parse = require('url').parse
 const querystring = require('querystring')
-let runtime = {}
-
-const headers = {
-    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'Referer': 'https://music.163.com',
-    'X-Real-IP': '118.88.88.88'
-}
 
 let user = {}
 
@@ -20,11 +12,11 @@ const encrypt = object => {
     return {eparams: Buffer.concat([cipher.update(buffer), cipher.final()]).toString('hex').toUpperCase()}
 }
 
-const request = (method, url, body = null) => {
+const request = (method, url, headers, body = null) => {
 	url = parse(url)
 	return new Promise((resolve, reject) => {
 		(url.protocol == 'https:' ? https.request : http.request)({method: method, host: url.host, path: url.path, headers: headers})
-		.on('response', response => resolve([201, 301, 302, 303, 307, 308].includes(response.statusCode) ? request(method, url.resolve(response.headers.location), body) : response))
+		.on('response', response => resolve([201, 301, 302, 303, 307, 308].includes(response.statusCode) ? request(method, url.resolve(response.headers.location), headers, body) : response))
 		.on('error', error => reject(error)).end(body)
 	})
 }
@@ -40,11 +32,17 @@ const json = response => {
 }
 
 const apiRequest = (path, data, load = true) => {
-    let method = 'POST'
-    url = parse('https://music.163.com').resolve(`/api/${path}`)
-    data = querystring.stringify(encrypt({method: method, url: url, params: data}))
-    url = 'https://music.163.com/api/linux/forward'
-    return request(method, url, data).then(load ? json : response => response)
+    const method = 'POST'
+    const url = 'https://music.163.com/api/linux/forward'
+    const headers = {
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Referer': 'https://music.163.com',
+        'X-Real-IP': '118.88.88.88',
+        'Cookie': ['os=linux', user.cookie].join('; ')
+    }
+    data = querystring.stringify(encrypt({method: method, url: parse('https://music.163.com').resolve(`/api/${path}`), params: data}))    
+    return request(method, url, headers, data).then(load ? json : response => response)
 }
 
 const api = {
@@ -118,13 +116,9 @@ const api = {
 }
 
 const sync = () => {
-    headers['Cookie'] = ['os=linux', user.cookie].join('; ')
     runtime.globalStorage.set('user', JSON.stringify(user))
     runtime.stateManager.set('logged', user.cookie ? true : false)
 }
 
-module.exports = handle => {
-    runtime = handle
-    api.refresh()
-    return api
-}
+module.exports = api
+const runtime = require('./runtime.js')
