@@ -1,4 +1,4 @@
-<img src="https://user-images.githubusercontent.com/26399680/50566307-04890700-0d73-11e9-81e5-b0c99b38306b.png" alt="logo" width="96" height="96" align="right">
+<img src="https://user-images.githubusercontent.com/26399680/50566307-04890700-0d73-11e9-81e5-b0c99b38306b.png" alt="logo" width="128" height="128" align="right">
 
 # VSC Netease Music
 
@@ -25,8 +25,8 @@
 
 ## TODOs
 
-- [] i18n
-- [] setting
+- [ ] i18n
+- [ ] setting
 
 ## Extension Settings
 
