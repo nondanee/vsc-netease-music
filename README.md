@@ -1,22 +1,36 @@
-# vsc-netease-music README
+<img src="https://user-images.githubusercontent.com/26399680/50566307-04890700-0d73-11e9-81e5-b0c99b38306b.png" alt="logo" width="96" height="96" align="right">
 
-This is the README for your extension "vsc-netease-music". After writing up a brief description, we recommend including the following sections.
+# VSC Netease Music
+
+**UNOFFICAL** Netease Music extension for Visual Studio Code (🚧Under Construction🚧)
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- 用户登录（手机号/邮箱）
+- 用户收藏（歌单/歌手/专辑）
+- 每日歌曲推荐
+- 发现音乐（歌单/新歌/排行榜）
+- 喜欢音乐（加红心）
+- 搜索（单曲/歌手/专辑/歌单）
+- 歌词显示
+- 无海外限制
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+使用了 [Webview API](https://code.visualstudio.com/api/extension-guides/webview)，通过 Web Audio API 播放音乐，不依赖系统播放器
+
+由于 VS Code 使用的 Electron 版本并未编译 ffmpeg，正常使用需要替换 VS Code 自带的 ffmpeg 动态运行库。请在 "帮助>关于" 中查看 VS Code 所使用 Electron 版本，并于 [Electron Github Release Page](https://github.com/electron/electron/releases) 下载对应的 Electron 完整版本进行替换（每次更新 VS Code 后都需重复此操作）
+
+> Windows 下替换 ffmpeg.dll，macOS 下替换 libfffmpeg.dylib
+
+## TODOs
+
+- [] i18n
+- [] setting
 
 ## Extension Settings
+
+> 还没做...
 
 Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
 
@@ -29,37 +43,7 @@ This extension contributes the following settings:
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+- 不支持分页 (组件的交互限制)
+- 图标不合适（等 VSCode 开放其自带图标）
+- Webview 无法隐藏，如需继续使用请不要关闭 Webview 标签
+- Webview 需要前台可见才能操作，后台快速切换标签会引起滚动条闪动
