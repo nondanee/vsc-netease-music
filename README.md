@@ -6,27 +6,33 @@
 
 ## Features
 
+- 发现音乐（歌单/新歌/排行榜）
+- 搜索（单曲/歌手/专辑/歌单）
 - 用户登录（手机号/邮箱）
 - 用户收藏（歌单/歌手/专辑）
 - 每日歌曲推荐
-- 发现音乐（歌单/新歌/排行榜）
-- 喜欢音乐（加红心）
-- 搜索（单曲/歌手/专辑/歌单）
-- 歌词显示
+- 喜欢音乐
+- 逐行歌词
+- 热门评论
 - 无海外限制
 
 ## Requirements
 
 使用了 [Webview API](https://code.visualstudio.com/api/extension-guides/webview)，通过 Web Audio API 播放音乐，不依赖系统播放器
 
-由于 VS Code 使用的 Electron 版本并未编译 ffmpeg，正常使用需要替换 VS Code 自带的 ffmpeg 动态运行库。请在 "帮助>关于" 中查看 VS Code 所使用 Electron 版本，并于 [Electron Github Release Page](https://github.com/electron/electron/releases) 下载对应的 Electron 完整版本进行替换（每次更新 VS Code 后都需重复此操作）
+由于 VS Code 使用的 Electron 版本并未编译 ffmpeg，正常使用需要替换 VS Code 自带的 ffmpeg 动态运行库。请在 "帮助 > 关于" 中查看 VS Code 所使用 Electron 版本，并于 Electron 的 [Release Page](https://github.com/electron/electron/releases) 下载对应的 Electron **完整**版本进行替换（每次更新 VS Code 后都需重复此操作）
 
-> Windows 下替换 ffmpeg.dll，macOS 下替换 libfffmpeg.dylib
+> Windows 下载 **electron-%version%-win32-x64.zip** 并替换 `./ffmpeg.dll`
+>
+> macOS 下替换 **electron-%version%-darwin-x64.zip** 并替换 `./Electron.app/Contents/Frameworks/Electron\ Framework.framework/Libraries/libffmpeg.dylib`
+>
+> Linux 下替换 **electron-%version%-linux-x64.zip** 并替换 `./libffmpeg.so`
 
 ## TODOs
 
 - [ ] i18n
-- [ ] setting
+- [ ] settings
+- [ ] shortcuts
 
 ## Extension Settings
 
@@ -43,7 +49,9 @@ This extension contributes the following settings:
 
 ## Known Issues
 
-- 不支持分页 (组件的交互限制)
+- 暂不支持分页 (组件的交互限制)
 - 图标不合适（等 VSCode 开放其自带图标）
-- Webview 无法隐藏，如需继续使用请不要关闭 Webview 标签
-- Webview 需要前台可见才能操作，后台快速切换标签会引起滚动条闪动
+- 列表对齐可能有问题（因不同字体下空格和符号的宽度不等）
+- Webview 标签无法隐藏，如需继续使用请不要关闭
+- Webview 限制只在前台可见才能操作，需要操作时插件会强制切换到 Webview 执行后再复原 Editor，标签切换不可见但会引起编辑器滚动条闪动（不影响输入）
+- 播放列表较长时无法定位到当前播放歌曲（VSCode 未实现 activeItems 的在非可视区域时的自动滚动）
