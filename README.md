@@ -1,5 +1,9 @@
 # VSC Netease Music
 
+[![release](https://vsmarketplacebadge.apphb.com/version/nondanee.vsc-netease-music.svg)](https://marketplace.visualstudio.com/items?itemName=nondanee.vsc-netease-music)
+[![installs](https://vsmarketplacebadge.apphb.com/installs/nondanee.vsc-netease-music.svg)](https://marketplace.visualstudio.com/items?itemName=nondanee.vsc-netease-music)
+[![rating](https://vsmarketplacebadge.apphb.com/rating-short/nondanee.vsc-netease-music.svg)](https://marketplace.visualstudio.com/items?itemName=nondanee.vsc-netease-music#review-details)
+
 **UNOFFICAL** Netease Music extension for Visual Studio Code
 
 ## Features
