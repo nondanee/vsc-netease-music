@@ -1,9 +1,12 @@
 {
     "name": "vsc-netease-music",
-    "displayName": "vsc-netease-music",
-    "description": "",
+    "displayName": "VSC Netease Music",
+    "description": "UNOFFICAL Netease Music extension for Visual Studio Code",
     "version": "0.0.1",
-    "publisher": "vsc-netease-music",
+    "icon": "icon.png",
+    "publisher": "nondanee",
+    "repository": "https://github.com/nondanee/vsc-netease-music.git",
+    "license": "MIT",
     "engines": {
         "vscode": "^1.28.0"
     },
@@ -18,128 +21,128 @@
         "commands": [
             {
                 "command": "neteasemusic.start",
-                "title": "启动",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.start%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.stop",
-                "title": "关闭",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.stop%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.play",
-                "title": "播放",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.play%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.mute",
-                "title": "静音",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.mute%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.unmute",
-                "title": "取消静音",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.unmute%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.pause",
-                "title": "暂停",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.pause%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.previous",
-                "title": "上一首",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.previous%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.next",
-                "title": "下一首",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.next%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.list",
-                "title": "播放列表",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.list%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.comment",
-                "title": "热门评论",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.comment%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.like",
-                "title": "红心",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.like%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.dislike",
-                "title": "取消红心",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.dislike%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.search",
-                "title": "搜索",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.search%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.login",
-                "title": "登录",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.login%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.logout",
-                "title": "退出登录",
-                "category": "网易云音乐"
+                "title": "%command.neteasemusic.logout%",
+                "category": "%category.neteasemusic%"
             },
             {
                 "command": "neteasemusic.recommend.song",
-                "title": "每日歌单推荐",
-                "category": "网易云音乐 个性推荐"
+                "title": "%command.neteasemusic.recommend.song%",
+                "category": "%category.neteasemusic.recommend%"
             },
             {
                 "command": "neteasemusic.recommend.playlist",
-                "title": "推荐歌单",
-                "category": "网易云音乐 个性推荐"
+                "title": "%command.neteasemusic.recommend.playlist%",
+                "category": "%category.neteasemusic.recommend%"
             },
             {
                 "command": "neteasemusic.user.playlist",
-                "title": "歌单",
-                "category": "网易云音乐 我的音乐"
+                "title": "%command.neteasemusic.user.playlist%",
+                "category": "%category.neteasemusic.my%"
             },
             {
                 "command": "neteasemusic.user.artist",
-                "title": "歌手",
-                "category": "网易云音乐 我的音乐"
+                "title": "%command.neteasemusic.user.artist%",
+                "category": "%category.neteasemusic.my%"
             },
             {
                 "command": "neteasemusic.user.album",
-                "title": "专辑",
-                "category": "网易云音乐 我的音乐"
+                "title": "%command.neteasemusic.user.album%",
+                "category": "%category.neteasemusic.my%"
             },
             {
                 "command": "neteasemusic.new.song",
-                "title": "新歌速递",
-                "category": "网易云音乐 发现音乐"
+                "title": "%command.neteasemusic.new.song%",
+                "category": "%category.neteasemusic.discover%"
             },
             {
                 "command": "neteasemusic.new.album",
-                "title": "新碟上架",
-                "category": "网易云音乐 发现音乐"
+                "title": "%command.neteasemusic.new.album%",
+                "category": "%category.neteasemusic.discover%"
             },
             {
                 "command": "neteasemusic.playlist.highquality",
-                "title": "精品歌单",
-                "category": "网易云音乐 发现音乐"
+                "title": "%command.neteasemusic.playlist.highquality%",
+                "category": "%category.neteasemusic.discover%"
             },
             {
                 "command": "neteasemusic.playlist.hot",
-                "title": "热门歌单",
-                "category": "网易云音乐 发现音乐"
+                "title": "%command.neteasemusic.playlist.hot%",
+                "category": "%category.neteasemusic.discover%"
             },
             {
                 "command": "neteasemusic.toplist",
-                "title": "排行榜",
-                "category": "网易云音乐 发现音乐"
+                "title": "%command.neteasemusic.toplist%",
+                "category": "%category.neteasemusic.discover%"
             }
         ],
         "menus": {
