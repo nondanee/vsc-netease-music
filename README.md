@@ -20,7 +20,7 @@
 
 由于 [VS Code 使用的 Electron 版本不包含 ffmpeg](https://stackoverflow.com/a/51735036)，正常使用需要替换 VS Code 自带的 ffmpeg 动态运行库。请在 "帮助 > 关于" 中查看 VS Code 所使用 Electron 版本，并于 Electron 的 [Release Page](https://github.com/electron/electron/releases) 下载对应的 **Electron 完整版本**进行替换（每次更新 VS Code 后都需重复此操作）
 
-> 修改 url 可以快速定位版本 https://github.com/electron/electron/releases/tag/%version%
+*修改 url 可以快速定位版本 https://github.com/electron/electron/releases/tag/%version%*
 
 ### Windows
 下载 **electron-%version%-win32-x64.zip** 
@@ -39,7 +39,7 @@
 
 ## TODOs
 
-- [-] i18n
+- [x] i18n
 - [ ] settings
 - [ ] shortcuts
 - [ ] exit point
@@ -60,8 +60,8 @@ This extension contributes the following settings:
 ## Known Issues
 
 - 暂不支持分页 (组件的交互限制)
-- 图标不合适（等 VS Code 开放其自带图标）
+- 图标不合适（[等 VS Code 增加更多图标支持](https://github.com/Microsoft/vscode/issues/10455)）
 - 列表对齐可能有问题（不同字体下空格和符号的宽度不等）
 - Webview 标签无法隐藏，使用时请不要关闭标签
-- Webview API 限制只在前台可见才能操作，需要操作时插件会自动切换到 Webview 执行后再复原 Editor，标签切换不可见但会引起编辑器滚动条闪动（不影响输入）
+- [Webview API 限制只在前台可见才能接收消息](https://github.com/Microsoft/vscode/issues/47534)，需要操作时插件会自动切换到 Webview 执行后再复原 Editor，标签切换不可见但会引起编辑器滚动条闪动（不影响输入）
 - 播放列表较长时无法定位到当前播放歌曲（VS Code 未实现 activeItems 处于 quickPick 非可视区域时的自动聚焦）
