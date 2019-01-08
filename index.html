@@ -8,7 +8,7 @@
 
         const Lyric = () => {
             const lyric = {}
-            const parse = lrc => lrc.trim().split('\n').forEach(line => {
+            const parse = lrc => lrc.trim().split('\n').filter(item => item).forEach(line => {
                 let point = line.slice(1, line.indexOf(']')).split(':')
                 let text = line.slice(line.indexOf(']') + 1).trim()
                 if (isNaN(point[0])) return

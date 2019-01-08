@@ -101,7 +101,7 @@ const interaction = {
             })), '我的歌手')
             onPickItem = item => {
                 quickPick.busy = true
-                interaction.artist(item.id)
+                interaction.artist.album(item.id)
             }
         }),
         album: () => api.user.album().then(data => {
@@ -117,21 +117,41 @@ const interaction = {
             }
         })
     },
-    artist: id => api.artist.album(id).then(data => {
-        quickPick.busy = false
-        fillQuickPick(data.hotAlbums.map(album => ({
-            id: album.id,
-            label: album.name,
-            description: dateFormat(album.publishTime),
-        })), data.artist.name)
-        onPickItem = item => {
-            quickPick.busy = true
-            interaction.album(item.id)
-        }
-    }),
+    artist: {
+        song: id => api.artist.song(id).then(data => {
+            quickPick.busy = false
+            let track = data.hotSongs.map(songFormat).map(songDisplay).map(addIndex)
+            track.forEach(song => song.description = song.album)
+            fillQuickPick(track, `${data.artist.name} 热门单曲`)
+            onPickItem = item => {
+                quickPick.busy = true
+                controller.add(track)
+                controller.play(item.index)
+                quickPick.hide()
+            }
+        }),
+        album: id => api.artist.album(id).then(data => {
+            quickPick.busy = false
+            fillQuickPick([{
+                id: id,
+                label: '热门单曲',
+                description: 'TOP 50',
+                greatest: true
+            }].concat(data.hotAlbums.map(album => ({
+                id: album.id,
+                label: album.name,
+                description: dateFormat(album.publishTime),
+            }))), data.artist.name)
+            onPickItem = item => {
+                quickPick.busy = true
+                item.greatest ? interaction.artist.song(id) : interaction.album(item.id)
+            }
+        })
+    },
     album: id => api.album(id).then(data => {
         quickPick.busy = false
         let track = data.songs.map(songFormat).map(songDisplay).map(addIndex)
+        track.forEach(song => song.description = song.artist)
         fillQuickPick(track, data.album.name)
         onPickItem = item => {
             quickPick.busy = true
@@ -342,7 +362,7 @@ const interaction = {
                 else if(!item.id)
                     search(text, item.type) 
                 else if(item.type == 'artist')
-                    interaction.artist(item.id)
+                    interaction.artist.album(item.id)
                 else if(item.type == 'album')
                     interaction.album(item.id)
                 else if(item.type == 'playlist')

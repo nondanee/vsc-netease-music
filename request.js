@@ -54,7 +54,7 @@ const api = {
         likes: () => apiRequest('song/like/get', {})
     },
     artist: {
-        song: id => apiRequest(`v1/artist/${id}`, {}),
+        song: id => apiRequest(`v1/artist/${id}`, {top: 50}),
         album: id => apiRequest(`artist/albums/${id}`, {limit: 1000, offset: 0}),
     },
     album: id => apiRequest(`v1/album/${id}`, {}),
