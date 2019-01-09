@@ -6,7 +6,7 @@
 
 **UNOFFICAL** Netease Music extension for Visual Studio Code
 
-## Features
+## Feature
 
 使用 [Webview](https://code.visualstudio.com/api/extension-guides/webview) 实现，通过 Web Audio API 播放音乐，不依赖[系统播放器](https://github.com/shime/play-sound#options)，**灵感来自 [kangping/video](https://marketplace.visualstudio.com/items?itemName=kangping.video)**
 
@@ -20,7 +20,7 @@
 - 热门评论
 - 无海外限制
 
-## Requirements
+## Requirement
 
 由于 [VS Code 使用的 Electron 版本不包含 ffmpeg](https://stackoverflow.com/a/51735036)，正常使用需要替换 VS Code 自带的 ffmpeg 动态运行库。请在 "帮助 > 关于" 中查看 VS Code 所使用 Electron 版本，并于 Electron 的 [Release Page](https://github.com/electron/electron/releases) 下载对应的 **Electron 完整版本**进行替换（每次更新 VS Code 后都需重复此操作）
 
@@ -41,14 +41,20 @@
 
 替换 `./libffmpeg.so`
 
-## TODOs
+## Usage
+
+按下 <kbd>F1</kbd> 或 <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>P</kbd> 打开命令面板
+
+输入命令前缀 `网易云音乐` 或 `NeteaseMusic` 开始探索 :D
+
+## Todo
 
 - [x] i18n
-- [ ] settings
+- [ ] setting
 - [ ] shortcuts
 - [ ] exit point
 
-## Extension Settings
+## Extension Setting
 
 > 还没做...
 
@@ -61,7 +67,7 @@ This extension contributes the following settings:
 * `myExtension.enable`: enable/disable this extension
 * `myExtension.thing`: set to `blah` to do something
 
-## Known Issues
+## Known Issue
 
 - 暂不支持分页 (组件的交互限制)
 - 图标不合适（[等 VS Code 增加更多图标支持](https://github.com/Microsoft/vscode/issues/10455)）
