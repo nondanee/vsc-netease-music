@@ -2,7 +2,7 @@
     "name": "vsc-netease-music",
     "displayName": "VSC Netease Music",
     "description": "UNOFFICAL Netease Music extension for Visual Studio Code",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "icon": "icon.png",
     "publisher": "nondanee",
     "repository": "https://github.com/nondanee/vsc-netease-music.git",
