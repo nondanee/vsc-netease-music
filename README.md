@@ -10,7 +10,7 @@
 
 ## Feature
 
-使用 [Webview](https://code.visualstudio.com/api/extension-guides/webview) 实现，通过 Web Audio API 播放音乐，不依赖[系统播放器](https://github.com/shime/play-sound#options)，**灵感来自 [kangping/video](https://marketplace.visualstudio.com/items?itemName=kangping.video)**
+使用 [Webview](https://code.visualstudio.com/api/extension-guides/webview) 实现，通过 Web Audio API 播放音乐，不依赖[命令行播放器](https://github.com/shime/play-sound#options)，**灵感来自 [kangping/video](https://marketplace.visualstudio.com/items?itemName=kangping.video)**
 
 - 发现音乐（歌单/新歌/排行榜）
 - 搜索（单曲/歌手/专辑/歌单）
@@ -24,24 +24,45 @@
 
 ## Requirement
 
-由于 [VS Code 使用的 Electron 版本不包含 ffmpeg](https://stackoverflow.com/a/51735036)，正常使用需要替换 VS Code 自带的 ffmpeg 动态运行库。请在 "帮助 > 关于" 中查看 VS Code 所使用 Electron 版本，并于 Electron 的 [Release Page](https://github.com/electron/electron/releases) 下载对应的 **Electron 完整版本**进行替换（每次更新 VS Code 后都需重复此操作）
+由于 [VS Code 使用的 Electron 版本不包含 ffmpeg](https://stackoverflow.com/a/51735036)，正常使用需要替换 VS Code 自带的 ffmpeg 动态链接库（每次更新 VS Code 后都需重新替换）
 
-*修改 url 可以快速定位版本 https://github.com/electron/electron/releases/tag/%version%*
+### Manual
+通过你的 VS Code 版本在 https://raw.githubusercontent.com/Microsoft/vscode/%version%/.yarnrc  查看其使用 Electron 版本，并于 https://github.com/electron/electron/releases/tag/%version% 下载对应的 **Electron 完整版本**进行替换
 
-### Windows
-下载 **electron-%version%-win32-x64.zip** 
+#### Windows
+下载 **electron-%version%-win32-%arch%.zip**
 
 替换 `./ffmpeg.dll`
 
-### macOS
+#### macOS
 下载 **electron-%version%-darwin-x64.zip** 
 
 替换 `./Electron.app/Contents/Frameworks/Electron\ Framework.framework/Libraries/libffmpeg.dylib`
 
-###  Linux
-下载 **electron-%version%-linux-x64.zip** 
+####  Linux
+下载 **electron-%version%-linux-%arch%.zip**
 
 替换 `./libffmpeg.so`
+
+### Script
+要求 Python 环境（Python 2/3 均可，无额外依赖）
+
+#### Windows Powershell
+
+```powershell
+Invoke-RestMethod https://gist.githubusercontent.com/nondanee/f157bbbccecfe29e48d87273cd02e213/raw | python
+```
+
+#### Unix Shell
+
+```
+curl https://gist.githubusercontent.com/nondanee/f157bbbccecfe29e48d87273cd02e213/raw | python
+```
+
+如果你的 VS Code 未修改默认安装位置，脚本会自动寻找并替换，若自定义了安装位置，需自行修改 [installation](https://gist.github.com/nondanee/f157bbbccecfe29e48d87273cd02e213#file-helper-py-L20)
+
+**默认安装位置下 macOS 不需管理员权限，Linux 和 Windows 需要**
+
 
 ## Usage
 
@@ -70,6 +91,8 @@ This extension contributes the following settings:
 * `myExtension.thing`: set to `blah` to do something
 
 ## Known Issue
+
+- 由于未找到**支持播放在线音乐**、**能够正常遥控**又**足够小巧**的命令行播放器而借助 Webview 实现 ([mpg123 在 windows 下的控制有 bug](https://sourceforge.net/p/mpg123/mailman/mpg123-users/thread/CAN5OgQWuYFt4mbbjDZcxMMdTQLZoNiF8AgH5S8Z8rwraN%2B65uA%40mail.gmail.com/))
 
 - 暂不支持分页 (组件的交互限制)
 - 图标不合适（[等 VS Code 增加更多图标支持](https://github.com/Microsoft/vscode/issues/10455)）
