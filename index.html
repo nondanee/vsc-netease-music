@@ -1,82 +1,82 @@
 <!DOCTYPE html>
 <html>
-    Please preserve this webview tab
-    <script>
-        const audio = new Audio()
-        const vscode = acquireVsCodeApi()
-        const postMessage = (type, body) => vscode.postMessage({type, body})
+	Please preserve this webview tab
+	<script>
+		const audio = new Audio()
+		const vscode = acquireVsCodeApi()
+		const postMessage = (type, body) => vscode.postMessage({type, body})
 
-        const Lyric = () => {
-            const lyric = {}
-            const parse = lrc => lrc.trim().split('\n').filter(item => item).forEach(line => {
-                let point = line.slice(1, line.indexOf(']')).split(':')
-                let text = line.slice(line.indexOf(']') + 1).trim()
-                if (isNaN(point[0])) return
-                point = (parseInt(point[0]) * 60 + parseFloat(point[1])).toFixed(2)
-                if (!(point in lyric)) lyric[point] = []
-                lyric[point].push(text)
-            })
-            song.lyric.filter(lrc => lrc).forEach(parse)
-            const timeline = Object.keys(lyric).sort((x, y) => parseFloat(x) - parseFloat(y))
-            let cursor = 0
-            return second => {
-                if (second > timeline[cursor]) {
-                    cursor += 1
-                    return lyric[timeline[cursor - 1]].join('  ')
-                }
-            }
-        }
+		const Lyric = () => {
+			const lyric = {}
+			const parse = lrc => lrc.trim().split('\n').filter(item => item).forEach(line => {
+				let point = line.slice(1, line.indexOf(']')).split(':')
+				let text = line.slice(line.indexOf(']') + 1).trim()
+				if (isNaN(point[0])) return
+				point = (parseInt(point[0]) * 60 + parseFloat(point[1])).toFixed(2)
+				if (!(point in lyric)) lyric[point] = []
+				lyric[point].push(text)
+			})
+			song.lyric.filter(lrc => lrc).forEach(parse)
+			const timeline = Object.keys(lyric).sort((x, y) => parseFloat(x) - parseFloat(y))
+			let cursor = 0
+			return second => {
+				if (second > timeline[cursor]) {
+					cursor += 1
+					return lyric[timeline[cursor - 1]].join('  ')
+				}
+			}
+		}
 
-        let song = null
-        let lyric = null
-        
-        audio.addEventListener('play', () => {
-            postMessage('event', {name: 'play'})
-        }, false)
+		let song = null
+		let lyric = null
 
-        audio.addEventListener('pause', () => {
-            postMessage('event', {name: 'pause'})
-        }, false)
+		audio.addEventListener('play', () => {
+			postMessage('event', {name: 'play'})
+		}, false)
 
-        audio.addEventListener('ended', () => {
-            postMessage('event', {name: 'end'})
-        }, false)
+		audio.addEventListener('pause', () => {
+			postMessage('event', {name: 'pause'})
+		}, false)
 
-        audio.addEventListener('timeupdate', () => {
-            let update = lyric(audio.currentTime)
-            if (update) postMessage('event', {name: 'lyric', data: update})
-        }, false)
+		audio.addEventListener('ended', () => {
+			postMessage('event', {name: 'end'})
+		}, false)
 
-        audio.addEventListener('volumechange', () => {
-            postMessage('event', {name: audio.muted ? 'mute' : 'unmute'})
-        })
+		audio.addEventListener('timeupdate', () => {
+			let update = lyric(audio.currentTime)
+			if (update) postMessage('event', {name: 'lyric', data: update})
+		}, false)
 
-        audio.addEventListener('loadstart', () => {
-            postMessage('event', {name: 'load', data: song})
-        }, false)
+		audio.addEventListener('volumechange', () => {
+			postMessage('event', {name: audio.muted ? 'mute' : 'unmute'})
+		})
 
-        window.addEventListener('message', event => {
-            const command = event.data.command
-            const payload = event.data.data
-            if (command === 'load') {
-                let play = (!audio.src || !audio.paused || audio.ended)
-                audio.src = payload.url
-                if (play) audio.play()
-                song = payload
-                lyric = Lyric()
-            }
-            else if (command === 'play') {
-                if (audio.paused) audio.play()
-            }
-            else if (command === 'pause') {
-                if (!audio.paused) audio.pause()
-            }
-            else if (command === 'mute') {
-                if (!audio.muted) audio.muted = true
-            }
-            else if (command === 'unmute') {
-                if (audio.muted) audio.muted = false
-            }
-        })
-    </script>
+		audio.addEventListener('loadstart', () => {
+			postMessage('event', {name: 'load', data: song})
+		}, false)
+
+		window.addEventListener('message', event => {
+			const command = event.data.command
+			const payload = event.data.data
+			if (command === 'load') {
+				let play = (!audio.src || !audio.paused || audio.ended)
+				audio.src = payload.url
+				if (play) audio.play()
+				song = payload
+				lyric = Lyric()
+			}
+			else if (command === 'play') {
+				if (audio.paused) audio.play()
+			}
+			else if (command === 'pause') {
+				if (!audio.paused) audio.pause()
+			}
+			else if (command === 'mute') {
+				if (!audio.muted) audio.muted = true
+			}
+			else if (command === 'unmute') {
+				if (audio.muted) audio.muted = false
+			}
+		})
+	</script>
 </html>
