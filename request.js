@@ -12,24 +12,19 @@ const encrypt = object => {
 	return {eparams: Buffer.concat([cipher.update(buffer), cipher.final()]).toString('hex').toUpperCase()}
 }
 
-const request = (method, url, headers, body = null) => {
-	url = parse(url)
-	return new Promise((resolve, reject) => {
-		(url.protocol == 'https:' ? https.request : http.request)({method: method, host: url.host, path: url.path, headers: headers})
-		.on('response', response => resolve([201, 301, 302, 303, 307, 308].includes(response.statusCode) ? request(method, url.resolve(response.headers.location), headers, body) : response))
-		.on('error', error => reject(error)).end(body)
-	})
-}
+const request = (method, url, headers, body = null) => new Promise((resolve, reject) => {
+	url = parse(url), (url.protocol == 'https:' ? https.request : http.request)({method: method, host: url.host, path: url.path, headers: headers})
+	.on('response', response => resolve([201, 301, 302, 303, 307, 308].includes(response.statusCode) ? request(method, url.resolve(response.headers.location), headers, body) : response))
+	.on('error', error => reject(error)).end(body)
+})
 
-const json = response => {
-	return new Promise((resolve, reject) => {
-		let chunks = []
-		response
-		.on('data', chunk => chunks.push(chunk))
-		.on('end', () => {try{resolve(JSON.parse(Buffer.concat(chunks)))}catch(error){reject(error)}})
-		.on('error', error => reject(error))
-	})
-}
+const json = response => new Promise((resolve, reject) => {
+	let chunks = []
+	response
+	.on('data', chunk => chunks.push(chunk))
+	.on('end', () => {try{resolve(JSON.parse(Buffer.concat(chunks)))}catch(error){reject(error)}})
+	.on('error', error => reject(error))
+})
 
 const apiRequest = (path, data, load = true) => {
 	const method = 'POST'
@@ -87,8 +82,9 @@ const api = {
 		hot: () => apiRequest('search/hot', {type: 1111})
 	},
 	login: (account, password) => {
+		let area = Array.from(['+1', '+1242', '+1246', '+1264', '+1268', '+1345', '+1441', '+1473', '+1664', '+1670', '+1671', '+1758', '+1784', '+1787', '+1868', '+1876', '+1890', '+20', '+212', '+213', '+216', '+218', '+220', '+221', '+223', '+224', '+225', '+226', '+227', '+228', '+229', '+230', '+231', '+232', '+233', '+234', '+235', '+236', '+237', '+239', '+241', '+242', '+243', '+244', '+247', '+248', '+249', '+251', '+252', '+253', '+254', '+255', '+256', '+257', '+258', '+260', '+261', '+262', '+263', '+264', '+265', '+266', '+267', '+268', '+27', '+30', '+31', '+32', '+33', '+34', '+350', '+351', '+352', '+353', '+354', '+355', '+356', '+357', '+358', '+359', '+36', '+370', '+371', '+372', '+373', '+374', '+375', '+376', '+377', '+378', '+380', '+381', '+386', '+39', '+40', '+41', '+420', '+421', '+423', '+43', '+44', '+45', '+46', '+47', '+48', '+49', '+501', '+502', '+503', '+504', '+505', '+506', '+507', '+509', '+51', '+52', '+53', '+54', '+55', '+56', '+57', '+58', '+591', '+592', '+593', '+594', '+595', '+596', '+597', '+598', '+599', '+60', '+61', '+62', '+63', '+64', '+65', '+66', '+673', '+674', '+675', '+676', '+677', '+679', '+682', '+684', '+685', '+689', '+7', '+81', '+82', '+84', '+850', '+852', '+853', '+855', '+856', '+86', '+880', '+886', '+90', '+91', '+92', '+93', '+94', '+95', '+960', '+961', '+962', '+963', '+964', '+965', '+966', '+967', '+968', '+971', '+972', '+973', '+974', '+976', '+977', '+98', '+992', '+993', '+994', '+995', '+996', '+998']).find(prefix => account.startsWith(prefix))
 		let path = '', data = {password: crypto.createHash('md5').update(password).digest('hex'), rememberLogin: 'true'}
-		account.includes('@') ? (data.username = account, path = 'login') : (data.phone = account, path = 'login/cellphone')
+		account.includes('@') ? (Object.assign(data, {username: account}), path = 'login') : (Object.assign(data, {phone: account.replace(area, ''), countrycode: (area || '').replace('+', '')}), path = 'login/cellphone')
 		return apiRequest(path, data, false).then(response => {
 			if (response.headers['set-cookie']) user.cookie = response.headers['set-cookie'].map(cookie => cookie.replace(/;.*/,'')).join('; ')
 			return response
