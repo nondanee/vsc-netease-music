@@ -1,4 +1,5 @@
 const fs = require('fs')
+const ws = require('ws')
 const path = require('path')
 const vscode = require('vscode')
 
@@ -123,28 +124,20 @@ const PlayerBar = context => {
     }
 }
 
-const WebviewPanel = context => {
+const DuplexChannel = context => {
+    let webSocket = null
     let activeEditor = ActiveEditor()
-    const panel = vscode.window.createWebviewPanel(
-        'neteasemusic', 'NetEaseMusic',
-        {preserveFocus: true, viewColumn: vscode.ViewColumn.One},
-        {enableScripts: true, retainContextWhenHidden: true}
-    )
-    panel.webview.html = fs.readFileSync(vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath)
-
-    panel.onDidDispose(() => {
-        runtime.commandManager.dispose()
-        runtime.stateManager.dispose()
-        runtime.playerBar.dispose()
-        runtime.commandManager = null
-        runtime.stateManager = null
-        runtime.playerBar = null
-        runtime.webviewPanel = null
+    
+    const webSocketd = new ws.Server({port: 16363})
+    .once('connection', connection => {
+        webSocket = connection
+        .on('message', message => {
+            let data = JSON.parse(message)
+            receiveMessage(data.type, data.body)
+        })
     })
 
-    panel.webview.onDidReceiveMessage(message => {
-        const type = message.type
-        const body = message.body
+    const receiveMessage = (type, body) => {
         if (type == 'event') {
             if (body.name == 'ready' && activeEditor) {
                 activeEditor.reveal()
@@ -166,19 +159,38 @@ const WebviewPanel = context => {
         else if (type == 'echo') {
             vscode.window.showInformationMessage(body)
         }
-    }, undefined, context.subscriptions)
+    }
 
     return {
-        dispose: () => panel.dispose(),
+        dispose: () => webSocketd.close(),
         postMessage: (command, data) => {
-            let shift = !panel.visible
-            let activeEditor = ActiveEditor()
-            Promise.resolve()
-            .then(() => (shift ? panel.reveal() : undefined))
-            .then(() => panel.webview.postMessage({command, data}))
-            .then(() => (shift ? activeEditor.reveal() : undefined))
-            .then(() => activeEditor = null)
+            if (webSocket) webSocket.send(JSON.stringify({command, data}))
         }
+    }
+}
+
+const WebviewPanel = context => {
+    const panel = vscode.window.createWebviewPanel(
+        'neteasemusic', 'NeteaseMusic',
+        {preserveFocus: true, viewColumn: vscode.ViewColumn.One},
+        {enableScripts: true, retainContextWhenHidden: true}
+    )
+    panel.webview.html = fs.readFileSync(vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath)
+
+    panel.onDidDispose(() => {
+        runtime.commandManager.dispose()
+        runtime.duplexChannel.dispose()
+        runtime.stateManager.dispose()
+        runtime.playerBar.dispose()
+        runtime.commandManager = null
+        runtime.duplexChannel = null
+        runtime.stateManager = null
+        runtime.playerBar = null
+        runtime.webviewPanel = null
+    })
+
+    return {
+        dispose: () => panel.dispose()
     }
 }
 
@@ -239,6 +251,7 @@ const runtime = {
         runtime.globalStorage = GlobalStorage(context)
         runtime.stateManager = StateManager(context)
         runtime.playerBar = PlayerBar(context)
+        runtime.duplexChannel = DuplexChannel(context)
         runtime.webviewPanel = WebviewPanel(context)
         runtime.commandManager = CommandManager(context)
 

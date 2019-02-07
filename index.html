@@ -2,7 +2,6 @@
 <html>
 	<script>
 		const audio = new Audio()
-
 		const Lyric = () => {
 			const lyric = {}
 			const parse = lrc => lrc.trim().split('\n').filter(item => item).forEach(line => {
@@ -52,13 +51,13 @@
 			postMessage('event', {name: 'load', data: song})
 		}, false)
 
-		window.addEventListener('message', event => {
-			const data = event.data
+		const webSocket = new WebSocket('ws://localhost:16363')
+		webSocket.addEventListener('message', event => {
+			let data = JSON.parse(event.data)
 			receiveMessage(data.command, data.data)
 		})
 
-		const vscode = acquireVsCodeApi()
-		const postMessage = (type, body) => vscode.postMessage({type, body})
+		const postMessage = (type, body) => webSocket.send(JSON.stringify({type, body}))
 		const receiveMessage = (command, data) => {
 			if (command === 'load') {
 				let play = (!audio.src || !audio.paused || audio.ended)
@@ -82,15 +81,14 @@
 		}
 
 		const interacted = () => {
-			document.body.innerHTML = 'Please preserve this webview tab'
 			postMessage('event', {name: 'ready'})
 			document.removeEventListener('click', interacted)
-            document.removeEventListener('touchend', interacted)
+			document.removeEventListener('touchend', interacted)
+			document.body.innerHTML = 'Please preserve this webview tab'
 		}
 
 		document.addEventListener('click', interacted)
 		document.addEventListener('touchend', interacted)
-		
 	</script>
 	<body>
 		Please interact with the document first otherwise play() will failed

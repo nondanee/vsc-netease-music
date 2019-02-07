@@ -93,10 +93,11 @@ This extension contributes the following settings:
 ## Known Issue
 
 - 由于未找到**支持播放在线音乐**、**能够正常遥控**又**足够小巧**的命令行播放器而借助 Webview 实现 ([mpg123 在 windows 下的控制有 bug](https://sourceforge.net/p/mpg123/mailman/mpg123-users/thread/CAN5OgQWuYFt4mbbjDZcxMMdTQLZoNiF8AgH5S8Z8rwraN%2B65uA%40mail.gmail.com/))
-
 - 暂不支持分页 (组件的交互限制)
-- 图标不合适（[等 VS Code 增加更多图标支持](https://github.com/Microsoft/vscode/issues/10455)）
-- 列表对齐可能有问题（不同字体下空格和符号的宽度不等）
+- 图标不合适 ([等 VS Code 增加更多图标支持](https://github.com/Microsoft/vscode/issues/10455))
+- 列表对齐可能有问题 (不同字体下字符宽度不等)
 - Webview 标签无法隐藏，使用时请不要关闭标签
-- [Webview API 限制只在前台可见才能接收消息](https://github.com/Microsoft/vscode/issues/47534)，需要操作时插件会自动切换到 Webview 执行后再复原 Editor，标签切换不可见但会引起编辑器滚动条闪动（不影响输入）
-- 播放列表较长时无法定位到当前播放歌曲（VS Code 未实现 activeItems 处于 quickPick 非可视区域时的自动聚焦）
+- ~~[Webview API 限制只在前台可见才能接收 postMessage 消息](https://code.visualstudio.com/api/references/vscode-api#Webview)，需要操作时插件会自动切换到 Webview 执行后再复原 Editor，标签切换不可见但会引起编辑器滚动条闪动 (不影响输入)~~ 
+- 自 1.31.0 开始 reveal 后 postMessage 会有可见的切换延迟，已改用 WebSocket 实现双向通信
+- 1.31.0 升级使用 Electron 3.x，受制于 [Chrome 66 内核的 Autoplay Policy](https://developers.google.com/web/updates/2017/09/autoplay-policy-changes) 限制，需要用户先与 Webview 交互才能播放
+- 播放列表较长时无法定位到当前播放歌曲 (VS Code 未实现 activeItems 处于 quickPick 非可视区域时的自动聚焦)

@@ -261,5 +261,7 @@
         "@types/node": "^8.10.25",
         "@types/mocha": "^2.2.42"
     },
-    "dependencies": {}
+    "dependencies": {
+        "ws": "^6.1.3"
+    }
 }

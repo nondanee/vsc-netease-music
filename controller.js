@@ -36,13 +36,13 @@ const controller = {
 	resume: () => {
 		if (list.length == 0) return
 		let paused = !runtime.stateManager.get('playing')
-		if (paused) runtime.webviewPanel.postMessage('play')
+		if (paused) runtime.duplexChannel.postMessage('play')
 		return paused
 	},
 	pause: () => {
 		if (list.length == 0) return
 		let playing = !!runtime.stateManager.get('playing')
-		if (playing) runtime.webviewPanel.postMessage('pause')
+		if (playing) runtime.duplexChannel.postMessage('pause')
 		return playing
 	},
 	play: target => {
@@ -61,7 +61,7 @@ const controller = {
 				url = url.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net')
 				song.url = url
 				song.lyric = [data[1].lrc.lyric, data[1].tlyric.lyric]
-				runtime.webviewPanel.postMessage('load', song)
+				runtime.duplexChannel.postMessage('load', song)
 				runtime.playerBar.state(likes.includes(song.id) ? 'like' : 'dislike')
 				vscode.window.showInformationMessage(`正在播放: ${song.artist} - ${song.name}`)
 			}
@@ -98,12 +98,12 @@ const controller = {
 	mute: () => {
 		if (list.length == 0) return
 		let muted = !!runtime.stateManager.get('muted')
-		if (!muted) runtime.webviewPanel.postMessage('mute')
+		if (!muted) runtime.duplexChannel.postMessage('mute')
 	},
 	unmute: () => {
 		if (list.length == 0) return
 		let muted = !!runtime.stateManager.get('muted')
-		if (muted) runtime.webviewPanel.postMessage('unmute')
+		if (muted) runtime.duplexChannel.postMessage('unmute')
 	},
 	refresh: () => {
 		api.user.likes().then(data => {
