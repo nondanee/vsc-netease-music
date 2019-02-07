@@ -4,7 +4,7 @@ const vscode = require('vscode')
 
 const ActiveEditor = () => {
     let activeTextEditor = vscode.window.activeTextEditor
-    return {reveal: () => {if (activeTextEditor) vscode.window.showTextDocument(activeTextEditor.document, activeTextEditor.viewColumn, false)}}
+    return {reveal: () => activeTextEditor ? vscode.window.showTextDocument(activeTextEditor.document, activeTextEditor.viewColumn, false) : undefined}
 }
 
 const GlobalStorage = context => {
@@ -131,8 +131,6 @@ const WebviewPanel = context => {
         {enableScripts: true, retainContextWhenHidden: true}
     )
     panel.webview.html = fs.readFileSync(vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath)
-    activeEditor.reveal()
-    activeEditor = null
 
     panel.onDidDispose(() => {
         runtime.commandManager.dispose()
@@ -148,7 +146,11 @@ const WebviewPanel = context => {
         const type = message.type
         const body = message.body
         if (type == 'event') {
-            if (body.name == 'end') {
+            if (body.name == 'ready' && activeEditor) {
+                activeEditor.reveal()
+                activeEditor = null
+            }
+            else if (body.name == 'end') {
                 runtime.commandManager.execute('next')
             }
             else if (body.name == 'load') {
@@ -171,10 +173,11 @@ const WebviewPanel = context => {
         postMessage: (command, data) => {
             let shift = !panel.visible
             let activeEditor = ActiveEditor()
-            if (shift) panel.reveal()
-            panel.webview.postMessage({command, data})
-            if (shift) activeEditor.reveal()
-            activeEditor = null
+            Promise.resolve()
+            .then(() => (shift ? panel.reveal() : undefined))
+            .then(() => panel.webview.postMessage({command, data}))
+            .then(() => (shift ? activeEditor.reveal() : undefined))
+            .then(() => activeEditor = null)
         }
     }
 }

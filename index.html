@@ -1,10 +1,7 @@
 <!DOCTYPE html>
 <html>
-	Please preserve this webview tab
 	<script>
 		const audio = new Audio()
-		const vscode = acquireVsCodeApi()
-		const postMessage = (type, body) => vscode.postMessage({type, body})
 
 		const Lyric = () => {
 			const lyric = {}
@@ -56,13 +53,18 @@
 		}, false)
 
 		window.addEventListener('message', event => {
-			const command = event.data.command
-			const payload = event.data.data
+			const data = event.data
+			receiveMessage(data.command, data.data)
+		})
+
+		const vscode = acquireVsCodeApi()
+		const postMessage = (type, body) => vscode.postMessage({type, body})
+		const receiveMessage = (command, data) => {
 			if (command === 'load') {
 				let play = (!audio.src || !audio.paused || audio.ended)
-				audio.src = payload.url
+				audio.src = data.url
 				if (play) audio.play()
-				song = payload
+				song = data
 				lyric = Lyric()
 			}
 			else if (command === 'play') {
@@ -77,6 +79,20 @@
 			else if (command === 'unmute') {
 				if (audio.muted) audio.muted = false
 			}
-		})
+		}
+
+		const interacted = () => {
+			document.body.innerHTML = 'Please preserve this webview tab'
+			postMessage('event', {name: 'ready'})
+			document.removeEventListener('click', interacted)
+            document.removeEventListener('touchend', interacted)
+		}
+
+		document.addEventListener('click', interacted)
+		document.addEventListener('touchend', interacted)
+		
 	</script>
+	<body>
+		Please interact with the document first otherwise play() will failed
+	</body>
 </html>
