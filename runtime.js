@@ -11,7 +11,8 @@ const ActiveEditor = () => {
 const GlobalStorage = context => {
     return {
         get: key => context.globalState.get(key),
-        set: (key, value) => context.globalState.update(key, value)
+        set: (key, value) => context.globalState.update(key, value),
+        dispose: () => {}
     }
 }
 
@@ -83,11 +84,11 @@ const PlayerBar = context => {
         }
     }
 
-    const bind = (item, preset) => {
-        item.color = preset.color || undefined
-        item.text = preset.icon
-        item.command = preset.command
-        if (preset.state) Object.keys(preset.state).forEach(key => runtime.stateManager.set(key, preset.state[key]))
+    const bind = (item, button) => {
+        item.color = button.color || undefined
+        item.text = button.icon
+        item.command = button.command
+        if (button.state) Object.keys(button.state).forEach(key => runtime.stateManager.set(key, button.state[key]))
     }
 
     const order = [['list'], /*['comment'],*/ ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['mute', 'unmute']].reverse()
@@ -135,6 +136,7 @@ const DuplexChannel = context => {
             let data = JSON.parse(message)
             receiveMessage(data.type, data.body)
         })
+        .on('close', () => runtime.dispose())
     })
 
     const receiveMessage = (type, body) => {
@@ -170,25 +172,13 @@ const DuplexChannel = context => {
 }
 
 const WebviewPanel = context => {
+    // const panel = vscode.env.openExternal(vscode.Uri.file(path.join(context.extensionPath, 'index.html')))
     const panel = vscode.window.createWebviewPanel(
         'neteasemusic', 'NeteaseMusic',
         {preserveFocus: true, viewColumn: vscode.ViewColumn.One},
         {enableScripts: true, retainContextWhenHidden: true}
     )
     panel.webview.html = fs.readFileSync(vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath)
-
-    panel.onDidDispose(() => {
-        runtime.commandManager.dispose()
-        runtime.duplexChannel.dispose()
-        runtime.stateManager.dispose()
-        runtime.playerBar.dispose()
-        runtime.commandManager = null
-        runtime.duplexChannel = null
-        runtime.stateManager = null
-        runtime.playerBar = null
-        runtime.webviewPanel = null
-    })
-
     return {
         dispose: () => panel.dispose()
     }
@@ -240,9 +230,14 @@ const runtime = {
     globalStorage: null,
     playerBar: null,
     webviewPanel: null,
+    duplexChannel: null,
     commandManager: null,
     dispose: () => {
-        if (runtime.webviewPanel) runtime.webviewPanel.dispose()
+        Object.keys(runtime).filter(key => typeof runtime[key] != 'function' && runtime[key])
+        .forEach(key => {
+            runtime[key].dispose()
+            runtime[key] = null
+        })
     },
     activate: context => {
         if (runtime.webviewPanel) return
