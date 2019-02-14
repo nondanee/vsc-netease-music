@@ -1,10 +1,16 @@
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/nondanee/vsc-netease-music/master/icon.png" alt="icon" width="128px">
+
 # VSC Netease Music
 
-[![release](https://vsmarketplacebadge.apphb.com/version/nondanee.vsc-netease-music.svg)](https://marketplace.visualstudio.com/items?itemName=nondanee.vsc-netease-music)
-[![installs](https://vsmarketplacebadge.apphb.com/installs/nondanee.vsc-netease-music.svg)](https://marketplace.visualstudio.com/items?itemName=nondanee.vsc-netease-music)
-[![rating](https://vsmarketplacebadge.apphb.com/rating-short/nondanee.vsc-netease-music.svg)](https://marketplace.visualstudio.com/items?itemName=nondanee.vsc-netease-music#review-details)
-
 **UNOFFICAL** Netease Music extension for Visual Studio Code
+
+[![Visual Studio Marketplace](https://img.shields.io/badge/Visual%20Studio-Marketplace-007acc.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=nondanee.vsc-netease-music)
+[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/nondanee.vsc-netease-music.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=nondanee.vsc-netease-music)
+[![Visual Studio Marketplace Rating](https://img.shields.io/visual-studio-marketplace/stars/nondanee.vsc-netease-music.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=nondanee.vsc-netease-music)
+
+</div>
 
 ![demo](https://user-images.githubusercontent.com/26399680/50915155-240ae880-1473-11e9-91b6-731183a6b26a.gif)
 
@@ -12,10 +18,10 @@
 
 使用 [Webview](https://code.visualstudio.com/api/extension-guides/webview) 实现，通过 Web Audio API 播放音乐，不依赖[命令行播放器](https://github.com/shime/play-sound#options)，**灵感来自 [kangping/video](https://marketplace.visualstudio.com/items?itemName=kangping.video)**
 
-- 发现音乐（歌单/新歌/排行榜）
-- 搜索（单曲/歌手/专辑/歌单）
-- 用户登录（手机号/邮箱）
-- 用户收藏（歌单/歌手/专辑）
+- 发现音乐 (歌单 / 新歌 / 排行榜)
+- 搜索 (单曲 / 歌手 / 专辑 / 歌单)
+- 用户登录 (手机号 / 邮箱)
+- 用户收藏 (歌单 / 歌手 / 专辑)
 - 每日歌曲推荐
 - 喜欢音乐
 - 逐行歌词
@@ -24,7 +30,12 @@
 
 ## Requirement
 
-由于 [VS Code 使用的 Electron 版本不包含 ffmpeg](https://stackoverflow.com/a/51735036)，正常使用需要替换 VS Code 自带的 ffmpeg 动态链接库（每次更新 VS Code 后都需重新替换）
+**自 1.31.0 开始，VS Code 携带了完整的 ffmpeg 动态链接库 (不知是 feature 还是 bug), 已不需自行替换，安装插件即可使用**
+
+~~由于 [VS Code 使用的 Electron 版本不包含 ffmpeg](https://stackoverflow.com/a/51735036)，正常使用需要替换 VS Code 自带的 ffmpeg 动态链接库 (每次更新 VS Code 后都需重新替换)~~
+
+<details>
+<summary>Deprecated</summary>
 
 ### Manual
 通过你的 VS Code 版本在 https://raw.githubusercontent.com/Microsoft/vscode/%version%/.yarnrc  查看其使用 Electron 版本，并于 https://github.com/electron/electron/releases/tag/%version% 下载对应的 **Electron 完整版本**进行替换
@@ -45,7 +56,7 @@
 替换 `./libffmpeg.so`
 
 ### Script
-要求 Python 环境（Python 2/3 均可，无额外依赖）
+要求 Python 环境 (Python 2/3 均可，无额外依赖)
 
 #### Windows Powershell
 
@@ -63,6 +74,7 @@ curl https://gist.githubusercontent.com/nondanee/f157bbbccecfe29e48d87273cd02e21
 
 **默认安装位置下 macOS 不需管理员权限，Linux 和 Windows 需要**
 
+</details>
 
 ## Usage
 
