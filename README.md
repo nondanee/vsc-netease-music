@@ -8,11 +8,15 @@
 
 [![Visual Studio Marketplace](https://img.shields.io/badge/Visual%20Studio-Marketplace-007acc.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=nondanee.vsc-netease-music)
 [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/nondanee.vsc-netease-music.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=nondanee.vsc-netease-music)
+[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/nondanee.vsc-netease-music.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=nondanee.vsc-netease-music)
 [![Visual Studio Marketplace Rating](https://img.shields.io/visual-studio-marketplace/stars/nondanee.vsc-netease-music.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=nondanee.vsc-netease-music)
+[![GitHub Stars](https://img.shields.io/github/stars/nondanee/vsc-netease-music.svg?style=flat-square)](https://github.com/nondanee/vsc-netease-music)
+
+![demo](https://user-images.githubusercontent.com/26399680/50915155-240ae880-1473-11e9-91b6-731183a6b26a.gif)
 
 </div>
 
-![demo](https://user-images.githubusercontent.com/26399680/50915155-240ae880-1473-11e9-91b6-731183a6b26a.gif)
+
 
 ## Feature
 
@@ -30,14 +34,14 @@
 
 ## Requirement
 
-**自 1.31.0 开始，VS Code 携带了完整的 ffmpeg 动态链接库 (不知是 feature 还是 bug), 已不需自行替换，安装插件即可使用**
+**自 1.31.0 起，VS Code 自带完整的 ffmpeg 动态链接库 (不知是 feature 还是 bug)，无需自行替换，安装插件即可使用**
 
-~~由于 [VS Code 使用的 Electron 版本不包含 ffmpeg](https://stackoverflow.com/a/51735036)，正常使用需要替换 VS Code 自带的 ffmpeg 动态链接库 (每次更新 VS Code 后都需重新替换)~~
+~~[VS Code 使用的 Electron 版本不包含 ffmpeg](https://stackoverflow.com/a/51735036)，需替换自带的 ffmpeg 动态链接库才能正常播放 (每次更新 VS Code 都需重新替换)~~
 
 <details>
 <summary>Deprecated</summary>
 
-### Manual
+### Manual Replacement
 通过你的 VS Code 版本在 https://raw.githubusercontent.com/Microsoft/vscode/%version%/.yarnrc  查看其使用 Electron 版本，并于 https://github.com/electron/electron/releases/tag/%version% 下载对应的 **Electron 完整版本**进行替换
 
 #### Windows
@@ -55,7 +59,7 @@
 
 替换 `./libffmpeg.so`
 
-### Script
+### Automatic Replacement
 要求 Python 环境 (Python 2/3 均可，无额外依赖)
 
 #### Windows Powershell
@@ -109,7 +113,7 @@ This extension contributes the following settings:
 - 图标不合适 ([等 VS Code 增加更多图标支持](https://github.com/Microsoft/vscode/issues/10455))
 - 列表对齐可能有问题 (不同字体下字符宽度不等)
 - Webview 标签无法隐藏，使用时请不要关闭标签
-- ~~[Webview API 限制只在前台可见才能接收 postMessage 消息](https://code.visualstudio.com/api/references/vscode-api#Webview)，需要操作时插件会自动切换到 Webview 执行后再复原 Editor，标签切换不可见但会引起编辑器滚动条闪动 (不影响输入)~~ 
+- ~~[Webview API 限制只在前台可见才能接收 postMessage 消息](https://code.visualstudio.com/api/references/vscode-api#Webview)，需要通信时插件会自动切换到 Webview 再复原 Editor，标签切换不可见但会引起编辑器滚动条闪动 (不影响输入)~~ 
 - 自 1.31.0 开始 reveal 后 postMessage 会有可见的切换延迟，已改用 WebSocket 实现双向通信
-- 1.31.0 升级使用 Electron 3.x，受制于 [Chrome 66 内核的 Autoplay Policy](https://developers.google.com/web/updates/2017/09/autoplay-policy-changes) 限制，需要用户先与 Webview 交互才能播放
-- 播放列表较长时无法定位到当前播放歌曲 (VS Code 未实现 activeItems 处于 quickPick 非可视区域时的自动聚焦)
+- 1.31.0 升级使用 Electron 3.x，受制于 [Chrome 66 内核的 Autoplay Policy](https://developers.google.com/web/updates/2017/09/autoplay-policy-changes)，用户需先与 Webview 交互才能播放
+- 播放列表较长时无法定位到当前播放歌曲 (VS Code 未实现 activeItems 处于 quickPick 非可视区域时的滚动聚焦)
