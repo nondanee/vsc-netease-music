@@ -16,8 +16,6 @@
 
 </div>
 
-
-
 ## Feature
 
 使用 [Webview](https://code.visualstudio.com/api/extension-guides/webview) 实现，通过 Web Audio API 播放音乐，不依赖[命令行播放器](https://github.com/shime/play-sound#options)，**灵感来自 [kangping/video](https://marketplace.visualstudio.com/items?itemName=kangping.video)**
@@ -34,15 +32,15 @@
 
 ## Requirement
 
-**自 1.31.0 起，VS Code 自带完整的 ffmpeg 动态链接库 (不知是 feature 还是 bug)，无需自行替换，安装插件即可使用**
+**VS Code for Windows 自 1.31.0 起自带完整的 ffmpeg 动态链接库 (可能是 bug)，无需替换**
 
-~~[VS Code 使用的 Electron 版本不包含 ffmpeg](https://stackoverflow.com/a/51735036)，需替换自带的 ffmpeg 动态链接库才能正常播放 (每次更新 VS Code 都需重新替换)~~
+[VS Code 使用的 Electron 版本不包含 ffmpeg](https://stackoverflow.com/a/51735036)，需替换自带的 ffmpeg 动态链接库才能正常播放 (每次更新 VS Code 都需重新替换)
 
-<details>
-<summary>Deprecated</summary>
+<details><summary>
+<b>Manual Replacement</b>
+</summary>
 
-### Manual Replacement
-通过你的 VS Code 版本在 https://raw.githubusercontent.com/Microsoft/vscode/%version%/.yarnrc  查看其使用 Electron 版本，并于 https://github.com/electron/electron/releases/tag/%version% 下载对应的 **Electron 完整版本**进行替换
+通过 VS Code 版本在 https://raw.githubusercontent.com/Microsoft/vscode/%version%/.yarnrc  查看其使用的 Electron 版本，并于 https://github.com/electron/electron/releases/tag/%version% 下载对应的 **Electron 完整版本**进行替换
 
 #### Windows
 下载 **electron-%version%-win32-%arch%.zip**
@@ -59,8 +57,15 @@
 
 替换 `./libffmpeg.so`
 
-### Automatic Replacement
-要求 Python 环境 (Python 2/3 均可，无额外依赖)
+</details>
+
+<details><summary>
+<b>Automatic Replacement</b>
+</summary>
+
+使用 Python 脚本替换 (Python 2/3 均可，绝大部分发行版自带环境)
+
+**默认安装位置下 Linux 和 Windows 需要以管理员身份运行，macOS 不需要**
 
 #### Windows Powershell
 
@@ -74,9 +79,7 @@ Invoke-RestMethod https://gist.githubusercontent.com/nondanee/f157bbbccecfe29e48
 curl https://gist.githubusercontent.com/nondanee/f157bbbccecfe29e48d87273cd02e213/raw | python
 ```
 
-如果你的 VS Code 未修改默认安装位置，脚本会自动寻找并替换，若自定义了安装位置，需自行修改 [installation](https://gist.github.com/nondanee/f157bbbccecfe29e48d87273cd02e213#file-helper-py-L20)
-
-**默认安装位置下 macOS 不需管理员权限，Linux 和 Windows 需要**
+如果 VS Code 使用默认配置安装，脚本会自动寻找并替换，若自定义了安装位置，请自行修改 [installation](https://gist.github.com/nondanee/f157bbbccecfe29e48d87273cd02e213#file-helper-py-L20)
 
 </details>
 
