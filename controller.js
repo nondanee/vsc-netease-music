@@ -2,7 +2,7 @@ const vscode = require('vscode')
 let likes = []
 let list = []
 let index = 0
-let backup=list.map((val)=>{return val = 1})
+let backup=[]
 let n=1
 const format = song => ({id: song.id, name: song.name, album: song.album, artist: song.artist})
 
@@ -62,7 +62,6 @@ const controller = {
 	},
 	play: target => {
 		if (list.length == 0) return
-		backup=list
 		index = typeof(target) != 'undefined' ? target % list.length : index
 		let song = list[index]
 		Promise.all([api.song.url(song.id), api.song.lyric(song.id)])
