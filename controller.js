@@ -1,9 +1,9 @@
 const vscode = require('vscode')
-
 let likes = []
 let list = []
 let index = 0
-
+let backup=list.map((val)=>{return val = 1})
+let n=1
 const format = song => ({id: song.id, name: song.name, album: song.album, artist: song.artist})
 
 const controller = {
@@ -25,13 +25,28 @@ const controller = {
 	},
 	previous: () => {
 		if (list.length == 0) return
-		index = (index - 1 + list.length) % list.length
+		index = (index - n + list.length) % list.length
 		controller.play()
 	},
 	next: () => {
 		if (list.length == 0) return
-		index = (index + 1 + list.length) % list.length
+		index = (index + n + list.length) % list.length
 		controller.play()
+		
+	},
+	random:()=>{
+		if(list.length == 0)return
+		backup=list.map((val,index)=>{return val = index})
+		n=backup.splice(Math.floor(Math.random()*backup.length),1)[0]
+	},
+	repeat:()=>{
+		if(list.length == 0)return
+		n=backup.length
+				
+	},
+	loop:()=>{
+		if(list.length == 0)return
+		n=1
 	},
 	resume: () => {
 		if (list.length == 0) return
@@ -47,6 +62,7 @@ const controller = {
 	},
 	play: target => {
 		if (list.length == 0) return
+		backup=list
 		index = typeof(target) != 'undefined' ? target % list.length : index
 		let song = list[index]
 		Promise.all([api.song.url(song.id), api.song.lyric(song.id)])

@@ -1,7 +1,7 @@
 {
     "name": "vsc-netease-music",
     "displayName": "VSC Netease Music",
-    "description": "UNOFFICIAL Netease Music extension for Visual Studio Code",
+    "description": "UNOFFICAL Netease Music extension for Visual Studio Code",
     "version": "0.0.9",
     "icon": "icon.png",
     "publisher": "nondanee",
@@ -143,6 +143,21 @@
                 "command": "neteasemusic.toplist",
                 "title": "%command.neteasemusic.toplist%",
                 "category": "%category.neteasemusic.discover%"
+            },
+            {
+                "command": "neteasemusic.loop",
+                "title": "%command.neteasemusic.loop%",
+                "category": "%category.neteasemusic.discover%"
+            },
+            {
+                "command": "neteasemusic.repeat",
+                "title": "%command.neteasemusic.repeat%",
+                "category": "%category.neteasemusic.discover%"
+            },
+            {
+                "command": "neteasemusic.random",
+                "title": "%command.neteasemusic.random%",
+                "category": "%category.neteasemusic.discover%"
             }
         ],
         "menus": {
@@ -246,6 +261,18 @@
                 {
                     "command": "neteasemusic.pause",
                     "when": "neteasemusic.on && neteasemusic.track && neteasemusic.playing"
+                },
+                {
+                    "command": "neteasemusic.loop",
+                    "when": "neteasemusic.on && neteasemusic.track"
+                },
+                {
+                    "command": "neteasemusic.repeat",
+                    "when": "neteasemusic.on && neteasemusic.track"
+                },
+                {
+                    "command": "neteasemusic.random",
+                    "when": "neteasemusic.on && neteasemusic.track"
                 }
             ]
         }
