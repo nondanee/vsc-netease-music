@@ -169,11 +169,11 @@
             "commandPalette": [
                 {
                     "command": "neteasemusic.start",
-                    "when": "!neteasemusic.on"
+                    "when": "neteasemusic.on != 1"
                 },
                 {
                     "command": "neteasemusic.stop",
-                    "when": "neteasemusic.on"
+                    "when": "neteasemusic.on == 1"
                 },
                 {
                     "command": "neteasemusic.login",
@@ -273,15 +273,15 @@
                 },
                 {
                     "command": "neteasemusic.loop",
-                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode!=1"
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode != 2"
                 },
                 {
                     "command": "neteasemusic.repeat",
-                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode!=2"
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode != 0"
                 },
                 {
                     "command": "neteasemusic.random",
-                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode!=3"
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode != 1"
                 }
             ]
         }

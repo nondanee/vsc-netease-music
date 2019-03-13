@@ -260,23 +260,27 @@ const interaction = {
 	},
 	login: () => {
 		vscode.window.showInputBox({
-			placeHolder: "邮箱或手机号",
-			prompt: "请输入网易云账号"
-		})
-		.then(account => {
-			vscode.window.showInputBox({
-				password: true,
-				prompt: "请输入密码"
+				placeHolder: "邮箱或手机号",
+				prompt: "请输入网易云账号"
 			})
-			.then(password => {
-				if (account && password) {
-					api.login(account, password)
-					.then(data => {vscode.window.showInformationMessage(`登录成功: ${data.profile.nickname}(${data.account.id})`)})
-					.then(() => controller.refresh())
-					.catch(e => {vscode.window.showErrorMessage(`登录失败: ${e.code == 502 ? '账号或密码错误' : '未知错误'}(${e.code})`)})
-				}
+			.then(account => {
+				vscode.window.showInputBox({
+						password: true,
+						prompt: "请输入密码"
+					})
+					.then(password => {
+						if (account && password) {
+							api.login(account, password)
+								.then(data => {
+									vscode.window.showInformationMessage(`登录成功: ${data.profile.nickname}(${data.account.id})`)
+								})
+								.then(() => controller.refresh())
+								.catch(e => {
+									vscode.window.showErrorMessage(`登录失败: ${e.code == 502 ? '账号或密码错误' : '未知错误'}(${e.code})`)
+								})
+						}
+					})
 			})
-		})
 	},
 	logout: () => api.logout(),
 	list: () => {
@@ -299,11 +303,12 @@ const interaction = {
 		quickPick.activeItems = [quickPick.items[play]]
 		onPickItem = item => {
 			quickPick.busy = true
-			if(item.play){
+			if (item.play) {
 				controller.delete(item.index)
 				controller.play(item.index)
-			} 
-			else{controller.delete(item.index)}
+			} else {
+				controller.delete(item.index)
+			}
 			quickPick.hide()
 		}
 	},
@@ -329,14 +334,25 @@ const interaction = {
 			const value = quickPick.value
 			if (!value) quickPick.items = hot
 			else api.search.keyword(value).then(data => {
-				let items = (data.result && data.result.allMatch) ? data.result.allMatch.map(item => ({label: item.keyword, alwaysShow: true})) : []
-				if (!items.length || items[0].label != value) items.unshift({label: value, alwaysShow: true})
+				let items = (data.result && data.result.allMatch) ? data.result.allMatch.map(item => ({
+					label: item.keyword,
+					alwaysShow: true
+				})) : []
+				if (!items.length || items[0].label != value) items.unshift({
+					label: value,
+					alwaysShow: true
+				})
 				quickPick.items = items
 			})
 		}
 		const search = (text, type) => {
-			let code = {song: 1, artist: 100, album: 10, playlist: 1000}[type]
-			if(!code) api.search.suggest(text).then(data => display(text, data))
+			let code = {
+				song: 1,
+				artist: 100,
+				album: 10,
+				playlist: 1000
+			} [type]
+			if (!code) api.search.suggest(text).then(data => display(text, data))
 			else api.search.type(text, code).then(data => display(text, data, type))
 		}
 		const display = (text, data, type) => {
@@ -360,37 +376,56 @@ const interaction = {
 			albums.forEach(item => item.type = 'album')
 			playlists.forEach(item => item.type = 'playlist')
 			let items = Array.from([]).concat(
-				[{label: `${songs.length ? '▿' : '▹'}  单曲`, type: 'song'}],
+				[{
+					label: `${songs.length ? '▿' : '▹'}  单曲`,
+					type: 'song'
+				}],
 				songs,
-				[{label: `${artists.length ? '▿' : '▹'}  歌手`, type: 'artist'}],
+				[{
+					label: `${artists.length ? '▿' : '▹'}  歌手`,
+					type: 'artist'
+				}],
 				artists,
-				[{label: `${albums.length ? '▿' : '▹'}  专辑`, type: 'album'}],
+				[{
+					label: `${albums.length ? '▿' : '▹'}  专辑`,
+					type: 'album'
+				}],
 				albums,
-				[{label: `${playlists.length ? '▿' : '▹'}  歌单`, type: 'playlist'}],
+				[{
+					label: `${playlists.length ? '▿' : '▹'}  歌单`,
+					type: 'playlist'
+				}],
 				playlists
 			)
 			items.filter(item => item.id).forEach(item => item.label = '     ' + item.label)
 			fillQuickPick(items, `“${text}”的${{song: '歌曲', artist: '歌手', album: '专辑', playlist: '歌单'}[type] || ''}搜索结果`)
-			quickPick.activeItems = [quickPick.items[{song: 0, artist: 1, album: 2, playlist: 3}[type] || 0]]
+			quickPick.activeItems = [quickPick.items[{
+				song: 0,
+				artist: 1,
+				album: 2,
+				playlist: 3
+			} [type] || 0]]
 			onPickItem = item => {
-				if(!item.id && item.type == type)
+				if (!item.id && item.type == type)
 					return
-				else if(!item.id)
+				else if (!item.id)
 					search(text, item.type)
-				else if(item.type == 'artist')
+				else if (item.type == 'artist')
 					interaction.artist.album(item.id)
-				else if(item.type == 'album')
+				else if (item.type == 'album')
 					interaction.album(item.id)
-				else if(item.type == 'playlist')
+				else if (item.type == 'playlist')
 					interaction.playlist.detail(item.id)
-				else if(item.type == 'song'){
+				else if (item.type == 'song') {
 					controller.add(item)
 					controller.play()
 				}
 			}
 		}
 		api.search.hot().then(data => {
-			hot = data.result.hots.map(item => ({label: item.first}))
+			hot = data.result.hots.map(item => ({
+				label: item.first
+			}))
 			fillQuickPick(hot, '搜索歌曲、歌手、专辑、歌单')
 			onPickItem = item => {
 				search(item.label)
