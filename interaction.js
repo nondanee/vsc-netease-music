@@ -291,6 +291,22 @@ const interaction = {
 			quickPick.hide()
 		}
 	},
+	dlist: () => {
+		quickPick.busy = false
+		let track = controller.dlist().map(songDisplay).map(addIndex)
+		let play = track.findIndex(song => song.play)
+		fillQuickPick(track, `删除列表 (${track.length})`)
+		quickPick.activeItems = [quickPick.items[play]]
+		onPickItem = item => {
+			quickPick.busy = true
+			if(item.play){
+				controller.delete(item.index)
+				controller.play(item.index)
+			} 
+			else{controller.delete(item.index)}
+			quickPick.hide()
+		}
+	},
 	comment: () => {
 		let song = controller.list().find(song => song.play)
 		api.song.comment(song.id).then(data => {

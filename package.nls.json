@@ -8,6 +8,7 @@
     "command.neteasemusic.previous": "Previous",
     "command.neteasemusic.next": "Next",
     "command.neteasemusic.list": "Playlist",
+    "command.neteasemusic.dlist": "deletelist",
     "command.neteasemusic.comment": "Comment",
     "command.neteasemusic.like": "Like",
     "command.neteasemusic.dislike": "Unlike",
@@ -28,6 +29,7 @@
     "command.neteasemusic.repeat": "repeat",
     "command.neteasemusic.random": "random",
     "category.neteasemusic": "NeteaseMusic",
+    "category.neteasemusic.mode": "NeteaseMusic Mode",
     "category.neteasemusic.my": "NeteaseMusic My",
     "category.neteasemusic.discover": "NeteaseMusic Discover",
     "category.neteasemusic.recommend": "NeteaseMusic Recommend"

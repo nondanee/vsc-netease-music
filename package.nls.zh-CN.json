@@ -8,6 +8,7 @@
     "command.neteasemusic.previous": "上一首",
     "command.neteasemusic.next": "下一首",
     "command.neteasemusic.list": "播放列表",
+    "command.neteasemusic.dlist": "删除列表",
     "command.neteasemusic.comment": "热门评论",
     "command.neteasemusic.like": "红心",
     "command.neteasemusic.dislike": "取消红心",
@@ -28,6 +29,7 @@
     "command.neteasemusic.repeat": "单曲循环",
     "command.neteasemusic.random": "随机播放",
     "category.neteasemusic": "网易云音乐",
+    "category.neteasemusic.mode": "网易云音乐 播放模式",
     "category.neteasemusic.my": "网易云音乐 我的音乐",
     "category.neteasemusic.discover": "网易云音乐 发现音乐",
     "category.neteasemusic.recommend": "网易云音乐 个性推荐"
