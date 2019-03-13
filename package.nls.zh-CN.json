@@ -29,5 +29,6 @@
     "category.neteasemusic.discover": "网易云音乐 发现音乐",
     "category.neteasemusic.recommend": "网易云音乐 个性推荐",
     "command.neteasemusic.volume_up": "增大音量",
-    "command.neteasemusic.volume_down": "减小音量"
+    "command.neteasemusic.volume_down": "减小音量",
+    "command.neteasemusic.volume_change_repeat": "循环调节音量"
 }

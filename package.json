@@ -55,6 +55,11 @@
                 "category": "%category.neteasemusic%"
             },
             {
+                "command": "neteasemusic.volume_change_repeat",
+                "title": "%command.neteasemusic.volume_change_repeat%",
+                "category": "%category.neteasemusic%"
+            },
+            {
                 "command": "neteasemusic.pause",
                 "title": "%command.neteasemusic.pause%",
                 "category": "%category.neteasemusic%"

@@ -29,5 +29,6 @@
     "category.neteasemusic.discover": "NeteaseMusic Discover",
     "category.neteasemusic.recommend": "NeteaseMusic Recommend",
     "command.neteasemusic.volume_up": "Volume Up",
-    "command.neteasemusic.volume_down": "Volume Down"
+    "command.neteasemusic.volume_down": "Volume Down",
+    "command.neteasemusic.volume_change_repeat": "Volumn Adjust Repeatedly"
 }
