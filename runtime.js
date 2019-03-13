@@ -40,6 +40,14 @@ const PlayerBar = context => {
             command: 'neteasemusic.next',
             icon: ' $(chevron-right) '
         },
+        volume_down: {
+            command: 'neteasemusic.volume_down',
+            icon: '$(triangle-down)'
+        },
+        volume_up: {
+            command: 'neteasemusic.volume_up',
+            icon: '$(triangle-up)'
+        },
         play: {
             command: 'neteasemusic.play',
             // icon: '▶'
@@ -91,7 +99,7 @@ const PlayerBar = context => {
         if (button.state) Object.keys(button.state).forEach(key => runtime.stateManager.set(key, button.state[key]))
     }
 
-    const order = [['list'], /*['comment'],*/ ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['mute', 'unmute']].reverse()
+    const order = [['list'], /*['comment'],*/ ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['mute', 'unmute'],['volume_down'],['volume_up']].reverse()
     
     const items = order.map((group, index) => {
         group.forEach(name => buttons[name].index = index)
@@ -214,6 +222,9 @@ const CommandManager = context => {
 
         'mute': controller.mute,
         'unmute': controller.unmute,
+
+        'volume_up': controller.volume_up,
+        'volume_down': controller.volume_down
     }
     
     const registration = Object.keys(commands).map(name => vscode.commands.registerCommand(`neteasemusic.${name}`, commands[name]))

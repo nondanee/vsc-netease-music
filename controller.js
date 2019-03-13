@@ -109,6 +109,14 @@ const controller = {
 		api.user.likes().then(data => {
 			if (data.ids) likes = data.ids
 		})
+	},
+	volume_down: () => {
+		if (list.length == 0) return
+		runtime.duplexChannel.postMessage('volume_down')
+	},
+	volume_up: () => {
+		if (list.length == 0) return
+		runtime.duplexChannel.postMessage('volume_up')
 	}
 }
 

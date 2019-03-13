@@ -45,6 +45,16 @@
                 "category": "%category.neteasemusic%"
             },
             {
+                "command": "neteasemusic.volume_up",
+                "title": "%command.neteasemusic.volume_up%",
+                "category": "%category.neteasemusic%"
+            },
+            {
+                "command": "neteasemusic.volume_down",
+                "title": "%command.neteasemusic.volume_down%",
+                "category": "%category.neteasemusic%"
+            },
+            {
                 "command": "neteasemusic.pause",
                 "title": "%command.neteasemusic.pause%",
                 "category": "%category.neteasemusic%"
@@ -262,6 +272,7 @@
         "@types/mocha": "^2.2.42"
     },
     "dependencies": {
+        "websocket": "^1.0.28",
         "ws": "^6.1.3"
     }
 }
