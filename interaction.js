@@ -384,7 +384,29 @@ const interaction = {
 				timer = setTimeout(suggest, 250)
 			}
 		})
-	}
+    },
+    openInBrowser: target => {
+        let list = controller.list()
+        if (list.length == 0) return
+
+        let song = list.find(song => song.play)
+
+        vscode.env.openExternal(vscode.Uri.parse("https://music.163.com/#/song?id=" + song.id))
+    },
+    moreAction:() => {
+        quickPick.busy = false
+        let processAction = [{
+            action:()=> interaction.openInBrowser(),
+            label:"在浏览器中打开"
+        }]
+
+		fillQuickPick(processAction, "更多操作")
+		onPickItem = item => {
+			quickPick.busy = true
+            item.action()
+			quickPick.hide()
+		}
+    }
 }
 
 module.exports = interaction

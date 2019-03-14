@@ -1,5 +1,4 @@
 const vscode = require('vscode')
-const open = require('open')
 
 let likes = []
 let list = []
@@ -110,15 +109,6 @@ const controller = {
 		api.user.likes().then(data => {
 			if (data.ids) likes = data.ids
 		})
-    },
-    openInBrowser: () => {
-        if (list.length == 0) return
-		index = typeof(target) != 'undefined' ? target % list.length : index
-        let song = list[index]
-        
-        let config = vscode.workspace.getConfiguration('view-in-browser');
-        let customBrowser = config.get("customBrowser")
-        open("https://music.163.com/#/song?id=" + song.id,customBrowser)
     }
 }
 

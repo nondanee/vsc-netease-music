@@ -148,6 +148,11 @@
                 "command": "neteasemusic.openinbrowser",
                 "title": "%command.neteasemusic.openinbrowser%",
                 "category": "%category.neteasemusic%"
+            },
+            {
+                "command": "neteasemusic.moreaction",
+                "title": "%command.neteasemusic.moreaction%",
+                "category": "%category.neteasemusic%"
             }
         ],
         "menus": {
@@ -255,6 +260,10 @@
                 {
                     "command": "neteasemusic.openinbrowser",
                     "when": "neteasemusic.on && neteasemusic.track"
+                },
+                {
+                    "command": "neteasemusic.moreaction",
+                    "when": "neteasemusic.on && neteasemusic.track"
                 }
             ]
         }
@@ -271,7 +280,6 @@
         "@types/mocha": "^2.2.42"
     },
     "dependencies": {
-        "open": "0.0.5",
         "ws": "^6.1.3"
     }
 }
