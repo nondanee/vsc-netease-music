@@ -81,6 +81,10 @@ const PlayerBar = context => {
         list: {
             command: 'neteasemusic.list',
             icon: ''
+        },
+        openinbrowser: {
+            command: 'neteasemusic.openinbrowser',
+            icon: '$(reply)'
         }
     }
 
@@ -91,7 +95,7 @@ const PlayerBar = context => {
         if (button.state) Object.keys(button.state).forEach(key => runtime.stateManager.set(key, button.state[key]))
     }
 
-    const order = [['list'], /*['comment'],*/ ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['mute', 'unmute']].reverse()
+    const order = [['list'], /*['comment'],*/ ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['mute', 'unmute'],['openinbrowser']].reverse()
     
     const items = order.map((group, index) => {
         group.forEach(name => buttons[name].index = index)
@@ -214,6 +218,7 @@ const CommandManager = context => {
 
         'mute': controller.mute,
         'unmute': controller.unmute,
+        'openinbrowser':controller.openInBrowser
     }
     
     const registration = Object.keys(commands).map(name => vscode.commands.registerCommand(`neteasemusic.${name}`, commands[name]))
