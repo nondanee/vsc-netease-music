@@ -3,7 +3,6 @@ const vscode = require('vscode')
 let likes = []
 let list = []
 let index = 0
-let current_volume = 100
 const format = song => ({id: song.id, name: song.name, album: song.album, artist: song.artist})
 
 const controller = {
@@ -110,27 +109,8 @@ const controller = {
 			if (data.ids) likes = data.ids
 		})
 	},
-	volume_down: () => {
-		if (list.length == 0) return
-		runtime.duplexChannel.postMessage('volume_down')
-		current_volume = current_volume - 20
-		current_volume = Math.max(0, current_volume)
-		vscode.window.showInformationMessage(`当前音量: ${current_volume}%`)
-
-	},
-	volume_up: () => {
-		if (list.length == 0) return
-		runtime.duplexChannel.postMessage('volume_up')
-		current_volume = current_volume + 20
-		current_volume = Math.min(100, current_volume)
-		vscode.window.showInformationMessage(`当前音量: ${current_volume}%`)
-
-	},
-	volume_change_repeat: () => {
-		if (list.length == 0) return
-		runtime.duplexChannel.postMessage('volume_change_repeat')
-		current_volume = (current_volume + 20) % 120
-		vscode.window.showInformationMessage(`当前音量: ${current_volume}%`)
+	volumeChange: () => {
+		runtime.duplexChannel.postMessage('volumeChange')
 	}
 }
 

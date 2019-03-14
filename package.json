@@ -45,18 +45,8 @@
                 "category": "%category.neteasemusic%"
             },
             {
-                "command": "neteasemusic.volume_up",
-                "title": "%command.neteasemusic.volume_up%",
-                "category": "%category.neteasemusic%"
-            },
-            {
-                "command": "neteasemusic.volume_down",
-                "title": "%command.neteasemusic.volume_down%",
-                "category": "%category.neteasemusic%"
-            },
-            {
-                "command": "neteasemusic.volume_change_repeat",
-                "title": "%command.neteasemusic.volume_change_repeat%",
+                "command": "neteasemusic.volume",
+                "title": "%command.neteasemusic.volume%",
                 "category": "%category.neteasemusic%"
             },
             {
@@ -247,6 +237,10 @@
                     "when": "neteasemusic.on && neteasemusic.track"
                 },
                 {
+                    "command": "neteasemusic.volume",
+                    "when": "neteasemusic.on && neteasemusic.track"
+                },
+                {
                     "command": "neteasemusic.mute",
                     "when": "neteasemusic.on && neteasemusic.track && !neteasemusic.muted"
                 },
@@ -277,7 +271,6 @@
         "@types/mocha": "^2.2.42"
     },
     "dependencies": {
-        "websocket": "^1.0.28",
         "ws": "^6.1.3"
     }
 }
