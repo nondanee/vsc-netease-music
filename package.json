@@ -70,11 +70,6 @@
                 "category": "%category.neteasemusic%"
             },
             {
-                "command": "neteasemusic.comment",
-                "title": "%command.neteasemusic.comment%",
-                "category": "%category.neteasemusic%"
-            },
-            {
                 "command": "neteasemusic.like",
                 "title": "%command.neteasemusic.like%",
                 "category": "%category.neteasemusic%"
@@ -150,13 +145,8 @@
                 "category": "%category.neteasemusic.discover%"
             },
             {
-                "command": "neteasemusic.openinbrowser",
-                "title": "%command.neteasemusic.openinbrowser%",
-                "category": "%category.neteasemusic%"
-            },
-            {
-                "command": "neteasemusic.moreaction",
-                "title": "%command.neteasemusic.moreaction%",
+                "command": "neteasemusic.more",
+                "title": "%command.neteasemusic.more%",
                 "category": "%category.neteasemusic%"
             }
         ],
@@ -235,7 +225,7 @@
                     "when": "neteasemusic.on && neteasemusic.track"
                 },
                 {
-                    "command": "neteasemusic.comment",
+                    "command": "neteasemusic.more",
                     "when": "neteasemusic.on && neteasemusic.track"
                 },
                 {
@@ -265,14 +255,6 @@
                 {
                     "command": "neteasemusic.pause",
                     "when": "neteasemusic.on && neteasemusic.track && neteasemusic.playing"
-                },
-                {
-                    "command": "neteasemusic.openinbrowser",
-                    "when": "neteasemusic.on && neteasemusic.track"
-                },
-                {
-                    "command": "neteasemusic.moreaction",
-                    "when": "neteasemusic.on && neteasemusic.track"
                 }
             ]
         }

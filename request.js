@@ -65,7 +65,9 @@ const api = {
 		lyric: id => apiRequest('song/lyric', {id: id, lv: -1, tv: -1, cp: false}),
 		like: id => apiRequest('song/like', {trackId: id, like: true, time: 0, userid: 0}),
 		dislike: id => apiRequest('song/like', {trackId: id, like: false, time: 0, userid: 0}),
-		comment: id => apiRequest(`v1/resource/hotcomments/R_SO_4_${id}`, {rid: id, limit: 50, offset: 0})
+		collect: (id, pid) => apiRequest('playlist/manipulate/tracks', {trackIds: [id], pid: pid, op: 'add'}),
+		comment: id => apiRequest(`v1/resource/hotcomments/R_SO_4_${id}`, {rid: id, limit: 50, offset: 0}),
+		log: id => apiRequest('feedback/weblog', {logs: [{action: 'play', json: {id: id, type: 'song'}}]})
 	},
 	recommend: {
 		song: () => apiRequest('v1/discovery/recommend/songs', {limit: 30, offset: 0}),
