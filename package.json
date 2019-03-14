@@ -1,7 +1,7 @@
 {
     "name": "vsc-netease-music",
     "displayName": "VSC Netease Music",
-    "description": "UNOFFICAL Netease Music extension for Visual Studio Code",
+    "description": "UNOFFICIAL Netease Music extension for Visual Studio Code",
     "version": "0.0.9",
     "icon": "icon.png",
     "publisher": "nondanee",
@@ -42,6 +42,11 @@
             {
                 "command": "neteasemusic.unmute",
                 "title": "%command.neteasemusic.unmute%",
+                "category": "%category.neteasemusic%"
+            },
+            {
+                "command": "neteasemusic.volume",
+                "title": "%command.neteasemusic.volume%",
                 "category": "%category.neteasemusic%"
             },
             {
@@ -150,6 +155,16 @@
                 "category": "%category.neteasemusic.discover%"
             },
             {
+                "command": "neteasemusic.openinbrowser",
+                "title": "%command.neteasemusic.openinbrowser%",
+                "category": "%category.neteasemusic%"
+            },
+            {
+                "command": "neteasemusic.moreaction",
+                "title": "%command.neteasemusic.moreaction%",
+                "category": "%category.neteasemusic%"
+            },
+            {
                 "command": "neteasemusic.loop",
                 "title": "%command.neteasemusic.loop%",
                 "category": "%category.neteasemusic.mode%"
@@ -169,11 +184,11 @@
             "commandPalette": [
                 {
                     "command": "neteasemusic.start",
-                    "when": "neteasemusic.on != 1"
+                    "when": "!neteasemusic.on"
                 },
                 {
                     "command": "neteasemusic.stop",
-                    "when": "neteasemusic.on == 1"
+                    "when": "neteasemusic.on"
                 },
                 {
                     "command": "neteasemusic.login",
@@ -256,6 +271,10 @@
                     "when": "neteasemusic.on && neteasemusic.track"
                 },
                 {
+                    "command": "neteasemusic.volume",
+                    "when": "neteasemusic.on && neteasemusic.track"
+                },
+                {
                     "command": "neteasemusic.mute",
                     "when": "neteasemusic.on && neteasemusic.track && !neteasemusic.muted"
                 },
@@ -270,6 +289,14 @@
                 {
                     "command": "neteasemusic.pause",
                     "when": "neteasemusic.on && neteasemusic.track && neteasemusic.playing"
+                },
+                {
+                    "command": "neteasemusic.openinbrowser",
+                    "when": "neteasemusic.on && neteasemusic.track"
+                },
+                {
+                    "command": "neteasemusic.moreaction",
+                    "when": "neteasemusic.on && neteasemusic.track"
                 },
                 {
                     "command": "neteasemusic.loop",

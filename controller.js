@@ -1,23 +1,20 @@
 const vscode = require('vscode')
+
 let likes = []
 let list = []
 let index = 0
 let backup = []
 let arr = []
 let n, mode, song
-const format = song => ({
-	id: song.id,
-	name: song.name,
-	album: song.album,
-	artist: song.artist
-})
+const format = song => ({id: song.id, name: song.name, album: song.album, artist: song.artist})
 
 const controller = {
 	add: track => {
-		if (Array.isArray(track)) {
+		if (Array.isArray(track)){
 			list = track.map(format)
 			index = 0
-		} else {
+		}
+		else{
 			index = list.length
 			list.splice(index, 0, format(track))
 		}
@@ -65,21 +62,6 @@ const controller = {
 		}
 		runtime.playerBar.state(['repeat', 'random', 'loop'][mode - 1])
 	},
-	// repeat: () => {
-	// 	if (list.length == 0) return
-	// 	mode = runtime.stateManager.get('mode')
-	// 		backup = arr
-	// 	runtime.playerBar.state('random')
-	// 	console.log()
-	// },
-	// loop: () => {
-	// 	if (list.length == 0) return
-	// 	mode = runtime.stateManager.get('mode')
-	// 	if (mode === 1)
-	// 		backup = arr
-	// 	runtime.playerBar.state('repeat')
-
-	// },
 	resume: () => {
 		if (list.length == 0) return
 		let paused = !runtime.stateManager.get('playing')
@@ -94,25 +76,26 @@ const controller = {
 	},
 	play: target => {
 		if (list.length == 0) return
-		index = typeof (target) != 'undefined' ? target % list.length : index
+		index = typeof(target) != 'undefined' ? target % list.length : index
+		let song = list[index]
 		n = backup.indexOf(index)
-		song = list[index]
 		Promise.all([api.song.url(song.id), api.song.lyric(song.id)])
-			.then(data => {
-				let url = data[0].data[0].url
-				if (!url) {
-					vscode.window.showWarningMessage(`无法播放: ${song.artist} - ${song.name}`)
-					controller.remove(index)
-					controller.play()
-				} else {
-					url = url.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net')
-					song.url = url
-					song.lyric = data[1].nolyric ? [] : [data[1].lrc.lyric, data[1].tlyric.lyric]
-					runtime.duplexChannel.postMessage('load', song)
-					runtime.playerBar.state(likes.includes(song.id) ? 'like' : 'dislike')
-					vscode.window.showInformationMessage(`正在播放: ${song.artist} - ${song.name}`)
-				}
-			})
+		.then(data => {
+			let url = data[0].data[0].url
+			if (!url) {
+				vscode.window.showWarningMessage(`无法播放: ${song.artist} - ${song.name}`)
+				controller.remove(index)
+				controller.play()
+			}
+			else {
+				url = url.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net')
+				song.url = url
+				song.lyric = data[1].nolyric ? [] : [data[1].lrc.lyric, data[1].tlyric.lyric]
+				runtime.duplexChannel.postMessage('load', song)
+				runtime.playerBar.state(likes.includes(song.id) ? 'like' : 'dislike')
+				vscode.window.showInformationMessage(`正在播放: ${song.artist} - ${song.name}`)
+			}
+		})
 	},
 	list: () => {
 		if (list.length == 0) return []
@@ -136,7 +119,6 @@ const controller = {
 		controller.mode(mode)
 		if (list.length == 0) runtime.playerBar.hide()
 	},
-
 	like: () => {
 		if (list.length == 0) return
 		let id = list[index].id
@@ -173,6 +155,9 @@ const controller = {
 		api.user.likes().then(data => {
 			if (data.ids) likes = data.ids
 		})
+	},
+	volumeChange: () => {
+		runtime.duplexChannel.postMessage('volumeChange')
 	}
 }
 
