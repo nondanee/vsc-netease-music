@@ -45,6 +45,11 @@
                 "category": "%category.neteasemusic%"
             },
             {
+                "command": "neteasemusic.volume",
+                "title": "%command.neteasemusic.volume%",
+                "category": "%category.neteasemusic%"
+            },
+            {
                 "command": "neteasemusic.pause",
                 "title": "%command.neteasemusic.pause%",
                 "category": "%category.neteasemusic%"
@@ -239,6 +244,10 @@
                 },
                 {
                     "command": "neteasemusic.next",
+                    "when": "neteasemusic.on && neteasemusic.track"
+                },
+                {
+                    "command": "neteasemusic.volume",
                     "when": "neteasemusic.on && neteasemusic.track"
                 },
                 {

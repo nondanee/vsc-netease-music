@@ -4,6 +4,7 @@
     "command.neteasemusic.play": "Play",
     "command.neteasemusic.mute": "Mute",
     "command.neteasemusic.unmute": "Unmute",
+    "command.neteasemusic.volume": "Adjust volume",
     "command.neteasemusic.pause": "Pause",
     "command.neteasemusic.previous": "Previous",
     "command.neteasemusic.next": "Next",

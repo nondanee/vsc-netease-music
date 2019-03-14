@@ -74,6 +74,10 @@ const PlayerBar = context => {
             color: 'rgba(255,255,255,0.5)',
             state: {muted: true}
         },
+        volume: {
+            command: 'neteasemusic.volume',
+            icon: '100'
+        },
         comment: {
             command: 'neteasemusic.comment',
             icon: '$(comment-discussion)'
@@ -82,8 +86,8 @@ const PlayerBar = context => {
             command: 'neteasemusic.list',
             icon: ''
         },
-        moreaction: {
-            command: 'neteasemusic.moreaction',
+        more: {
+            command: 'neteasemusic.more',
             icon: '$(kebab-horizontal)'
         }
     }
@@ -95,7 +99,7 @@ const PlayerBar = context => {
         if (button.state) Object.keys(button.state).forEach(key => runtime.stateManager.set(key, button.state[key]))
     }
 
-    const order = [['list'], /*['comment'],*/ ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['mute', 'unmute'],['moreaction']].reverse()
+    const order = [['list'], /*['comment'],*/ ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['mute', 'unmute'], ['volume'], /*['more']*/].reverse()
     
     const items = order.map((group, index) => {
         group.forEach(name => buttons[name].index = index)
@@ -117,6 +121,11 @@ const PlayerBar = context => {
         },
         update: text => {
             items[buttons.list.index].text = text
+        },
+        volume: state => {
+            bind(items[buttons.mute.index], buttons[(state.muted ? 'unmute' : 'mute')])
+            items[buttons.volume.index].color = items[buttons.mute.index].color
+            items[buttons.volume.index].text = `${state.value.toFixed(2) * 100}`
         },
         show: () => {
             runtime.stateManager.set('track', true)
@@ -158,7 +167,10 @@ const DuplexChannel = context => {
             else if (body.name == 'lyric') {
                 runtime.playerBar.update(body.data)
             }
-            else if (['play', 'pause', 'mute', 'unmute'].includes(body.name)) {
+            else if (body.name == 'volume') {
+                runtime.playerBar.volume(body.data)
+            }
+            else if (['play', 'pause'].includes(body.name)) {
                 runtime.playerBar.state(body.name)
             }
         }
@@ -219,6 +231,7 @@ const CommandManager = context => {
 
         'mute': controller.mute,
         'unmute': controller.unmute,
+        'volume': controller.volumeChange
     }
     
     const registration = Object.keys(commands).map(name => vscode.commands.registerCommand(`neteasemusic.${name}`, commands[name]))

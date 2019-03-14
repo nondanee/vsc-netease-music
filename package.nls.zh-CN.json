@@ -4,6 +4,7 @@
     "command.neteasemusic.play": "播放",
     "command.neteasemusic.mute": "静音",
     "command.neteasemusic.unmute": "取消静音",
+    "command.neteasemusic.volume": "音量调节",
     "command.neteasemusic.pause": "暂停",
     "command.neteasemusic.previous": "上一首",
     "command.neteasemusic.next": "下一首",

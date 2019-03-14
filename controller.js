@@ -3,7 +3,6 @@ const vscode = require('vscode')
 let likes = []
 let list = []
 let index = 0
-
 const format = song => ({id: song.id, name: song.name, album: song.album, artist: song.artist})
 
 const controller = {
@@ -109,7 +108,10 @@ const controller = {
 		api.user.likes().then(data => {
 			if (data.ids) likes = data.ids
 		})
-    }
+	},
+	volumeChange: () => {
+		runtime.duplexChannel.postMessage('volumeChange')
+	}
 }
 
 module.exports = controller

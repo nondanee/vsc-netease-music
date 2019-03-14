@@ -44,7 +44,7 @@
 		}, false)
 
 		audio.addEventListener('volumechange', () => {
-			postMessage('event', {name: audio.muted ? 'mute' : 'unmute'})
+			postMessage('event', {name: 'volume', data: {muted: audio.muted, value: audio.volume}})
 		})
 
 		audio.addEventListener('loadstart', () => {
@@ -77,6 +77,10 @@
 			}
 			else if (command === 'unmute') {
 				if (audio.muted) audio.muted = false
+			}
+			else if (command === 'volumeChange') {
+				if (audio.muted) audio.muted = false
+				audio.volume + 0.2 > 1 ? audio.volume = 0 : audio.volume += 0.2
 			}
 		}
 
