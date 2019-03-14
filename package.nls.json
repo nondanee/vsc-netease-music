@@ -25,6 +25,8 @@
     "command.neteasemusic.playlist.highquality": "High Quality Mix",
     "command.neteasemusic.playlist.hot": "Hot Mix",
     "command.neteasemusic.toplist": "Chart",
+    "command.neteasemusic.openinbrowser": "Open in browser",
+    "command.neteasemusic.moreaction": "More action",
     "category.neteasemusic": "NeteaseMusic",
     "category.neteasemusic.my": "NeteaseMusic My",
     "category.neteasemusic.discover": "NeteaseMusic Discover",

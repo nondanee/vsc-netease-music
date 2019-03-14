@@ -224,6 +224,7 @@ const CommandManager = context => {
         'play': controller.resume,
         'previous': controller.previous,
         'next': controller.next,
+        'moreaction':interaction.moreAction,
 
         'like': controller.like,
         'dislike': controller.dislike,

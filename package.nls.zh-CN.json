@@ -25,6 +25,8 @@
     "command.neteasemusic.playlist.highquality": "精品歌单",
     "command.neteasemusic.playlist.hot": "热门歌单",
     "command.neteasemusic.toplist": "排行榜",
+    "command.neteasemusic.openinbrowser": "浏览器中打开",
+    "command.neteasemusic.moreaction": "更多操作",
     "category.neteasemusic": "网易云音乐",
     "category.neteasemusic.my": "网易云音乐 我的音乐",
     "category.neteasemusic.discover": "网易云音乐 发现音乐",

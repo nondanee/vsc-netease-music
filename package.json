@@ -148,6 +148,16 @@
                 "command": "neteasemusic.toplist",
                 "title": "%command.neteasemusic.toplist%",
                 "category": "%category.neteasemusic.discover%"
+            },
+            {
+                "command": "neteasemusic.openinbrowser",
+                "title": "%command.neteasemusic.openinbrowser%",
+                "category": "%category.neteasemusic%"
+            },
+            {
+                "command": "neteasemusic.moreaction",
+                "title": "%command.neteasemusic.moreaction%",
+                "category": "%category.neteasemusic%"
             }
         ],
         "menus": {
@@ -255,6 +265,14 @@
                 {
                     "command": "neteasemusic.pause",
                     "when": "neteasemusic.on && neteasemusic.track && neteasemusic.playing"
+                },
+                {
+                    "command": "neteasemusic.openinbrowser",
+                    "when": "neteasemusic.on && neteasemusic.track"
+                },
+                {
+                    "command": "neteasemusic.moreaction",
+                    "when": "neteasemusic.on && neteasemusic.track"
                 }
             ]
         }
