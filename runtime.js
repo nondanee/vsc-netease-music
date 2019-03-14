@@ -2,6 +2,7 @@ const fs = require('fs')
 const ws = require('ws')
 const path = require('path')
 const vscode = require('vscode')
+let mode=1
 
 const ActiveEditor = () => {
     let activeTextEditor = vscode.window.activeTextEditor
@@ -38,7 +39,23 @@ const PlayerBar = context => {
         },
         next: {
             command: 'neteasemusic.next',
-            icon: ' $(chevron-right) '
+            icon: ' $(chevron-right) ',
+            state: {auto: false}
+        },
+        random: {
+            command: 'neteasemusic.loop',
+            icon: ' $(three-bars) ',
+            state:{mode:0}
+        },
+        loop: {
+            command: 'neteasemusic.repeat',
+            icon: ' $(sync) ',
+            state:{mode:1}
+        },
+        repeat: {
+            command: 'neteasemusic.random',
+            icon: ' $(unverified) ',
+            state:{mode:2}
         },
         play: {
             command: 'neteasemusic.play',
@@ -159,7 +176,11 @@ const DuplexChannel = context => {
                 activeEditor = null
             }
             else if (body.name == 'end') {
+                if (mode==1) {
+                    runtime.commandManager.execute('play1')
+                } else {
                 runtime.commandManager.execute('next')
+            }
             }
             else if (body.name == 'load') {
                 runtime.playerBar.update(`${body.data.artist} - ${body.data.name}`)
@@ -220,7 +241,9 @@ const CommandManager = context => {
 
         'comment': interaction.comment,
         'list': interaction.list,
+        'dlist': interaction.dlist,
         'pause': controller.pause,
+        'play1': controller.play,
         'play': controller.resume,
         'previous': controller.previous,
         'next': controller.next,
@@ -231,7 +254,10 @@ const CommandManager = context => {
 
         'mute': controller.mute,
         'unmute': controller.unmute,
-        'volume': controller.volumeChange
+        'volume': controller.volumeChange,
+        'repeat':()=>controller.mode(mode=1),
+        'loop': ()=>controller.mode(mode=2),
+        'random': ()=>controller.mode(mode=3),
     }
     
     const registration = Object.keys(commands).map(name => vscode.commands.registerCommand(`neteasemusic.${name}`, commands[name]))
