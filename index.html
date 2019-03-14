@@ -78,6 +78,18 @@
 			else if (command === 'unmute') {
 				if (audio.muted) audio.muted = false
 			}
+			else if (command === 'volume_up') {
+				audio.volume += 0.2
+				audio.volume = Math.min(1, audio.volume)
+			}
+			else if (command === 'volume_down') {
+				audio.volume -= 0.2
+				audio.volume = Math.max(0, audio.volume)
+			}
+			else if (command === 'volume_change_repeat') {
+				if(audio.volume > 0.8) audio.volume = 0
+				else audio.volume += 0.2
+			}
 		}
 
 		const interacted = () => {
