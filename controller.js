@@ -90,7 +90,7 @@ const controller = {
 			else {
 				url = url.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net')
 				song.url = url
-				song.lyric = data[1].nolyric ? [] : [data[1].lrc.lyric, data[1].tlyric.lyric]
+				song.lyric = (data[1].nolyric || data[1].uncollected) ? [] : [data[1].lrc.lyric, data[1].tlyric.lyric]
 				runtime.duplexChannel.postMessage('load', song)
 				runtime.playerBar.state(likes.includes(song.id) ? 'like' : 'dislike')
 				vscode.window.showInformationMessage(`正在播放: ${song.artist} - ${song.name}`)

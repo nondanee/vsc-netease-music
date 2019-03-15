@@ -70,13 +70,8 @@
                 "category": "%category.neteasemusic%"
             },
             {
-                "command": "neteasemusic.dlist",
-                "title": "%command.neteasemusic.dlist%",
-                "category": "%category.neteasemusic%"
-            },
-            {
-                "command": "neteasemusic.comment",
-                "title": "%command.neteasemusic.comment%",
+                "command": "neteasemusic.list.edit",
+                "title": "%command.neteasemusic.list.edit%",
                 "category": "%category.neteasemusic%"
             },
             {
@@ -155,28 +150,23 @@
                 "category": "%category.neteasemusic.discover%"
             },
             {
-                "command": "neteasemusic.openinbrowser",
-                "title": "%command.neteasemusic.openinbrowser%",
+                "command": "neteasemusic.more",
+                "title": "%command.neteasemusic.more%",
                 "category": "%category.neteasemusic%"
             },
             {
-                "command": "neteasemusic.moreaction",
-                "title": "%command.neteasemusic.moreaction%",
-                "category": "%category.neteasemusic%"
-            },
-            {
-                "command": "neteasemusic.loop",
-                "title": "%command.neteasemusic.loop%",
+                "command": "neteasemusic.mode.loop",
+                "title": "%command.neteasemusic.mode.loop%",
                 "category": "%category.neteasemusic.mode%"
             },
             {
-                "command": "neteasemusic.repeat",
-                "title": "%command.neteasemusic.repeat%",
+                "command": "neteasemusic.mode.repeat",
+                "title": "%command.neteasemusic.mode.repeat%",
                 "category": "%category.neteasemusic.mode%"
             },
             {
-                "command": "neteasemusic.random",
-                "title": "%command.neteasemusic.random%",
+                "command": "neteasemusic.mode.random",
+                "title": "%command.neteasemusic.mode.random%",
                 "category": "%category.neteasemusic.mode%"
             }
         ],
@@ -255,11 +245,11 @@
                     "when": "neteasemusic.on && neteasemusic.track"
                 },
                 {
-                    "command": "neteasemusic.dlist",
+                    "command": "neteasemusic.list.edit",
                     "when": "neteasemusic.on && neteasemusic.track"
                 },
                 {
-                    "command": "neteasemusic.comment",
+                    "command": "neteasemusic.more",
                     "when": "neteasemusic.on && neteasemusic.track"
                 },
                 {
@@ -289,26 +279,18 @@
                 {
                     "command": "neteasemusic.pause",
                     "when": "neteasemusic.on && neteasemusic.track && neteasemusic.playing"
+				},
+                {
+                    "command": "neteasemusic.mode.loop",
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode == 0"
                 },
                 {
-                    "command": "neteasemusic.openinbrowser",
-                    "when": "neteasemusic.on && neteasemusic.track"
+                    "command": "neteasemusic.mode.repeat",
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode == 1"
                 },
                 {
-                    "command": "neteasemusic.moreaction",
-                    "when": "neteasemusic.on && neteasemusic.track"
-                },
-                {
-                    "command": "neteasemusic.loop",
-                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode != 2"
-                },
-                {
-                    "command": "neteasemusic.repeat",
-                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode != 0"
-                },
-                {
-                    "command": "neteasemusic.random",
-                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode != 1"
+                    "command": "neteasemusic.mode.random",
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode == 2"
                 }
             ]
         }

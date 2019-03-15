@@ -95,10 +95,6 @@ const PlayerBar = context => {
             command: 'neteasemusic.volume',
             icon: '100'
         },
-        comment: {
-            command: 'neteasemusic.comment',
-            icon: '$(comment-discussion)'
-        },
         list: {
             command: 'neteasemusic.list',
             icon: ''
@@ -116,7 +112,7 @@ const PlayerBar = context => {
         if (button.state) Object.keys(button.state).forEach(key => runtime.stateManager.set(key, button.state[key]))
     }
 
-    const order = [['list'], /*['comment'],*/ ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['mute', 'unmute'], ['volume'], /*['more']*/].reverse()
+    const order = [['list'], ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['mute', 'unmute'], ['volume'], ['more']].reverse()
     
     const items = order.map((group, index) => {
         group.forEach(name => buttons[name].index = index)
@@ -239,7 +235,7 @@ const CommandManager = context => {
         'login': interaction.login,
         'logout': interaction.logout,
 
-        'comment': interaction.comment,
+        'more': interaction.more,
         'list': interaction.list,
         'dlist': interaction.dlist,
         'pause': controller.pause,
@@ -247,7 +243,6 @@ const CommandManager = context => {
         'play': controller.resume,
         'previous': controller.previous,
         'next': controller.next,
-        'moreaction':interaction.moreAction,
 
         'like': controller.like,
         'dislike': controller.dislike,
