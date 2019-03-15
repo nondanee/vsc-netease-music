@@ -2,65 +2,47 @@ const vscode = require('vscode')
 
 let likes = []
 let list = []
+let random = []
+let mode = 0
 let index = 0
-let backup = []
-let arr = []
-let n, mode, song
+
 const format = song => ({id: song.id, name: song.name, album: song.album, artist: song.artist})
 
 const controller = {
 	add: track => {
-		if (Array.isArray(track)){
+		if (Array.isArray(track)) {
 			list = track.map(format)
 			index = 0
 		}
-		else{
+		else {
 			index = list.length
 			list.splice(index, 0, format(track))
 		}
-		arr = list.map((val, index) => {
-			return val = index
-		})
-		backup = list.map((val, index) => {
-			return val = index
-		})
+		let sequence = list.map((_, index) => index)
+		random = Array.apply(0, {length: sequence.length}).map(() => sequence.splice(Math.floor(Math.random() * sequence.length), 1)[0])
 		runtime.playerBar.show()
 	},
 	remove: target => {
 		list.splice(target, 1)
-		arr.splice(arr.indexOf(target), 1)
-		backup.splice(backup.indexOf(target), 1)
+		random = random.filter(value => value != target).map(value => value < target ? value : value - 1)
 		index = index < list.length ? index : 0
 		if (list.length == 0) runtime.playerBar.hide()
 	},
 	previous: () => {
 		if (list.length == 0) return
-		n--
-		index = backup[(n + backup.length) % backup.length]
+		let mapped = random[(random.indexOf(index) - 1 + random.length) % random.length]
+		index = (mode === 2 ? mapped : index - 1)
 		controller.play()
 	},
-	next: () => {
+	next: auto => {
 		if (list.length == 0) return
-		n++
-		index = backup[(n) % backup.length]
+		let mapped = random[(random.indexOf(index) + 1 + random.length) % random.length]
+		index = (auto && mode == 1) ? index : (mode === 2 ? mapped : index + 1)
 		controller.play()
 	},
-	mode: (mode) => {
-		if (list.length == 0) return
-		if (mode === 3) {
-			for (var i = 0; i < backup.length; i += 1) {
-				backup[i] = arr.splice(Math.floor(Math.random() * arr.length), 1)[0];
-			}
-			arr = list.map((val, index) => {
-				return val = index
-			})
-
-		} else if (mode === 1) {
-			backup = arr;
-		} else if (mode === 2) {
-			backup = arr
-		}
-		runtime.playerBar.state(['repeat', 'random', 'loop'][mode - 1])
+	mode: type => {
+		mode = type
+		runtime.playerBar.state(['loop', 'repeat', 'random'][type])
 	},
 	resume: () => {
 		if (list.length == 0) return
@@ -76,9 +58,8 @@ const controller = {
 	},
 	play: target => {
 		if (list.length == 0) return
-		index = typeof(target) != 'undefined' ? target % list.length : index
+		index = ((typeof(target) != 'undefined' ? target : index) + list.length) % list.length
 		let song = list[index]
-		n = backup.indexOf(index)
 		Promise.all([api.song.url(song.id), api.song.lyric(song.id)])
 		.then(data => {
 			let url = data[0].data[0].url
@@ -102,22 +83,6 @@ const controller = {
 		let copy = JSON.parse(JSON.stringify(list))
 		copy[index].play = true
 		return copy
-	},
-	dlist: () => {
-		if (list.length == 0) return []
-		let copy = JSON.parse(JSON.stringify(list))
-		copy[index].play = true
-		return copy
-	},
-	delete: target => {
-		list.splice(target, 1)
-		index = list.indexOf(song)
-		arr = list.map((val, index) => {
-			return val = index
-		})
-		controller.mode(1)
-		controller.mode(mode)
-		if (list.length == 0) runtime.playerBar.hide()
 	},
 	like: () => {
 		if (list.length == 0) return
@@ -152,6 +117,7 @@ const controller = {
 		if (muted) runtime.duplexChannel.postMessage('unmute')
 	},
 	refresh: () => {
+		runtime.stateManager.set('mode', 0)
 		api.user.likes().then(data => {
 			if (data.ids) likes = data.ids
 		})

@@ -98,7 +98,7 @@ const api = {
 				sync()
 				return Promise.resolve(data)
 			}
-			else{
+			else {
 				return Promise.reject(data)
 			}
 		})

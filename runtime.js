@@ -2,7 +2,6 @@ const fs = require('fs')
 const ws = require('ws')
 const path = require('path')
 const vscode = require('vscode')
-let mode=1
 
 const ActiveEditor = () => {
 	let activeTextEditor = vscode.window.activeTextEditor
@@ -26,7 +25,7 @@ const StateManager = context => {
 			vscode.commands.executeCommand('setContext', `neteasemusic.${key}`, value)
 		},
 		dispose: () => Object.keys(state).forEach(key => 
-			vscode.commands.executeCommand('setContext', `neteasemusic.${key}`, false)
+			vscode.commands.executeCommand('setContext', `neteasemusic.${key}`, undefined)
 		)
 	}
 }
@@ -42,20 +41,20 @@ const PlayerBar = context => {
 			icon: ' $(chevron-right) ',
 			state: {auto: false}
 		},
+		repeat: {
+			command: 'neteasemusic.mode.loop',
+			icon: ' $(sync) ',
+			state: {mode: 0}
+		},
 		random: {
-			command: 'neteasemusic.loop',
-			icon: ' $(three-bars) ',
-			state:{mode:0}
+			command: 'neteasemusic.mode.repeat',
+			icon: ' $(pin) ',
+			state: {mode: 1}
 		},
 		loop: {
-			command: 'neteasemusic.repeat',
-			icon: ' $(sync) ',
-			state:{mode:1}
-		},
-		repeat: {
-			command: 'neteasemusic.random',
-			icon: ' $(unverified) ',
-			state:{mode:2}
+			command: 'neteasemusic.mode.random',
+			icon: ' $(light-bulb) ',
+			state: {mode: 2}
 		},
 		play: {
 			command: 'neteasemusic.play',
@@ -112,7 +111,7 @@ const PlayerBar = context => {
 		if (button.state) Object.keys(button.state).forEach(key => runtime.stateManager.set(key, button.state[key]))
 	}
 
-	const order = [['list'], ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['mute', 'unmute'], ['volume'], ['more']].reverse()
+	const order = [['list'], ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['repeat', 'random', 'loop'], ['mute', 'unmute'], ['volume'], ['more']].reverse()
 	
 	const items = order.map((group, index) => {
 		group.forEach(name => buttons[name].index = index)
@@ -129,7 +128,7 @@ const PlayerBar = context => {
 			if (!(state in buttons)) return
 			if (state.includes('like')) runtime.stateManager.get('logged') ? items[buttons.like.index].show() : items[buttons.like.index].hide()
 			let index = buttons[state].index
-			let name = order[index].find(name => name != state)
+			let name = order[index][(order[index].indexOf(state) + 1) % order[index].length]
 			bind(items[index], buttons[name])
 		},
 		update: text => {
@@ -172,11 +171,7 @@ const DuplexChannel = context => {
 				activeEditor = null
 			}
 			else if (body.name == 'end') {
-				if (mode==1) {
-					runtime.commandManager.execute('play1')
-				} else {
-				runtime.commandManager.execute('next')
-			}
+				controller.next(true)
 			}
 			else if (body.name == 'load') {
 				runtime.playerBar.update(`${body.data.artist} - ${body.data.name}`)
@@ -236,10 +231,10 @@ const CommandManager = context => {
 		'logout': interaction.logout,
 
 		'more': interaction.more,
-		'list': interaction.list,
+		'list': interaction.list.show,
+		'list.edit': interaction.list.edit,
 		'dlist': interaction.dlist,
 		'pause': controller.pause,
-		'play1': controller.play,
 		'play': controller.resume,
 		'previous': controller.previous,
 		'next': controller.next,
@@ -250,9 +245,10 @@ const CommandManager = context => {
 		'mute': controller.mute,
 		'unmute': controller.unmute,
 		'volume': controller.volumeChange,
-		'repeat':()=>controller.mode(mode=1),
-		'loop': ()=>controller.mode(mode=2),
-		'random': ()=>controller.mode(mode=3),
+
+		'mode.loop': () => controller.mode(1),
+		'mode.repeat': () => controller.mode(2),
+		'mode.random': () => controller.mode(0)
 	}
 	
 	const registration = Object.keys(commands).map(name => vscode.commands.registerCommand(`neteasemusic.${name}`, commands[name]))
