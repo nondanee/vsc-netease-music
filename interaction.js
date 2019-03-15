@@ -240,6 +240,23 @@ const interaction = {
 		})), `播放列表 (${track.length})`)
 		quickPick.activeItems = [quickPick.items[play]]
 	},
+	edit: () => {
+// 		quickPick.busy = false
+// 		let track = controller.dlist().map(songDisplay).map(addIndex)
+// 		let play = track.findIndex(song => song.play)
+// 		fillQuickPick(track, `删除列表 (${track.length})`)
+// 		quickPick.activeItems = [quickPick.items[play]]
+// 		onPickItem = item => {
+// 			quickPick.busy = true
+// 			if (item.play) {
+// 				controller.delete(item.index)
+// 				controller.play(item.index)
+// 			} else {
+// 				controller.delete(item.index)
+// 			}
+// 			quickPick.hide()
+// 		}
+	},
 	search: () => {
 		let hot = []
 		let timer = 0

@@ -3,6 +3,9 @@ const vscode = require('vscode')
 let likes = []
 let list = []
 let index = 0
+let backup = []
+let arr = []
+let n, mode, song
 const format = song => ({id: song.id, name: song.name, album: song.album, artist: song.artist})
 
 const controller = {
@@ -15,22 +18,49 @@ const controller = {
 			index = list.length
 			list.splice(index, 0, format(track))
 		}
+		arr = list.map((val, index) => {
+			return val = index
+		})
+		backup = list.map((val, index) => {
+			return val = index
+		})
 		runtime.playerBar.show()
 	},
 	remove: target => {
 		list.splice(target, 1)
+		arr.splice(arr.indexOf(target), 1)
+		backup.splice(backup.indexOf(target), 1)
 		index = index < list.length ? index : 0
 		if (list.length == 0) runtime.playerBar.hide()
 	},
 	previous: () => {
 		if (list.length == 0) return
-		index = (index - 1 + list.length) % list.length
+		n--
+		index = backup[(n + backup.length) % backup.length]
 		controller.play()
 	},
 	next: () => {
 		if (list.length == 0) return
-		index = (index + 1 + list.length) % list.length
+		n++
+		index = backup[(n) % backup.length]
 		controller.play()
+	},
+	mode: (mode) => {
+		if (list.length == 0) return
+		if (mode === 3) {
+			for (var i = 0; i < backup.length; i += 1) {
+				backup[i] = arr.splice(Math.floor(Math.random() * arr.length), 1)[0];
+			}
+			arr = list.map((val, index) => {
+				return val = index
+			})
+
+		} else if (mode === 1) {
+			backup = arr;
+		} else if (mode === 2) {
+			backup = arr
+		}
+		runtime.playerBar.state(['repeat', 'random', 'loop'][mode - 1])
 	},
 	resume: () => {
 		if (list.length == 0) return
@@ -48,6 +78,7 @@ const controller = {
 		if (list.length == 0) return
 		index = typeof(target) != 'undefined' ? target % list.length : index
 		let song = list[index]
+		n = backup.indexOf(index)
 		Promise.all([api.song.url(song.id), api.song.lyric(song.id)])
 		.then(data => {
 			let url = data[0].data[0].url
@@ -71,6 +102,22 @@ const controller = {
 		let copy = JSON.parse(JSON.stringify(list))
 		copy[index].play = true
 		return copy
+	},
+	dlist: () => {
+		if (list.length == 0) return []
+		let copy = JSON.parse(JSON.stringify(list))
+		copy[index].play = true
+		return copy
+	},
+	delete: target => {
+		list.splice(target, 1)
+		index = list.indexOf(song)
+		arr = list.map((val, index) => {
+			return val = index
+		})
+		controller.mode(1)
+		controller.mode(mode)
+		if (list.length == 0) runtime.playerBar.hide()
 	},
 	like: () => {
 		if (list.length == 0) return
