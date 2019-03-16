@@ -2,7 +2,7 @@
     "name": "vsc-netease-music",
     "displayName": "VSC Netease Music",
     "description": "UNOFFICIAL Netease Music extension for Visual Studio Code",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "icon": "icon.png",
     "publisher": "nondanee",
     "repository": "https://github.com/nondanee/vsc-netease-music.git",
@@ -279,7 +279,7 @@
                 {
                     "command": "neteasemusic.pause",
                     "when": "neteasemusic.on && neteasemusic.track && neteasemusic.playing"
-				},
+                },
                 {
                     "command": "neteasemusic.mode.loop",
                     "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode == 0"
