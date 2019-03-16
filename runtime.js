@@ -139,9 +139,10 @@ const PlayerBar = context => {
 			items[buttons.volume.index].color = items[buttons.mute.index].color
 			items[buttons.volume.index].text = `${state.value.toFixed(2) * 100}`
 		},
-		show: () => {
+		show: radio => {
 			runtime.stateManager.set('track', true)
 			items.forEach(item => item.show())
+			if (radio) ['previous', 'repeat'].map(name => buttons[name].index).forEach(index => items[index].hide())
 		},
 		hide: () => {
 			runtime.stateManager.set('track', false)
@@ -175,6 +176,7 @@ const DuplexChannel = context => {
 			}
 			else if (body.name == 'load') {
 				runtime.playerBar.update(`${body.data.artist} - ${body.data.name}`)
+				api.song.log(body.data.id)
 			}
 			else if (body.name == 'lyric') {
 				runtime.playerBar.update(body.data)
@@ -226,6 +228,7 @@ const CommandManager = context => {
 		'user.album': interaction.user.album,
 		'recommend.song': interaction.recommend.song,
 		'recommend.playlist': interaction.recommend.playlist,
+		'recommend.radio': interaction.recommend.radio,
 
 		'login': interaction.login,
 		'logout': interaction.logout,

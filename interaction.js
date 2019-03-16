@@ -187,6 +187,10 @@ const interaction = {
 				description: playlist.copywriter,
 				action: () => interaction.playlist.detail(playlist.id)
 			})), '推荐歌单')
+		}),
+		radio: () => api.recommend.radio().then(data => {
+			controller.add(data.data.map(songFormat), true)
+			controller.play(0)
 		})
 	},
 	new: {

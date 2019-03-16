@@ -18,6 +18,7 @@
     "command.neteasemusic.logout": "Log Out",
     "command.neteasemusic.recommend.song": "Daily Recommended Song",
     "command.neteasemusic.recommend.playlist": "Recommended Mix",
+    "command.neteasemusic.recommend.radio": "Private FM",
     "command.neteasemusic.user.playlist": "Mix",
     "command.neteasemusic.user.artist": "Artist",
     "command.neteasemusic.user.album": "Album",

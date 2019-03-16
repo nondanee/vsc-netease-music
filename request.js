@@ -71,7 +71,8 @@ const api = {
 	},
 	recommend: {
 		song: () => apiRequest('v1/discovery/recommend/songs', {limit: 30, offset: 0}),
-		playlist: () => apiRequest('personalized/playlist', {limit: 20, offset: 0, n: 1000})
+		playlist: () => apiRequest('personalized/playlist', {limit: 20, offset: 0, n: 1000}),
+		radio: () => apiRequest('v1/radio/get', {})
 	},
 	new: {
 		song: () => apiRequest('v1/discovery/new/songs', {areaId: 0, limit: 50, offset: 0}),

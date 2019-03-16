@@ -110,6 +110,11 @@
                 "category": "%category.neteasemusic.recommend%"
             },
             {
+                "command": "neteasemusic.recommend.radio",
+                "title": "%command.neteasemusic.recommend.radio%",
+                "category": "%category.neteasemusic.recommend%"
+            },
+            {
                 "command": "neteasemusic.user.playlist",
                 "title": "%command.neteasemusic.user.playlist%",
                 "category": "%category.neteasemusic.my%"
@@ -221,6 +226,10 @@
                     "when": "neteasemusic.on && neteasemusic.logged"
                 },
                 {
+                    "command": "neteasemusic.recommend.radio",
+                    "when": "neteasemusic.on && neteasemusic.logged"
+                },
+                {
                     "command": "neteasemusic.user.artist",
                     "when": "neteasemusic.on && neteasemusic.logged"
                 },
@@ -246,7 +255,7 @@
                 },
                 {
                     "command": "neteasemusic.list.edit",
-                    "when": "neteasemusic.on && neteasemusic.track"
+                    "when": "neteasemusic.on && neteasemusic.track && !neteasemusic.radio"
                 },
                 {
                     "command": "neteasemusic.more",
@@ -254,7 +263,7 @@
                 },
                 {
                     "command": "neteasemusic.previous",
-                    "when": "neteasemusic.on && neteasemusic.track"
+                    "when": "neteasemusic.on && neteasemusic.track && !neteasemusic.radio"
                 },
                 {
                     "command": "neteasemusic.next",
@@ -282,15 +291,15 @@
                 },
                 {
                     "command": "neteasemusic.mode.loop",
-                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode == 0"
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode == 0 && !neteasemusic.radio"
                 },
                 {
                     "command": "neteasemusic.mode.repeat",
-                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode == 1"
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode == 1 && !neteasemusic.radio"
                 },
                 {
                     "command": "neteasemusic.mode.random",
-                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode == 2"
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode == 2 && !neteasemusic.radio"
                 }
             ]
         }

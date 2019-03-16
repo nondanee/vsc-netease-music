@@ -9,7 +9,9 @@ let index = 0
 const format = song => ({id: song.id, name: song.name, album: song.album, artist: song.artist})
 
 const controller = {
-	add: track => {
+	add: (track, radio = false) => {
+		if (radio != runtime.stateManager.get('radio')) list = []
+		runtime.stateManager.set('radio', radio)
 		if (Array.isArray(track)) {
 			list = track.map(format)
 			index = 0
@@ -20,7 +22,7 @@ const controller = {
 		}
 		let sequence = list.map((_, index) => index)
 		random = Array.apply(0, {length: sequence.length}).map(() => sequence.splice(Math.floor(Math.random() * sequence.length), 1)[0])
-		runtime.playerBar.show()
+		runtime.playerBar.show(radio)
 	},
 	remove: target => {
 		list.splice(target, 1)
@@ -36,6 +38,7 @@ const controller = {
 	},
 	next: auto => {
 		if (list.length == 0) return
+		if (runtime.stateManager.get('radio') && index === list.length - 1) return interaction.recommend.radio()
 		let mapped = random[(random.indexOf(index) + 1 + random.length) % random.length]
 		index = (auto && mode == 1) ? index : (mode === 2 ? mapped : index + 1)
 		controller.play()
@@ -130,3 +133,4 @@ const controller = {
 module.exports = controller
 const api = require('./request.js')
 const runtime = require('./runtime.js')
+const interaction = require('./interaction.js')

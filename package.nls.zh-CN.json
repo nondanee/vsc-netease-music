@@ -18,6 +18,7 @@
     "command.neteasemusic.logout": "退出登录",
     "command.neteasemusic.recommend.song": "每日歌曲推荐",
     "command.neteasemusic.recommend.playlist": "推荐歌单",
+    "command.neteasemusic.recommend.radio": "私人 FM",
     "command.neteasemusic.user.playlist": "歌单",
     "command.neteasemusic.user.artist": "歌手",
     "command.neteasemusic.user.album": "专辑",
