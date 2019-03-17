@@ -249,9 +249,8 @@ const CommandManager = context => {
 		'more': interaction.more,
 		'list': interaction.list.show,
 		'list.edit': interaction.list.edit,
-		'dlist': interaction.dlist,
-		'pause': controller.pause,
 		'play': controller.resume,
+		'pause': controller.pause,
 		'previous': controller.previous,
 		'next': controller.next,
 
@@ -261,6 +260,9 @@ const CommandManager = context => {
 		'mute': controller.mute,
 		'unmute': controller.unmute,
 		'volume': controller.volumeChange,
+
+		'auto.mute.unmute': () => controller[runtime.stateManager.get('muted') ? 'unmute' : 'mute'](),
+		'auto.play.pause': () => controller[runtime.stateManager.get('playing') ? 'pause' : 'resume'](),
 
 		'mode.loop': () => controller.mode(1),
 		'mode.repeat': () => controller.mode(2),

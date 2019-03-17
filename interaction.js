@@ -82,30 +82,30 @@ const interaction = {
 	user: {
 		playlist: id => api.user.playlist(id).then(data => {
 			id = id || data.playlist[0].creator.userId
-			const show = playlist => ({
+			const show = (playlist, creator) => ({
 				label: '     ' + playlist.name,
-				description: `${(playlist.trackCount || 0)}首`,
+				description: `${(playlist.trackCount || 0)}首${creator ? ' by ' + playlist.creator.nickname : ''}`,
 				action: () => interaction.playlist.detail(playlist.id)
 			})
 			let users = data.playlist.filter(playlist => playlist.creator.userId === id)
 			let others = data.playlist.filter(playlist => playlist.creator.userId != id)
-			const playlists = (create, collect) => Array.from([]).concat(
+			const playlists = (created, collected) => Array.from([]).concat(
 				[{
-					label: `${create ? '▿' : '▹'}  创建的歌单(${users.length})`,
+					label: `${created ? '▿' : '▹'}  创建的歌单(${users.length})`,
 					action: () => {
-						fillQuickPick(playlists(!create, collect), '我的歌单')
+						fillQuickPick(playlists(!created, collected), '我的歌单')
 						quickPick.activeItems = [quickPick.items[0]]
 					}
 				}],
-				create ? users.map(show) : [],
+				created ? users.map(playlist => show(playlist, false)) : [],
 				[{
-					label: `${collect ? '▿' : '▹'}  收藏的歌单(${others.length})`,
+					label: `${collected ? '▿' : '▹'}  收藏的歌单(${others.length})`,
 					action: () => {
-						fillQuickPick(playlists(create, !collect), '我的歌单')
-						quickPick.activeItems = [quickPick.items[(create ? users.length : 0) + 1]]
+						fillQuickPick(playlists(created, !collected), '我的歌单')
+						quickPick.activeItems = [quickPick.items[(created ? users.length : 0) + 1]]
 					}
 				}],
-				collect ? others.map(show) : []
+				collected ? others.map(playlist => show(playlist, true)) : []
 			)
 			fillQuickPick(playlists(true, true), '我的歌单')
 			quickPick.activeItems = [quickPick.items[1]]

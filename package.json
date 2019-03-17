@@ -35,6 +35,16 @@
                 "category": "%category.neteasemusic%"
             },
             {
+                "command": "neteasemusic.pause",
+                "title": "%command.neteasemusic.pause%",
+                "category": "%category.neteasemusic%"
+            },
+            {
+                "command": "neteasemusic.auto.play.pause",
+                "title": "%command.neteasemusic.auto.play.pause%",
+                "category": "%category.neteasemusic%"
+            },
+            {
                 "command": "neteasemusic.mute",
                 "title": "%command.neteasemusic.mute%",
                 "category": "%category.neteasemusic%"
@@ -45,13 +55,13 @@
                 "category": "%category.neteasemusic%"
             },
             {
-                "command": "neteasemusic.volume",
-                "title": "%command.neteasemusic.volume%",
+                "command": "neteasemusic.auto.mute.unmute",
+                "title": "%command.neteasemusic.auto.mute.unmute%",
                 "category": "%category.neteasemusic%"
             },
             {
-                "command": "neteasemusic.pause",
-                "title": "%command.neteasemusic.pause%",
+                "command": "neteasemusic.volume",
+                "title": "%command.neteasemusic.volume%",
                 "category": "%category.neteasemusic%"
             },
             {
@@ -175,6 +185,32 @@
                 "category": "%category.neteasemusic.mode%"
             }
         ],
+        "keybindings": [
+            {
+                "command": "neteasemusic.auto.mute.unmute",
+                "key": "alt+m",
+                "mac": "alt+m",
+                "when": "neteasemusic.on && neteasemusic.track"
+            },
+            {
+                "command": "neteasemusic.previous",
+                "key": "alt+,",
+                "mac": "alt+,",
+                "when": "neteasemusic.on && neteasemusic.track && !neteasemusic.radio"
+            },
+            {
+                "command": "neteasemusic.next",
+                "key": "alt+.",
+                "mac": "alt+.",
+                "when": "neteasemusic.on && neteasemusic.track"
+            },
+            {
+                "command": "neteasemusic.auto.play.pause",
+                "key": "alt+/",
+                "mac": "alt+/",
+                "when": "neteasemusic.on && neteasemusic.track"
+            }
+        ],
         "menus": {
             "commandPalette": [
                 {
@@ -282,12 +318,20 @@
                     "when": "neteasemusic.on && neteasemusic.track && neteasemusic.muted"
                 },
                 {
+                    "command": "neteasemusic.auto.mute.unmute",
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.exposed"
+                },
+                {
                     "command": "neteasemusic.play",
                     "when": "neteasemusic.on && neteasemusic.track && !neteasemusic.playing"
                 },
                 {
                     "command": "neteasemusic.pause",
                     "when": "neteasemusic.on && neteasemusic.track && neteasemusic.playing"
+                },
+                {
+                    "command": "neteasemusic.auto.play.pause",
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.exposed"
                 },
                 {
                     "command": "neteasemusic.mode.loop",

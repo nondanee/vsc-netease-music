@@ -29,6 +29,7 @@
 - 播放模式切换 / 音量调节
 - 逐行歌词
 - 热门评论
+- 快捷键支持
 - 听歌记录 (不确定有效)
 - 无海外限制
 
@@ -91,11 +92,20 @@ curl https://gist.githubusercontent.com/nondanee/f157bbbccecfe29e48d87273cd02e21
 
 输入命令前缀 `网易云音乐` 或 `NeteaseMusic` 开始探索 :D
 
+## Hotkey
+
+| Command     | Key                         |
+| ----------- | --------------------------- |
+| 静音 / 恢复 | <kbd>Alt</kbd> <kbd>M</kbd> |
+| 上一首      | <kbd>Alt</kbd> <kbd>,</kbd> |
+| 下一首      | <kbd>Alt</kbd> <kbd>.</kbd> |
+| 播放 / 暂停 | <kbd>Alt</kbd> <kbd>/</kbd> |
+
 ## Todo
 
 - [x] i18n
 - [ ] setting
-- [ ] shortcuts
+- [x] shortcuts
 - [ ] exit point
 
 ## Extension Setting
