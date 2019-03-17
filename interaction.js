@@ -108,6 +108,7 @@ const interaction = {
 				collect ? others.map(show) : []
 			)
 			fillQuickPick(playlists(true, true), '我的歌单')
+			quickPick.activeItems = [quickPick.items[1]]
 		}),
 		artist: () => api.user.artist().then(data => {
 			fillQuickPick(data.data.map(artist => ({

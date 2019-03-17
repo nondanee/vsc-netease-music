@@ -34,65 +34,76 @@ const PlayerBar = context => {
 	const buttons = {
 		previous: {
 			command: 'neteasemusic.previous',
-			icon: ' $(chevron-left) '
+			icon: ' $(chevron-left) ',
+			title: '上一首'
 		},
 		next: {
 			command: 'neteasemusic.next',
 			icon: ' $(chevron-right) ',
-			state: {auto: false}
+			title: '下一首'
 		},
 		repeat: {
 			command: 'neteasemusic.mode.loop',
 			icon: ' $(sync) ',
+			title: '播放模式: 循环播放',
 			state: {mode: 0}
 		},
 		random: {
 			command: 'neteasemusic.mode.repeat',
 			icon: ' $(pin) ',
+			title: '播放模式: 单曲循环',
 			state: {mode: 1}
 		},
 		loop: {
 			command: 'neteasemusic.mode.random',
 			icon: ' $(light-bulb) ',
+			title: '播放模式: 随机播放',
 			state: {mode: 2}
 		},
 		play: {
 			command: 'neteasemusic.play',
 			// icon: '▶'
 			icon: ' $(triangle-right) ',
+			title: '播放',
 			state: {playing: false}
 		},
 		pause: {
 			command: 'neteasemusic.pause',
 			// icon: ' ❚❚ '
 			icon: ' $(primitive-square) ',
+			title: '暂停',
 			state: {playing: true}
 		},
 		like: {
 			command: 'neteasemusic.like',
 			icon: ' $(heart) ',
+			title: '红心',
 			color: 'rgba(255,255,255,0.5)',
 			state: {liked: false}
 		},
 		dislike: {
 			command: 'neteasemusic.dislike',
 			icon: ' $(heart) ',
+			title: '取消红心',
 			state: {liked: true}
 		},
 		mute: {
 			command: 'neteasemusic.mute',
 			icon: '$(unmute)',
+			title: '静音',
 			state: {muted: false}
 		},
 		unmute: {
 			command: 'neteasemusic.unmute',
 			icon: '$(mute)',
+			title: '取消静音',
 			color: 'rgba(255,255,255,0.5)',
 			state: {muted: true}
 		},
 		volume: {
 			command: 'neteasemusic.volume',
-			icon: '100'
+			icon: '100',
+			title: '音量调节'
 		},
 		list: {
 			command: 'neteasemusic.list',
@@ -100,6 +111,7 @@ const PlayerBar = context => {
 		},
 		more: {
 			command: 'neteasemusic.more',
+			title: '更多操作',			
 			icon: '$(kebab-horizontal)'
 		}
 	}
@@ -108,6 +120,7 @@ const PlayerBar = context => {
 		item.color = button.color || undefined
 		item.text = button.icon
 		item.command = button.command
+		item.tooltip = button.title || undefined
 		if (button.state) Object.keys(button.state).forEach(key => runtime.stateManager.set(key, button.state[key]))
 	}
 
