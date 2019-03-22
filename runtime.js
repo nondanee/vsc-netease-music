@@ -111,8 +111,8 @@ const PlayerBar = context => {
 		},
 		more: {
 			command: 'neteasemusic.more',
-			title: '更多操作',			
-			icon: '$(kebab-horizontal)'
+			icon: '$(kebab-horizontal)',
+			title: '更多操作'
 		}
 	}
 

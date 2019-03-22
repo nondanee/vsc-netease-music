@@ -54,20 +54,28 @@ const api = {
 	},
 	album: id => apiRequest(`v1/album/${id}`, {}),
 	playlist: {
-		detail: id => apiRequest('v3/playlist/detail', {id: id, n: 100000}),
+		detail: id => apiRequest('v3/playlist/detail', {id, n: 1000})
+		.then(data =>
+			Promise.all(
+				Array.apply(null, {length: Math.ceil(data.playlist.trackCount / 1000) - 1}).map((_, group) =>
+				apiRequest('v3/song/detail', {c: JSON.stringify(data.playlist.trackIds.slice((group + 1) * 1000).slice(0, 1000).map(item => ({id: item.id})))})
+			))
+			.then(rest => rest.forEach(part => Array.prototype.push.apply(data.playlist.tracks, part.songs)))
+			.then(() => data)
+		),
 		highquality: () => apiRequest('playlist/highquality/list', {cat: '全部', limit: 50}),
 		hot: () => apiRequest('playlist/list', {cat: '全部', limit: 50, offset: 0, order: 'hot'})
 	},
 	toplist: () => apiRequest('toplist', {}),
 	song: {
-		detail: id => apiRequest('v3/song/detail', {c: `[{"id":'${id}'}]`, ids: `['${id}']`}),
-		url: id => apiRequest('song/enhance/player/url', {ids: `['${id}']`, br: 999000}),
-		lyric: id => apiRequest('song/lyric', {id: id, lv: -1, tv: -1, cp: false}),
+		detail: id => apiRequest('v3/song/detail', {c: JSON.stringify([{id}])}),
+		url: id => apiRequest('song/enhance/player/url', {ids: [id], br: 320000}),
+		lyric: id => apiRequest('song/lyric', {id, lv: -1, tv: -1, cp: false}),
 		like: id => apiRequest('song/like', {trackId: id, like: true, time: 0, userid: 0}),
 		dislike: id => apiRequest('song/like', {trackId: id, like: false, time: 0, userid: 0}),
 		collect: (id, pid) => apiRequest('playlist/manipulate/tracks', {trackIds: [id], pid: pid, op: 'add'}),
 		comment: id => apiRequest(`v1/resource/hotcomments/R_SO_4_${id}`, {rid: id, limit: 50, offset: 0}),
-		log: id => apiRequest('feedback/weblog', {logs: [{action: 'play', json: {id: id, type: 'song'}}]})
+		log: id => apiRequest('feedback/weblog', {logs: [{action: 'play', json: {id, type: 'song'}}]})
 	},
 	recommend: {
 		song: () => apiRequest('v1/discovery/recommend/songs', {limit: 30, offset: 0}),
@@ -88,7 +96,8 @@ const api = {
 		let area = Array.from(['+1', '+1242', '+1246', '+1264', '+1268', '+1345', '+1441', '+1473', '+1664', '+1670', '+1671', '+1758', '+1784', '+1787', '+1868', '+1876', '+1890', '+20', '+212', '+213', '+216', '+218', '+220', '+221', '+223', '+224', '+225', '+226', '+227', '+228', '+229', '+230', '+231', '+232', '+233', '+234', '+235', '+236', '+237', '+239', '+241', '+242', '+243', '+244', '+247', '+248', '+249', '+251', '+252', '+253', '+254', '+255', '+256', '+257', '+258', '+260', '+261', '+262', '+263', '+264', '+265', '+266', '+267', '+268', '+27', '+30', '+31', '+32', '+33', '+34', '+350', '+351', '+352', '+353', '+354', '+355', '+356', '+357', '+358', '+359', '+36', '+370', '+371', '+372', '+373', '+374', '+375', '+376', '+377', '+378', '+380', '+381', '+386', '+39', '+40', '+41', '+420', '+421', '+423', '+43', '+44', '+45', '+46', '+47', '+48', '+49', '+501', '+502', '+503', '+504', '+505', '+506', '+507', '+509', '+51', '+52', '+53', '+54', '+55', '+56', '+57', '+58', '+591', '+592', '+593', '+594', '+595', '+596', '+597', '+598', '+599', '+60', '+61', '+62', '+63', '+64', '+65', '+66', '+673', '+674', '+675', '+676', '+677', '+679', '+682', '+684', '+685', '+689', '+7', '+81', '+82', '+84', '+850', '+852', '+853', '+855', '+856', '+86', '+880', '+886', '+90', '+91', '+92', '+93', '+94', '+95', '+960', '+961', '+962', '+963', '+964', '+965', '+966', '+967', '+968', '+971', '+972', '+973', '+974', '+976', '+977', '+98', '+992', '+993', '+994', '+995', '+996', '+998']).find(prefix => account.startsWith(prefix))
 		let path = '', data = {password: crypto.createHash('md5').update(password).digest('hex'), rememberLogin: 'true'}
 		account.includes('@') ? (Object.assign(data, {username: account}), path = 'login') : (Object.assign(data, {phone: account.replace(area, ''), countrycode: (area || '').replace('+', '')}), path = 'login/cellphone')
-		return apiRequest(path, data, false).then(response => {
+		return apiRequest(path, data, false)
+		.then(response => {
 			if (response.headers['set-cookie']) user.cookie = response.headers['set-cookie'].map(cookie => cookie.replace(/;.*/,'')).join('; ')
 			return response
 		})
