@@ -36,7 +36,7 @@
 		}, false)
 
 		audio.addEventListener('ended', () => {
-			postMessage('event', {name: 'end'})
+			postMessage('event', {name: 'end', data: song})
 		}, false)
 
 		audio.addEventListener('timeupdate', () => {
@@ -62,10 +62,10 @@
 		const receiveMessage = (command, data) => {
 			if (command === 'load') {
 				let play = (!audio.src || !audio.paused || audio.ended)
-				audio.src = data.url
-				if (play) audio.play()
-				song = data
+				song = data.song
 				lyric = Lyric(data.lyric)
+				audio.src = song.url
+				if (play) audio.play()
 			}
 			else if (command === 'play') {
 				if (audio.paused) audio.play()

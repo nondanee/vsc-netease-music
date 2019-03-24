@@ -16,6 +16,17 @@ const GlobalStorage = context => {
 	}
 }
 
+const SceneKeeper = context => {
+	return {
+		save: (key, value) => {
+
+		},
+		restore: () => {
+			
+		}
+	}
+}
+
 const StateManager = context => {
 	const state = {}
 	return {
@@ -188,7 +199,9 @@ const DuplexChannel = context => {
 				controller.next(true)
 			}
 			else if (body.name == 'load') {
-				runtime.playerBar.update(`${body.data.artist} - ${body.data.name}`)
+				let playing = `${body.data.artists.map(artist => artist.name).join(' / ')} - ${body.data.name}`
+				vscode.window.showInformationMessage(`正在播放: ${playing}`)
+				runtime.playerBar.update(playing)
 				api.song.log(body.data.id)
 			}
 			else if (body.name == 'lyric') {

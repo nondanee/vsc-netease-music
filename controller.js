@@ -6,19 +6,19 @@ let random = []
 let mode = 0
 let index = 0
 
-const format = song => ({id: song.id, name: song.name, album: song.album, artist: song.artist})
+const compact = song => ['id', 'name', 'album', 'artists', 'source'].reduce((result, key) => Object.assign(result, {[key]: song[key]}), {})
 
 const controller = {
 	add: (track, radio = false) => {
 		if (radio != runtime.stateManager.get('radio')) list = []
 		runtime.stateManager.set('radio', radio)
 		if (Array.isArray(track)) {
-			list = track.map(format)
+			list = track.map(compact)
 			index = 0
 		}
 		else {
 			index = list.length
-			list.splice(index, 0, format(track))
+			list.splice(index, 0, compact(track))
 		}
 		let sequence = list.map((_, index) => index)
 		random = Array.apply(0, {length: sequence.length}).map(() => sequence.splice(Math.floor(Math.random() * sequence.length), 1)[0])
@@ -63,23 +63,31 @@ const controller = {
 		if (list.length == 0) return
 		index = ((typeof(target) != 'undefined' ? target : index) + list.length) % list.length
 		let song = list[index]
-		Promise.all([api.song.url(song.id), api.song.lyric(song.id)])
-		.then(data => {
-			let url = data[0].data[0].url
+		Promise.all([api.song.url, api.song.lyric].map(call => call(song.id)))
+		.then(batch => {
+			let url = batch[0].data[0].url
+			let lyric = (batch[1].nolyric || batch[1].uncollected) ? [] : [batch[1].lrc.lyric, batch[1].tlyric.lyric]
 			if (!url) {
-				vscode.window.showWarningMessage(`无法播放: ${song.artist} - ${song.name}`)
+				vscode.window.showWarningMessage(`无法播放: ${song.artists.map(artist => artist.name).join(' / ')} - ${song.name}`)
 				controller.remove(index)
 				controller.play()
 			}
 			else {
 				url = url.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net')
-				song.url = url
-				song.lyric = (data[1].nolyric || data[1].uncollected) ? [] : [data[1].lrc.lyric, data[1].tlyric.lyric]
-				runtime.duplexChannel.postMessage('load', song)
+				runtime.duplexChannel.postMessage('load', {lyric, song: Object.assign({url}, song)})
 				runtime.playerBar.state(likes.includes(song.id) ? 'like' : 'dislike')
-				vscode.window.showInformationMessage(`正在播放: ${song.artist} - ${song.name}`)
 			}
 		})
+	},
+	current: item => {
+		if (list.length == 0) return
+		let song = list[index]
+		if (item.id === song.id && item.source.type === song.source.type) {
+			if (!('id' in song.source))
+				return true
+			else if(item.source.id === song.source.id)
+				return true
+		}
 	},
 	list: () => {
 		if (list.length == 0) return []
