@@ -184,7 +184,7 @@ const interaction = {
 						action: () => interaction.artist.album(id)
 					}],
 					data.hotSongs.map(song => utility.format.song(song, {type: 'artist', id, name: data.artist.name}))
-					.map((song, index, track) => utility.lift.song(song, {index, track, artist: false}, () => {
+					.map((song, index, track) => utility.lift.song(song, {index, artist: false}, () => {
 						controller.add(track)
 						controller.play(index)
 						quickPick.hide()
@@ -229,7 +229,7 @@ const interaction = {
 					}), refresh)
 				}],
 				data.songs.map(song => utility.format.song(song, {type: 'album', id, name: data.album.name}))
-				.map((song, index, track) => utility.lift.song(song, {index, track, album: false}, () => {
+				.map((song, index, track) => utility.lift.song(song, {index, album: false}, () => {
 					controller.add(track)
 					controller.play(index)
 					quickPick.hide()
@@ -275,7 +275,7 @@ const interaction = {
 						}), refresh)
 					}] : [],
 					data.playlist.tracks.map(song => utility.format.song(song, {type: 'playlist', id, name: data.playlist.name}))
-					.map((song, index, track) => utility.lift.song(song, {index, track}, () => {
+					.map((song, index, track) => utility.lift.song(song, {index}, () => {
 						controller.add(track)
 						controller.play(index)
 						quickPick.hide()
@@ -303,7 +303,7 @@ const interaction = {
 	recommend: {
 		song: () => api.recommend.song().then(data => {
 			selector(data.recommend.map(song => utility.format.song(song, {type: 'recommend'}))
-			.map((song, index, track) => utility.lift.song(song, {index, track}, () => {
+			.map((song, index, track) => utility.lift.song(song, {index}, () => {
 				controller.add(track)
 				controller.play(index)
 				quickPick.hide()
@@ -363,7 +363,7 @@ const interaction = {
 		show: () => {
 			let track = controller.list()
 			let play = track.findIndex(song => song.play)
-			selector(track.map((song, index, track) => utility.lift.song(song, {index, track}, () => {
+			selector(track.map((song, index) => utility.lift.song(song, {index}, () => {
 				song.play ? (controller.pause() || controller.resume()) : controller.play(index)
 				quickPick.hide()
 			})), `播放列表 (${track.length})`)
@@ -372,7 +372,7 @@ const interaction = {
 		edit: () => {
 			let track = controller.list()
 			let play = track.findIndex(song => song.play)
-			selector(track.map((song, index, track) => utility.lift.song(song, {index, track}, () => {
+			selector(track.map((song, index) => utility.lift.song(song, {index}, () => {
 				controller.remove(index)
 				if (index == play) controller.play()
 				interaction.list.edit()
