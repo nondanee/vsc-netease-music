@@ -150,7 +150,7 @@ const PlayerBar = context => {
 		},
 		state: state => {
 			if (!(state in buttons)) return
-			if (state.includes('like')) runtime.stateManager.get('logged') ? items[buttons.like.index].show() : items[buttons.like.index].hide()
+			if (state.includes('like')) api.user.logged() ? items[buttons.like.index].show() : items[buttons.like.index].hide()
 			let index = buttons[state].index
 			let name = order[index][(order[index].indexOf(state) + 1) % order[index].length]
 			bind(items[index], buttons[name])
@@ -199,7 +199,7 @@ const DuplexChannel = context => {
 				controller.next(true)
 			}
 			else if (body.name == 'load') {
-				let playing = `${body.data.artists.map(artist => artist.name).join(' / ')} - ${body.data.name}`
+				let playing = `${interaction.utility.stringify.song(body.data)}`
 				vscode.window.showInformationMessage(`正在播放: ${playing}`)
 				runtime.playerBar.update(playing)
 				api.song.log(body.data.id)

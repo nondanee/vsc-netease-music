@@ -46,25 +46,35 @@ const api = {
 		artist: () => apiRequest(`artist/sublist`, {limit: 1000, offset: 0}),
 		album: () => apiRequest(`album/sublist`, {limit: 1000, offset: 0}),
 		playlist: id => apiRequest('user/playlist', {uid: id || user.id, limit: 100000}),
-		likes: () => apiRequest('song/like/get', {})
+		likes: () => apiRequest('song/like/get', {}),
+		logged: () => user.id
 	},
 	artist: {
-		song: id => apiRequest(`v1/artist/${id}`, {top: 50}),
+		song: id => 
+			Promise.all([apiRequest(`v1/artist/${id}`, {top: 50}), apiRequest(`artist/detail/v4`, {id})])
+			.then(data => {data[0].artist.fansNum = data[1].fansNum; return data[0]}),
 		album: id => apiRequest(`artist/albums/${id}`, {limit: 1000, offset: 0}),
+		subscribe: (id, action) => apiRequest(`artist/${action ? 'sub' : 'unsub'}`, {artistId: id, artistIds: [id]})
 	},
-	album: id => apiRequest(`v1/album/${id}`, {}),
+	album: {
+		detail: id => 
+			Promise.all([apiRequest(`v1/album/${id}`, {}), apiRequest('album/detail/dynamic', {id})])
+			.then(data => {Object.assign(data[0].album.info, data[1]); return data[0]}),
+		subscribe: (id, action) => apiRequest(`album/${action ? 'sub' : 'unsub'}`, {id})
+	},
 	playlist: {
 		detail: id => apiRequest('v3/playlist/detail', {id, n: 1000})
 		.then(data =>
 			Promise.all(
-				Array.apply(null, {length: Math.ceil(data.playlist.trackCount / 1000) - 1}).map((_, group) =>
+				Array.from(Array(Math.ceil(data.playlist.trackCount / 1000) - 1).keys()).map(group =>
 				apiRequest('v3/song/detail', {c: JSON.stringify(data.playlist.trackIds.slice((group + 1) * 1000).slice(0, 1000).map(item => ({id: item.id})))})
 			))
 			.then(rest => rest.forEach(part => Array.prototype.push.apply(data.playlist.tracks, part.songs)))
 			.then(() => data)
 		),
 		highquality: () => apiRequest('playlist/highquality/list', {cat: '全部', limit: 50}),
-		hot: () => apiRequest('playlist/list', {cat: '全部', limit: 50, offset: 0, order: 'hot'})
+		hot: () => apiRequest('playlist/list', {cat: '全部', limit: 50, offset: 0, order: 'hot'}),
+		subscribe: (id, action) => apiRequest(`playlist/${action ? 'subscribe' : 'unsubscribe'}`, {id})
 	},
 	toplist: () => apiRequest('toplist', {}),
 	song: {

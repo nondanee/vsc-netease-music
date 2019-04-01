@@ -6,7 +6,7 @@ let random = []
 let mode = 0
 let index = 0
 
-const compact = song => ['id', 'name', 'album', 'artists', 'source'].reduce((result, key) => Object.assign(result, {[key]: song[key]}), {})
+const compact = song => interaction.utility.extract(song, ['id', 'name', 'album', 'artists', 'source'])
 
 const controller = {
 	add: (track, radio = false) => {
@@ -68,7 +68,7 @@ const controller = {
 			let url = batch[0].data[0].url
 			let lyric = (batch[1].nolyric || batch[1].uncollected) ? [] : [batch[1].lrc.lyric, batch[1].tlyric.lyric]
 			if (!url) {
-				vscode.window.showWarningMessage(`无法播放: ${song.artists.map(artist => artist.name).join(' / ')} - ${song.name}`)
+				vscode.window.showWarningMessage(`无法播放: ${interaction.utility.stringify.song(song)}`)
 				controller.remove(index)
 				controller.play()
 			}
