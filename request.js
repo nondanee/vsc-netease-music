@@ -42,7 +42,7 @@ const apiRequest = (path, data, load = true) => {
 
 const api = {
 	user: {
-		detail: id => apiRequest(`v1/user/detail/${id}`, {}),
+		detail: id => apiRequest(`v1/user/detail/${id|| user.id}`, {}),
 		artist: () => apiRequest(`artist/sublist`, {limit: 1000, offset: 0}),
 		album: () => apiRequest(`album/sublist`, {limit: 1000, offset: 0}),
 		playlist: id => apiRequest('user/playlist', {uid: id || user.id, limit: 100000}),
@@ -50,10 +50,10 @@ const api = {
 		logged: () => user.id
 	},
 	artist: {
-		song: id => 
-			Promise.all([apiRequest(`v1/artist/${id}`, {top: 50}), apiRequest(`artist/detail/v4`, {id})])
-			.then(data => {data[0].artist.fansNum = data[1].fansNum; return data[0]}),
-		album: id => apiRequest(`artist/albums/${id}`, {limit: 1000, offset: 0}),
+		song: id => apiRequest(`v1/artist/${id}`, {top: 50}),
+		album: id =>
+			Promise.all([apiRequest(`artist/albums/${id}`, {limit: 1000, offset: 0}), apiRequest(`artist/detail/v4`, {id}), apiRequest(`artist/detail/dynamic`, {id})])
+			.then(data => {data[0].artist.fansNum = data[1].fansNum; data[0].artist.followed = data[2].followed; return data[0]}),
 		subscribe: (id, action) => apiRequest(`artist/${action ? 'sub' : 'unsub'}`, {artistId: id, artistIds: [id]})
 	},
 	album: {
@@ -114,7 +114,6 @@ const api = {
 		.then(json).then(data => {
 			if (data.code == 200) {
 				user.id = data.account.id
-				user.name = data.profile.nickname
 				sync()
 				return Promise.resolve(data)
 			}
@@ -127,15 +126,17 @@ const api = {
 		user = {}
 		sync()
 	},
-	refresh : () => {
-		user = JSON.parse(runtime.globalStorage.get('user') || '{}')
-		sync()
-	}
+	sign: () => apiRequest('point/dailyTask', {type: 1}),
+	refresh: cookie => {
+		user = cookie ? {cookie} : JSON.parse(runtime.globalStorage.get('user') || '{}')
+		return apiRequest('/user/info', {}).then(data => data.code === 200 ? user.id = data.userPoint.userId : user = {}).then(sync)
+		.then(() => user.id ? api.user.detail().then(data => runtime.stateManager.set('signed', data.pcSign ? true : false) || data) : null)
+	},
 }
 
 const sync = () => {
 	runtime.globalStorage.set('user', JSON.stringify(user))
-	runtime.stateManager.set('logged', user.cookie ? true : false)
+	runtime.stateManager.set('logged', user.id ? true : false)
 }
 
 module.exports = api

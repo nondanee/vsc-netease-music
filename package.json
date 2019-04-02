@@ -105,8 +105,18 @@
                 "category": "%category.neteasemusic%"
             },
             {
+                "command": "neteasemusic.login.cookie",
+                "title": "%command.neteasemusic.login.cookie%",
+                "category": "%category.neteasemusic%"
+            },
+            {
                 "command": "neteasemusic.logout",
                 "title": "%command.neteasemusic.logout%",
+                "category": "%category.neteasemusic%"
+            },
+            {
+                "command": "neteasemusic.sign",
+                "title": "%command.neteasemusic.sign%",
                 "category": "%category.neteasemusic%"
             },
             {
@@ -226,8 +236,16 @@
                     "when": "neteasemusic.on && !neteasemusic.logged"
                 },
                 {
+                    "command": "neteasemusic.login.cookie",
+                    "when": "neteasemusic.on && !neteasemusic.logged"
+                },
+                {
                     "command": "neteasemusic.logout",
                     "when": "neteasemusic.on && neteasemusic.logged"
+                },
+                {
+                    "command": "neteasemusic.sign",
+                    "when": "neteasemusic.on && neteasemusic.logged && !neteasemusic.signed"
                 },
                 {
                     "command": "neteasemusic.search",

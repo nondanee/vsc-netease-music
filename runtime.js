@@ -257,7 +257,9 @@ const CommandManager = context => {
 		'recommend.radio': interaction.recommend.radio,
 
 		'login': interaction.login,
+		'login.cookie': interaction.clone,
 		'logout': interaction.logout,
+		'sign': interaction.sign,
 
 		'more': interaction.more,
 		'list': interaction.list.show,

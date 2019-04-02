@@ -13,19 +13,14 @@ quickPick.onDidAccept(() => {
 })
 
 const selector = (items, title) => {
-	items = items.filter(item => item)
-	const width = string => (string || '').toString().replace(/\$\(\S+?\)/, '0').length
-	let space = Math.max.apply(null, items.map(item => width(item.icon)))
-	if (space) items.forEach(item => item.label = utility.pad(space - width(item.icon) + 1, item.icon || '', 0) + '   ' + item.label)
 	quickPick.busy = false
 	quickPick.value = ''
-	quickPick.items = items
+	quickPick.items = items.filter(item => item)
 	quickPick.placeholder = title
 	quickPick.show()
 }
 
 const utility = {
-	pad: (before, string, after, space = '\u2007') => [(new Array(before + 1)).join(space), string, (new Array(after + 1)).join(space)].join(''),
 	extract: (item, keys = ['id', 'name']) => 
 		Object.keys(item).filter(key => keys.includes(key)).reduce((result, key) => Object.assign(result, {[key]: item[key]}), {}),
 	format: {
@@ -41,8 +36,9 @@ const utility = {
 		song: (song, tuner, action) => {
 			song.label = song.name
 			song.action = action
-			if( 'index' in tuner) {
-				song.icon = controller.current(song) ? '\u2006♬' : (tuner.index + 1)
+			if ('index' in tuner) {
+				let indicate = controller.current(song) ? '\u2006♬' : (tuner.index + 1).toString()
+				song.label = (new Array(Math.max(tuner.track.length.toString().length, 2) - indicate.length + 1)).join('\u2007') + indicate + '   ' + song.label
 			}
 			song.description = [
 				tuner.artist === false ? null : utility.stringify.artist(song), 
@@ -95,6 +91,13 @@ const utility = {
 				if (typeof pass === 'function') pass()
 			}
 		}
+	},
+	indicate: {
+		expand: fill => `${fill ? '⯆' : '⯈'}  `,
+		collect: done => `${done ? '【 $(check) 已收藏 】' : '【 $(plus) 收藏 】'}`
+	},
+	indent: {
+		expand: item => Object.assign(item, {label: `\u2006\u2007\u2006  ${item.label}`})
 	}
 }
 
@@ -112,25 +115,23 @@ const interaction = {
 			let others = data.playlist.filter(playlist => playlist.creator.userId != id)
 			const playlists = (created, collected) => Array.from([]).concat(
 				[{
-					icon: (created ? '▿' : '▹') + '\u2008',
-					label: '创建的歌单',
+					label: `${utility.indicate.expand(created)}创建的歌单`,
 					description: `(${users.length})`,
 					action: () => {
 						selector(playlists(!created, collected), '我的歌单')
 						quickPick.activeItems = [quickPick.items[0]]
 					}
 				}],
-				created ? users.map(playlist => show(playlist, false)) : [],
+				created ? users.map(playlist => show(playlist, false)).map(utility.indent.expand) : [],
 				[{
-					icon: (collected ? '▿' : '▹') + '\u2008',
-					label: '收藏的歌单',
+					label: `${utility.indicate.expand(collected)}收藏的歌单`,
 					description: `(${others.length})`,
 					action: () => {
 						selector(playlists(created, !collected), '我的歌单')
 						quickPick.activeItems = [quickPick.items[(created ? users.length : 0) + 1]]
 					}
 				}],
-				collected ? others.map(playlist => show(playlist, true)) : []
+				collected ? others.map(playlist => show(playlist, true)).map(utility.indent.expand) : []
 			)
 			selector(playlists(true, true), '我的歌单')
 			quickPick.activeItems = [quickPick.items[1]]
@@ -139,7 +140,7 @@ const interaction = {
 			selector(data.data.map(artist => ({
 				label: artist.name,
 				description: `${artist.albumSize || 0}张专辑`,
-				action: () => interaction.artist.song(artist.id)
+				action: () => interaction.artist.album(artist.id)
 			})), '我的歌手')
 		}),
 		album: () => api.user.album().then(data => {
@@ -153,83 +154,63 @@ const interaction = {
 	artist: {
 		song: id => api.artist.song(id).then(data => {
 			const refresh = () => {
-				selector(Array.from([]).concat(
-					[data.artist.followed ? {
-						icon: '$(check)\u2006',
-						label: '已收藏',
-						description: `(${utility.stringify.number(data.artist.fansNum)})`,
-						action: () => utility.check.logged(api.artist.subscribe(id, false).then(result => {
-							if (result.code === 200) {
-								data.artist.followed = false
-								data.artist.fansNum -= 1
-							}
-							refresh()
-						}), refresh)
-					} : {
-						icon: '$(plus)\u2006',
-						label: '收藏',
-						description: `(${utility.stringify.number(data.artist.fansNum)})`,
-						action: () => utility.check.logged(api.artist.subscribe(id, true).then(result => {
-							if (result.code === 200) {
-								data.artist.followed = true
-								data.artist.fansNum += 1
-							}
-							refresh()
-						}), refresh)
-					}],
-					[{
-						icon: '$(versions)\u200B',
-						label: '所有专辑',
-						description: `(${data.artist.albumSize})`,
-						action: () => interaction.artist.album(id)
-					}],
-					data.hotSongs.map(song => utility.format.song(song, {type: 'artist', id, name: data.artist.name}))
-					.map((song, index, track) => utility.lift.song(song, {index, artist: false}, () => {
-						controller.add(track)
-						controller.play(index)
-						quickPick.hide()
-					}))
-				), data.artist.name)
+				selector(data.hotSongs.map(song => utility.format.song(song, {type: 'artist', id, name: data.artist.name}))
+				.map((song, index, track) => utility.lift.song(song, {index, track, artist: false}, () => {
+					controller.add(track)
+					controller.play(index)
+					quickPick.hide()
+				})), `${data.artist.name} 热门单曲`)
 				quickPick.activeItems = [quickPick.items[1]]
 			}
 			refresh()
 		}),
 		album: id => api.artist.album(id).then(data => {
-			selector(data.hotAlbums.map(album => ({
-				label: album.name,
-				description: utility.stringify.date(album.publishTime),
-				action: () => interaction.album(album.id)
-			})), `${data.artist.name} 所有专辑`)
+			const refresh = () => {
+				selector(Array.from([]).concat(
+					[{
+						label: utility.indicate.collect(data.artist.followed),
+						description: `${utility.stringify.number(data.artist.fansNum)}人收藏`,
+						action: () => utility.check.logged(api.artist.subscribe(id, !data.artist.followed).then(result => {
+							console.log(result, data.artist.followed)
+							if (result.code === 200) {
+								data.artist.followed = !data.artist.followed
+								data.artist.fansNum += (data.artist.followed ? 1 : -1)
+							}
+							refresh()
+						}), refresh)
+					}],
+					[{
+						label: '热门单曲',
+						description: `TOP 50`,
+						action: () => interaction.artist.song(id)
+					}],
+					data.hotAlbums.map(album => ({
+						label: album.name,
+						description: utility.stringify.date(album.publishTime),
+						action: () => interaction.album(album.id)
+					}))
+				), data.artist.name)
+				quickPick.activeItems = [quickPick.items[1]]
+			}
+			refresh()
 		})
 	},
 	album: id => api.album.detail(id).then(data => {
 		const refresh = () => {
 			selector(Array.from([]).concat(
-				[data.album.info.isSub ? {
-					icon: '$(check)\u2006',
-					label: '已收藏',
-					description: `(${utility.stringify.number(data.album.info.subCount)})`,
-					action: () => utility.check.logged(api.album.subscribe(id, false).then(result => {
+				[{
+					label: utility.indicate.collect(data.album.info.isSub),
+					description: `${utility.stringify.number(data.album.info.subCount)}人收藏`,
+					action: () => utility.check.logged(api.album.subscribe(id, !data.album.info.isSub).then(result => {
 						if (result.code === 200) {
-							data.album.info.isSub = false
-							data.album.info.subCount -= 1
-						}
-						refresh()
-					}), refresh)
-				} : {
-					icon: '$(plus)\u2006',
-					label: '收藏',
-					description: `(${utility.stringify.number(data.album.info.subCount)})`,
-					action: () =>  utility.check.logged(api.album.subscribe(id, true).then(result => {
-						if (result.code === 200) {
-							data.album.info.isSub = true
-							data.album.info.subCount += 1
+							data.album.info.isSub = !data.album.info.isSub
+							data.album.info.subCount += (data.album.info.isSub ? 1 : -1)
 						}
 						refresh()
 					}), refresh)
 				}],
 				data.songs.map(song => utility.format.song(song, {type: 'album', id, name: data.album.name}))
-				.map((song, index, track) => utility.lift.song(song, {index, album: false}, () => {
+				.map((song, index, track) => utility.lift.song(song, {index, track, album: false}, () => {
 					controller.add(track)
 					controller.play(index)
 					quickPick.hide()
@@ -251,31 +232,19 @@ const interaction = {
 			let self = data.playlist.creator.userId == api.user.logged()
 			const refresh = () => {
 				selector(Array.from([]).concat(
-					!self ? [data.playlist.subscribed ? {
-						icon: '$(check)\u2006',
-						label: '已收藏',
-						description: `(${utility.stringify.number(data.playlist.subscribedCount)})`,
-						action: () => utility.check.logged(api.playlist.subscribe(id, false).then(result => {
+					!self ? [{
+						label: utility.indicate.collect(data.playlist.subscribed),
+						description: `${utility.stringify.number(data.playlist.subscribedCount)}人收藏`,
+						action: () => utility.check.logged(api.playlist.subscribe(id, !data.playlist.subscribed).then(result => {
 							if (result.code === 200) {
-								data.playlist.subscribed = false
-								data.playlist.subscribedCount -= 1
-							}
-							refresh()
-						}), refresh)
-					} : {
-						icon: '$(plus)\u2006',
-						label: '收藏',
-						description: `(${utility.stringify.number(data.playlist.subscribedCount)})`,
-						action: () => utility.check.logged(api.playlist.subscribe(id, true).then(result => {
-							if (result.code === 200) {
-								data.playlist.subscribed = true
-								data.playlist.subscribedCount += 1
+								data.playlist.subscribed = !data.playlist.subscribed
+								data.playlist.subscribedCount += (data.playlist.subscribed ? 1 : -1)
 							}
 							refresh()
 						}), refresh)
 					}] : [],
 					data.playlist.tracks.map(song => utility.format.song(song, {type: 'playlist', id, name: data.playlist.name}))
-					.map((song, index, track) => utility.lift.song(song, {index}, () => {
+					.map((song, index, track) => utility.lift.song(song, {index, track}, () => {
 						controller.add(track)
 						controller.play(index)
 						quickPick.hide()
@@ -303,7 +272,7 @@ const interaction = {
 	recommend: {
 		song: () => api.recommend.song().then(data => {
 			selector(data.recommend.map(song => utility.format.song(song, {type: 'recommend'}))
-			.map((song, index, track) => utility.lift.song(song, {index}, () => {
+			.map((song, index, track) => utility.lift.song(song, {index, track}, () => {
 				controller.add(track)
 				controller.play(index)
 				quickPick.hide()
@@ -359,11 +328,31 @@ const interaction = {
 		})
 	},
 	logout: () => api.logout(),
+	sign: () => api.sign().then(data => {
+		if ([-2, 200].includes(data.code)) {
+			vscode.window.showInformationMessage('签到成功')
+			runtime.stateManager.set('signed', true)
+		}
+	}),
+	clone: () => {
+		vscode.window.showInputBox({
+			placeHolder: '"MUSIC_U"的值',
+			prompt: '从浏览器开发者工具复制Cookie'
+		})
+		.then(value => {
+			if (value) {
+				api.refresh(`MUSIC_U=${value.trim()}`)
+				.then(data => {vscode.window.showInformationMessage(`登录成功: ${data.profile.nickname}(${data.userPoint.userId})`)})
+				.then(() => controller.refresh())
+				.catch(e => {vscode.window.showErrorMessage(`登录失败: Cookie 无效`)})
+			}
+		})
+	},
 	list: {
 		show: () => {
 			let track = controller.list()
 			let play = track.findIndex(song => song.play)
-			selector(track.map((song, index) => utility.lift.song(song, {index}, () => {
+			selector(track.map((song, index) => utility.lift.song(song, {index, track}, () => {
 				song.play ? (controller.pause() || controller.resume()) : controller.play(index)
 				quickPick.hide()
 			})), `播放列表 (${track.length})`)
@@ -372,7 +361,7 @@ const interaction = {
 		edit: () => {
 			let track = controller.list()
 			let play = track.findIndex(song => song.play)
-			selector(track.map((song, index) => utility.lift.song(song, {index}, () => {
+			selector(track.map((song, index) => utility.lift.song(song, {index, track}, () => {
 				controller.remove(index)
 				if (index == play) controller.play()
 				interaction.list.edit()
@@ -410,7 +399,7 @@ const interaction = {
 			}))
 			let artists = (data.result.artists || []).map(artist => ({
 				label: artist.name,
-				action: () => interaction.artist.song(artist.id)
+				action: () => interaction.artist.album(artist.id)
 			}))
 			let albums = (data.result.albums || []).map(album => ({
 				label: album.name,
@@ -418,36 +407,31 @@ const interaction = {
 				action: () => interaction.album(album.id)
 			}))
 			let playlists = (data.result.playlists || []).map(playlist => ({
-				id: playlist.id,
 				label: playlist.name,
 				description: `${utility.stringify.number(playlist.playCount)}次播放  ${utility.stringify.number(playlist.bookCount)}次收藏`,
 				action: () => interaction.playlist.detail(playlist.id)
 			}))
 			selector(Array.from([]).concat(
 				[{
-					icon: (songs.length ? '▿' : '▹') + '\u2008',
-					label: '单曲',
+					label: `${utility.indicate.expand(songs.length)}单曲`,
 					action: type != 'song' ? () => search(text, 'song') : null
 				}],
-				songs,
+				songs.map(utility.indent.expand),
 				[{
-					icon: (artists.length ? '▿' : '▹') + '\u2008',
-					label: '歌手',
+					label: `${utility.indicate.expand(artists.length)}歌手`,
 					action: type != 'artist' ? () => search(text, 'artist') : null
 				}],
-				artists,
+				artists.map(utility.indent.expand),
 				[{
-					icon: (albums.length ? '▿' : '▹') + '\u2008',
-					label: '专辑',
+					label: `${utility.indicate.expand(albums.length)}专辑`,
 					action: type != 'album' ? () => search(text, 'album') : null
 				}],
-				albums,
+				albums.map(utility.indent.expand),
 				[{
-					icon: (playlists.length ? '▿' : '▹') + '\u2008',
-					label: '歌单',
+					label: `${utility.indicate.expand(playlists.length)}歌单`,
 					action: type != 'playlist' ? () => search(text, 'playlist') : null
 				}],
-				playlists
+				playlists.map(utility.indent.expand)
 			), `“${text}”的${{song: '歌曲', artist: '歌手', album: '专辑', playlist: '歌单'}[type] || ''}搜索结果`)
 			quickPick.activeItems = [quickPick.items[{song: 0, artist: 1, album: 2, playlist: 3}[type] || 0]]
 		}
@@ -471,8 +455,8 @@ const interaction = {
 				label: `歌手: ${utility.stringify.artist(song)}`,
 				action: () => song.artists.length > 1 ? selector(song.artists.map(artist => ({
 					label: artist.name,
-					action: () => interaction.artist.song(artist.id)
-				})), '查看歌手') : interaction.artist.song(song.artists[0].id)
+					action: () => interaction.artist.album(artist.id)
+				})), '查看歌手') : interaction.artist.album(song.artists[0].id)
 			},
 			song.source ? ({
 				playlist: {
