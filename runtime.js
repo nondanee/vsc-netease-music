@@ -234,7 +234,7 @@ const WebviewPanel = context => {
 		{preserveFocus: true, viewColumn: vscode.ViewColumn.One},
 		{enableScripts: true, retainContextWhenHidden: true}
 	)
-	panel.webview.html = fs.readFileSync(vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath)
+	panel.webview.html = fs.readFileSync(vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath, 'utf-8')
 	return {
 		dispose: () => panel.dispose()
 	}
