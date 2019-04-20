@@ -102,25 +102,11 @@ curl https://gist.githubusercontent.com/nondanee/f157bbbccecfe29e48d87273cd02e21
 | 下一首      | <kbd>Alt</kbd> <kbd>.</kbd> |
 | 播放 / 暂停 | <kbd>Alt</kbd> <kbd>/</kbd> |
 
-## Todo
-
-- [x] i18n
-- [ ] setting
-- [x] shortcuts
-- [ ] exit point
-
 ## Extension Setting
 
-> 还没做...
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+* `NeteaseMusic.API.SSL`: 启用 / 禁用 HTTPS API
+* `NeteaseMusic.SSL.strict`: 启用 / 禁用 SSL 证书检查
+* `NeteaseMusic.CDN.redirect`: 启用 / 禁用海外 CDN 重定向
 
 ## Known Issue
 

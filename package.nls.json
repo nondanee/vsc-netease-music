@@ -38,5 +38,8 @@
     "category.neteasemusic.mode": "NeteaseMusic Mode",
     "category.neteasemusic.my": "NeteaseMusic My",
     "category.neteasemusic.discover": "NeteaseMusic Discover",
-    "category.neteasemusic.recommend": "NeteaseMusic Recommend"
+    "category.neteasemusic.recommend": "NeteaseMusic Recommend",
+    "description.neteasemusic.api.ssl": "Enable HTTPS API (Disable this if you edit hosts file)",
+    "description.neteasemusic.ssl.strict": "Enable SSL certificate verification (Disable this is you use untrusted certificate)",
+    "description.neteasemusic.cdn.redirect": "Enable oversea CDN redirection (Disable this if you are in China mainland)"
 }

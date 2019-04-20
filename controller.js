@@ -12,6 +12,7 @@ const controller = {
 	add: (track, radio = false) => {
 		if (radio != runtime.stateManager.get('radio')) list = []
 		runtime.stateManager.set('radio', radio)
+		runtime.sceneKeeper.save('radio', radio)
 		if (Array.isArray(track)) {
 			list = track.map(compact)
 			index = 0
@@ -20,14 +21,17 @@ const controller = {
 			index = list.length
 			list.splice(index, 0, compact(track))
 		}
-		let sequence = list.map((_, index) => index)
-		random = Array.apply(0, {length: sequence.length}).map(() => sequence.splice(Math.floor(Math.random() * sequence.length), 1)[0])
+		let sequence = Array.from(list.keys())
+		random = Array.from(list.keys()).map(() => sequence.splice(Math.floor(Math.random() * sequence.length), 1)[0])
+		runtime.sceneKeeper.save('list', list)
 		runtime.playerBar.show(radio)
 	},
 	remove: target => {
 		list.splice(target, 1)
 		random = random.filter(value => value != target).map(value => value < target ? value : value - 1)
+		index = target < index ? index - 1 : index
 		index = index < list.length ? index : 0
+		runtime.sceneKeeper.save('list', list)
 		if (list.length == 0) runtime.playerBar.hide()
 	},
 	previous: () => {
@@ -45,7 +49,8 @@ const controller = {
 	},
 	mode: type => {
 		mode = type
-		runtime.playerBar.state(['loop', 'repeat', 'random'][type])
+		runtime.sceneKeeper.save('mode', mode)
+		runtime.playerBar.state(['loop', 'repeat', 'random'][mode])
 	},
 	resume: () => {
 		if (list.length == 0) return
@@ -59,9 +64,10 @@ const controller = {
 		if (playing) runtime.duplexChannel.postMessage('pause')
 		return playing
 	},
-	play: target => {
+	play: (target, action = true) => {
 		if (list.length == 0) return
 		index = ((typeof(target) != 'undefined' ? target : index) + list.length) % list.length
+		runtime.sceneKeeper.save('index', index)
 		let song = list[index]
 		Promise.all([api.song.url, api.song.lyric].map(call => call(song.id)))
 		.then(batch => {
@@ -73,8 +79,8 @@ const controller = {
 				controller.play()
 			}
 			else {
-				url = url.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net')
-				runtime.duplexChannel.postMessage('load', {lyric, song: Object.assign({url}, song)})
+				if (runtime.preferenceReader.get('CDN.redirect')) url = url.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net')
+				runtime.duplexChannel.postMessage('load', {action, lyric, song: Object.assign({url}, song)})
 				runtime.playerBar.state(likes.includes(song.id) ? 'like' : 'dislike')
 			}
 		})
@@ -118,23 +124,20 @@ const controller = {
 		})
 	},
 	mute: () => {
-		if (list.length == 0) return
 		let muted = !!runtime.stateManager.get('muted')
 		if (!muted) runtime.duplexChannel.postMessage('mute')
 	},
 	unmute: () => {
-		if (list.length == 0) return
 		let muted = !!runtime.stateManager.get('muted')
 		if (muted) runtime.duplexChannel.postMessage('unmute')
 	},
 	refresh: () => {
-		runtime.stateManager.set('mode', 0)
-		api.user.likes().then(data => {
+		return api.user.likes().then(data => {
 			if (data.ids) likes = data.ids
 		})
 	},
-	volumeChange: () => {
-		runtime.duplexChannel.postMessage('volumeChange')
+	volumeChange: value => {
+		runtime.duplexChannel.postMessage('volumeChange', {value})
 	}
 }
 

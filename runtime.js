@@ -1,6 +1,7 @@
 const fs = require('fs')
 const ws = require('ws')
 const path = require('path')
+const events = require('events')
 const vscode = require('vscode')
 
 const ActiveEditor = () => {
@@ -11,18 +12,30 @@ const ActiveEditor = () => {
 const GlobalStorage = context => {
 	return {
 		get: key => context.globalState.get(key),
-		set: (key, value) => context.globalState.update(key, value),
-		dispose: () => {}
+		set: (key, value) => context.globalState.update(key, value)
+	}
+}
+
+const PreferenceReader = context => {
+	cache = {}
+	return {
+		get: key => cache[key] ? key in cache : cache[key] = vscode.workspace.getConfiguration().get(`NeteaseMusic.${key}`),
+		dispose: () => cache = {}
 	}
 }
 
 const SceneKeeper = context => {
 	return {
-		save: (key, value) => {
-
-		},
+		save: (key, value) => runtime.globalStorage.set(key, JSON.stringify(value)),
 		restore: () => {
-			
+			const load = (key, preset) => JSON.parse(runtime.globalStorage.get(key) || preset)
+			let list = load('list', '[]')
+			let radio = load('radio', 'false')
+			let index = load('index', '0')
+			controller.mode(load('mode', '0'))
+			controller.volumeChange(load('volume', '1'))
+			if (load('muted', 'false')) controller.mute()
+			if (list.length) controller.add(list, radio), controller.play(index, false)
 		}
 	}
 }
@@ -150,7 +163,7 @@ const PlayerBar = context => {
 		},
 		state: state => {
 			if (!(state in buttons)) return
-			if (state.includes('like')) api.user.logged() ? items[buttons.like.index].show() : items[buttons.like.index].hide()
+			if (state.includes('like')) api.user.account() ? items[buttons.like.index].show() : items[buttons.like.index].hide()
 			let index = buttons[state].index
 			let name = order[index][(order[index].indexOf(state) + 1) % order[index].length]
 			bind(items[index], buttons[name])
@@ -186,12 +199,13 @@ const DuplexChannel = context => {
 			let data = JSON.parse(message)
 			receiveMessage(data.type, data.body)
 		})
-		.on('close', () => runtime.dispose())
+		.on('close', () => runtime.event.emit('suspend'))
 	})
 
 	const receiveMessage = (type, body) => {
 		if (type == 'event') {
-			if (body.name == 'ready' && activeEditor) {
+			if (body.name == 'ready') {
+				runtime.event.emit('ready')
 				activeEditor.reveal()
 				activeEditor = null
 			}
@@ -209,6 +223,8 @@ const DuplexChannel = context => {
 			}
 			else if (body.name == 'volume') {
 				runtime.playerBar.volume(body.data)
+				runtime.sceneKeeper.save('muted', body.data.muted)
+				runtime.sceneKeeper.save('volume', body.data.value)
 			}
 			else if (['play', 'pause'].includes(body.name)) {
 				runtime.playerBar.state(body.name)
@@ -234,6 +250,10 @@ const WebviewPanel = context => {
 		{preserveFocus: true, viewColumn: vscode.ViewColumn.One},
 		{enableScripts: true, retainContextWhenHidden: true}
 	)
+	panel.iconPath = {
+		light: vscode.Uri.file(path.join(context.extensionPath, 'icon.svg')) ,
+		dark: vscode.Uri.file(path.join(context.extensionPath, 'icon.svg'))
+	}
 	panel.webview.html = fs.readFileSync(vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath, 'utf-8')
 	return {
 		dispose: () => panel.dispose()
@@ -294,8 +314,11 @@ const CommandManager = context => {
 }
 
 const runtime = {
+	event: null,
 	stateManager: null,
 	globalStorage: null,
+	preferenceReader: null,
+	sceneKeeper: null,
 	playerBar: null,
 	webviewPanel: null,
 	duplexChannel: null,
@@ -303,7 +326,7 @@ const runtime = {
 	dispose: () => {
 		Object.keys(runtime).filter(key => typeof runtime[key] != 'function' && runtime[key])
 		.forEach(key => {
-			runtime[key].dispose()
+			if (typeof runtime[key].dispose === 'function') runtime[key].dispose()
 			runtime[key] = null
 		})
 	},
@@ -311,16 +334,24 @@ const runtime = {
 		if (runtime.webviewPanel) return
 		// console.log('global state', context.globalState.get('user'))
 
-		runtime.globalStorage = GlobalStorage(context)
+		runtime.event = new events.EventEmitter()
 		runtime.stateManager = StateManager(context)
+		runtime.globalStorage = GlobalStorage(context)
+		runtime.preferenceReader = PreferenceReader(context)
+		runtime.sceneKeeper = SceneKeeper(context)
 		runtime.playerBar = PlayerBar(context)
 		runtime.duplexChannel = DuplexChannel(context)
 		runtime.webviewPanel = WebviewPanel(context)
 		runtime.commandManager = CommandManager(context)
 
-		api.refresh()
-		controller.refresh()
-		runtime.stateManager.set('on', true)
+		process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = runtime.preferenceReader.get('SSL.strict') ? undefined : 0
+		
+		runtime.event.on('ready', () => 
+			Promise.all([api, controller].map(component => component.refresh()))
+			.then(() => runtime.sceneKeeper.restore())
+			.then(() => runtime.stateManager.set('on', true))
+		)
+		runtime.event.on('suspend', () => runtime.dispose())
 	}
 }
 

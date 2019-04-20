@@ -61,11 +61,10 @@
 		const postMessage = (type, body) => webSocket.send(JSON.stringify({type, body}))
 		const receiveMessage = (command, data) => {
 			if (command === 'load') {
-				let play = (!audio.src || !audio.paused || audio.ended)
 				song = data.song
 				lyric = Lyric(data.lyric)
 				audio.src = song.url
-				if (play) audio.play()
+				if (data.action) audio.play()
 			}
 			else if (command === 'play') {
 				if (audio.paused) audio.play()
@@ -80,6 +79,7 @@
 				if (audio.muted) audio.muted = false
 			}
 			else if (command === 'volumeChange') {
+				if (data.value != null) return audio.volume = data.value
 				if (audio.muted) audio.muted = false
 				audio.volume + 0.2 > 1 ? audio.volume = 0 : audio.volume += 0.2
 			}

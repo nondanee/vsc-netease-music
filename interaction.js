@@ -33,16 +33,16 @@ const utility = {
 		}
 	},
 	lift: {
-		song: (song, tuner, action) => {
+		song: (song, index, flags, action) => {
 			song.label = song.name
 			song.action = action
-			if ('index' in tuner) {
-				let indicate = controller.current(song) ? '\u2006♬' : (tuner.index + 1).toString()
-				song.label = (new Array(Math.max(tuner.track.length.toString().length, 2) - indicate.length + 1)).join('\u2007') + indicate + '   ' + song.label
+			if (index) {
+				let indicate = controller.current(song) ? '\u2006♬' : (index[0] + 1).toString()
+				song.label = (new Array(Math.max(index[1].toString().length, 2) - indicate.length + 1)).join('\u2007') + indicate + '   ' + song.label
 			}
 			song.description = [
-				tuner.artist === false ? null : utility.stringify.artist(song), 
-				tuner.album === false ? null : song.album.name
+				flags.artist === false ? null : utility.stringify.artist(song), 
+				flags.album === false ? null : song.album.name
 			].filter(item => item).join(' - ')
 			return song
 		}
@@ -83,7 +83,7 @@ const utility = {
 	},
 	check: {
 		logged: (pass, failed) => {
-			if (!api.user.logged()) {
+			if (!api.user.account()) {
 				vscode.window.showWarningMessage('请先登录')
 				if (typeof failed === 'function') failed()
 			}
@@ -153,16 +153,12 @@ const interaction = {
 	},
 	artist: {
 		song: id => api.artist.song(id).then(data => {
-			const refresh = () => {
-				selector(data.hotSongs.map(song => utility.format.song(song, {type: 'artist', id, name: data.artist.name}))
-				.map((song, index, track) => utility.lift.song(song, {index, track, artist: false}, () => {
-					controller.add(track)
-					controller.play(index)
-					quickPick.hide()
-				})), `${data.artist.name} 热门单曲`)
-				quickPick.activeItems = [quickPick.items[1]]
-			}
-			refresh()
+			selector(data.hotSongs.map(song => utility.format.song(song, {type: 'artist', id, name: data.artist.name}))
+			.map((song, index, track) => utility.lift.song(song, [index, track.length], {artist: false}, () => {
+				controller.add(track)
+				controller.play(index)
+				quickPick.hide()
+			})), `${data.artist.name} 热门单曲`)
 		}),
 		album: id => api.artist.album(id).then(data => {
 			const refresh = () => {
@@ -171,7 +167,6 @@ const interaction = {
 						label: utility.indicate.collect(data.artist.followed),
 						description: `${utility.stringify.number(data.artist.fansNum)}人收藏`,
 						action: () => utility.check.logged(api.artist.subscribe(id, !data.artist.followed).then(result => {
-							console.log(result, data.artist.followed)
 							if (result.code === 200) {
 								data.artist.followed = !data.artist.followed
 								data.artist.fansNum += (data.artist.followed ? 1 : -1)
@@ -210,7 +205,7 @@ const interaction = {
 					}), refresh)
 				}],
 				data.songs.map(song => utility.format.song(song, {type: 'album', id, name: data.album.name}))
-				.map((song, index, track) => utility.lift.song(song, {index, track, album: false}, () => {
+				.map((song, index, track) => utility.lift.song(song, [index, track.length], {album: false}, () => {
 					controller.add(track)
 					controller.play(index)
 					quickPick.hide()
@@ -229,7 +224,7 @@ const interaction = {
 	}),
 	playlist: {
 		detail: id => api.playlist.detail(id).then(data => {
-			let self = data.playlist.creator.userId == api.user.logged()
+			let self = data.playlist.creator.userId == api.user.account()
 			const refresh = () => {
 				selector(Array.from([]).concat(
 					!self ? [{
@@ -244,7 +239,7 @@ const interaction = {
 						}), refresh)
 					}] : [],
 					data.playlist.tracks.map(song => utility.format.song(song, {type: 'playlist', id, name: data.playlist.name}))
-					.map((song, index, track) => utility.lift.song(song, {index, track}, () => {
+					.map((song, index, track) => utility.lift.song(song, [index, track.length], {}, () => {
 						controller.add(track)
 						controller.play(index)
 						quickPick.hide()
@@ -272,7 +267,7 @@ const interaction = {
 	recommend: {
 		song: () => api.recommend.song().then(data => {
 			selector(data.recommend.map(song => utility.format.song(song, {type: 'recommend'}))
-			.map((song, index, track) => utility.lift.song(song, {index, track}, () => {
+			.map((song, index, track) => utility.lift.song(song, [index, track.length], {}, () => {
 				controller.add(track)
 				controller.play(index)
 				quickPick.hide()
@@ -293,7 +288,7 @@ const interaction = {
 	new: {
 		song: () => api.new.song().then(data => {
 			selector(data.data.map(song => utility.format.song(song, {type: 'new'}))
-			.map(song => utility.lift.song(song, {}, () => {
+			.map(song => utility.lift.song(song, null, {}, () => {
 				controller.add(song)
 				controller.play()
 				quickPick.hide()
@@ -327,13 +322,6 @@ const interaction = {
 			})
 		})
 	},
-	logout: () => api.logout(),
-	sign: () => api.sign().then(data => {
-		if ([-2, 200].includes(data.code)) {
-			vscode.window.showInformationMessage('签到成功')
-			runtime.stateManager.set('signed', true)
-		}
-	}),
 	clone: () => {
 		vscode.window.showInputBox({
 			placeHolder: '"MUSIC_U"的值',
@@ -348,11 +336,18 @@ const interaction = {
 			}
 		})
 	},
+	logout: () => api.logout(),
+	sign: () => api.sign().then(data => {
+		if ([-2, 200].includes(data.code)) {
+			vscode.window.showInformationMessage('签到成功')
+			runtime.stateManager.set('signed', true)
+		}
+	}),
 	list: {
 		show: () => {
 			let track = controller.list()
 			let play = track.findIndex(song => song.play)
-			selector(track.map((song, index) => utility.lift.song(song, {index, track}, () => {
+			selector(track.map((song, index) => utility.lift.song(song, [index, track.length], {}, () => {
 				song.play ? (controller.pause() || controller.resume()) : controller.play(index)
 				quickPick.hide()
 			})), `播放列表 (${track.length})`)
@@ -361,11 +356,11 @@ const interaction = {
 		edit: () => {
 			let track = controller.list()
 			let play = track.findIndex(song => song.play)
-			selector(track.map((song, index) => utility.lift.song(song, {index, track}, () => {
+			selector(track.map((song, index) => utility.lift.song(song, [index, track.length], {}, () => {
 				controller.remove(index)
-				if (index == play) controller.play()
+				if (index == play) controller.play(undefined, runtime.stateManager.get('playing'))
 				interaction.list.edit()
-			})).map(addIndex), `编辑播放列表 (${track.length})`)
+			})), `编辑播放列表 (${track.length})`)
 		}
 	},
 	search: () => {
@@ -392,7 +387,7 @@ const interaction = {
 		
 		const display = (text, data, type) => {
 			let songs = (data.result.songs || []).map(song => utility.format.song(song, {type: 'search'}))
-			.map(song => utility.lift.song(song, {}, () => {
+			.map(song => utility.lift.song(song, null, {}, () => {
 				controller.add(song)
 				controller.play()
 				quickPick.hide()
@@ -495,7 +490,7 @@ const interaction = {
 					})), `热门评论 (${data.hotComments.length})`)
 				})
 			},
-			api.user.logged() ? {
+			api.user.account() ? {
 				label: '收藏到歌单', 
 				action: () => api.user.playlist().then(data => data.playlist).then(playlists => {
 					selector(playlists.filter(playlist => playlist.creator.userId === playlists[0].creator.userId)

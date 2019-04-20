@@ -38,5 +38,8 @@
     "category.neteasemusic.mode": "网易云音乐 播放模式",
     "category.neteasemusic.my": "网易云音乐 我的音乐",
     "category.neteasemusic.discover": "网易云音乐 发现音乐",
-    "category.neteasemusic.recommend": "网易云音乐 个性推荐"
+    "category.neteasemusic.recommend": "网易云音乐 个性推荐",
+    "description.neteasemusic.api.ssl": "启用 HTTPS API (若修改了 hosts 文件, 请禁用)",
+    "description.neteasemusic.ssl.strict": "启用 SSL 证书检查 (若使用了非信任证书, 请禁用)",
+    "description.neteasemusic.cdn.redirect": "启用海外 CDN 重定向 (坐标中国大陆, 请禁用)"
 }

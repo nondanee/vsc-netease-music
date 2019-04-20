@@ -13,8 +13,8 @@ const encrypt = object => {
 }
 
 const request = (method, url, headers, body = null) => new Promise((resolve, reject) => {
-	url = parse(url), (url.protocol == 'https:' ? https.request : http.request)({method: method, host: url.host, path: url.path, headers: headers})
-	.on('response', response => resolve([201, 301, 302, 303, 307, 308].includes(response.statusCode) ? request(method, url.resolve(response.headers.location), headers, body) : response))
+	(url.startsWith('https://') ? https.request : http.request)(Object.assign(parse(url), {method, headers}))
+	.on('response', response => resolve([201, 301, 302, 303, 307, 308].includes(response.statusCode) ? request(method, parse(url).resolve(response.headers.location), headers, body) : response))
 	.on('error', error => reject(error)).end(body)
 })
 
@@ -28,15 +28,15 @@ const json = response => new Promise((resolve, reject) => {
 
 const apiRequest = (path, data, load = true) => {
 	const method = 'POST'
-	const url = 'https://music.163.com/api/linux/forward'
+	const url = `${runtime.preferenceReader.get('API.SSL') ? 'https:': 'http:'}//music.163.com/api/linux/forward`
 	const headers = {
 		'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
 		'Content-Type': 'application/x-www-form-urlencoded',
-		'Referer': 'https://music.163.com',
+		'Referer': parse(url).resolve('/'),
 		'X-Real-IP': '118.88.88.88',
 		'Cookie': ['os=linux', user.cookie].join('; ')
 	}
-	data = querystring.stringify(encrypt({method: method, url: parse('https://music.163.com').resolve(`/api/${path}`), params: data}))
+	data = querystring.stringify(encrypt({method: method, url: parse(url).resolve(`/api/${path}`), params: data}))
 	return request(method, url, headers, data).then(load ? json : response => response)
 }
 
@@ -47,7 +47,7 @@ const api = {
 		album: () => apiRequest(`album/sublist`, {limit: 1000, offset: 0}),
 		playlist: id => apiRequest('user/playlist', {uid: id || user.id, limit: 100000}),
 		likes: () => apiRequest('song/like/get', {}),
-		logged: () => user.id
+		account: () => user.id
 	},
 	artist: {
 		song: id => apiRequest(`v1/artist/${id}`, {top: 50}),
@@ -112,7 +112,7 @@ const api = {
 			return response
 		})
 		.then(json).then(data => {
-			if (data.code == 200) {
+			if (data.code === 200) {
 				user.id = data.account.id
 				sync()
 				return Promise.resolve(data)
@@ -130,13 +130,13 @@ const api = {
 	refresh: cookie => {
 		user = cookie ? {cookie} : JSON.parse(runtime.globalStorage.get('user') || '{}')
 		return apiRequest('/user/info', {}).then(data => data.code === 200 ? user.id = data.userPoint.userId : user = {}).then(sync)
-		.then(() => user.id ? api.user.detail().then(data => runtime.stateManager.set('signed', data.pcSign ? true : false) || data) : null)
 	},
 }
 
 const sync = () => {
 	runtime.globalStorage.set('user', JSON.stringify(user))
-	runtime.stateManager.set('logged', user.id ? true : false)
+	runtime.stateManager.set('logged', !!user.id)
+	return user.id ? api.user.detail().then(data => runtime.stateManager.set('signed', !!data.pcSign) || data) : Promise.resolve()
 }
 
 module.exports = api

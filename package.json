@@ -221,6 +221,27 @@
                 "when": "neteasemusic.on && neteasemusic.track"
             }
         ],
+        "configuration": {
+            "type": "object",
+            "title": "%category.neteasemusic%",
+            "properties": {
+                "NeteaseMusic.API.SSL": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%description.neteasemusic.api.ssl%"
+                },
+                "NeteaseMusic.SSL.strict": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%description.neteasemusic.ssl.strict%"
+                },
+                "NeteaseMusic.CDN.redirect": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%description.neteasemusic.cdn.redirect%"
+                }
+            }
+        },
         "menus": {
             "commandPalette": [
                 {
