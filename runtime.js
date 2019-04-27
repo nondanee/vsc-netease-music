@@ -250,7 +250,7 @@ const WebviewPanel = context => {
 		{preserveFocus: true, viewColumn: vscode.ViewColumn.One},
 		{enableScripts: true, retainContextWhenHidden: true}
 	)
-	panel.iconPath = vscode.Uri.file(path.join(context.extensionPath, 'icon.svg'))
+	panel.iconPath = ['light', 'dark'].reduce((uri, theme) => Object.assign(uri, {[theme]: vscode.Uri.file(path.join(context.extensionPath, `${theme}.svg`))}), {})
 	panel.webview.html = fs.readFileSync(vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath, 'utf-8')
 	return {
 		dispose: () => panel.dispose()
