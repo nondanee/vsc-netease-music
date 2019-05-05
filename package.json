@@ -392,11 +392,11 @@
         "test": "node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
-        "typescript": "^2.6.1",
-        "vscode": "^1.1.21",
-        "eslint": "^4.11.0",
+        "@types/mocha": "^2.2.42",
         "@types/node": "^8.10.25",
-        "@types/mocha": "^2.2.42"
+        "eslint": "^4.11.0",
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.33"
     },
     "dependencies": {
         "ws": "^6.1.3"
