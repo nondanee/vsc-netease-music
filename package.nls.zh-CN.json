@@ -26,6 +26,8 @@
     "command.neteasemusic.user.playlist": "歌单",
     "command.neteasemusic.user.artist": "歌手",
     "command.neteasemusic.user.album": "专辑",
+    "command.neteasemusic.user.djradio": "电台",
+    "command.neteasemusic.user.record": "听歌排行",
     "command.neteasemusic.new.song": "新歌速递",
     "command.neteasemusic.new.album": "新碟上架",
     "command.neteasemusic.playlist.highquality": "精品歌单",

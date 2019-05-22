@@ -163,7 +163,7 @@ const PlayerBar = context => {
 		},
 		state: state => {
 			if (!(state in buttons)) return
-			if (state.includes('like')) api.user.account() ? items[buttons.like.index].show() : items[buttons.like.index].hide()
+			if (state.includes('like')) (api.user.account() && !runtime.stateManager.get('program')) ? items[buttons.like.index].show() : items[buttons.like.index].hide()
 			let index = buttons[state].index
 			let name = order[index][(order[index].indexOf(state) + 1) % order[index].length]
 			bind(items[index], buttons[name])
@@ -202,6 +202,23 @@ const DuplexChannel = context => {
 		.on('close', () => runtime.event.emit('suspend'))
 	})
 
+	const logger = song => {
+		const translation = {'playlist': 'list', 'artist': 'artist', 'album': 'album'}
+		const output = {
+			id: song.id, 
+			type: 'song',
+			wifi: 0,
+			download: 0,
+			time: parseInt(song.duration),
+			end: (runtime.stateManager.get('mode') == 1 ? 'playend' : 'ui')
+		}
+		if (translation[song.source.type]) {
+			output.source = translation[song.source.type]
+			output.sourceid = song.source.id
+		}
+		return output
+	}
+
 	const receiveMessage = (type, body) => {
 		if (type == 'event') {
 			if (body.name == 'ready') {
@@ -211,12 +228,18 @@ const DuplexChannel = context => {
 			}
 			else if (body.name == 'end') {
 				controller.next(true)
+				let song = body.data
+				if (song.source.type != 'djradio') api.song.log(logger(song))
 			}
 			else if (body.name == 'load') {
-				let playing = `${interaction.utility.stringify.song(body.data)}`
+				let song = body.data
+				let program = song.source.type === 'djradio'
+				let artist = interaction.utility.stringify.artist(song)
+				let album = song.album.name
+				let playing = [program ? album : artist, song.name].join(' - ')
 				vscode.window.showInformationMessage(`正在播放: ${playing}`)
 				runtime.playerBar.update(playing)
-				api.song.log(body.data.id)
+				if (song.source.type == 'djradio') api.program.listen(song.id)
 			}
 			else if (body.name == 'lyric') {
 				runtime.playerBar.update(body.data)
@@ -269,6 +292,8 @@ const CommandManager = context => {
 		'user.playlist': interaction.user.playlist,
 		'user.artist': interaction.user.artist,
 		'user.album': interaction.user.album,
+		'user.djradio': interaction.user.djradio,
+		'user.record': interaction.user.record,
 		'recommend.song': interaction.recommend.song,
 		'recommend.playlist': interaction.recommend.playlist,
 		'recommend.radio': interaction.recommend.radio,

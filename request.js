@@ -45,7 +45,9 @@ const api = {
 		detail: id => apiRequest(`v1/user/detail/${id|| user.id}`, {}),
 		artist: () => apiRequest(`artist/sublist`, {limit: 1000, offset: 0}),
 		album: () => apiRequest(`album/sublist`, {limit: 1000, offset: 0}),
+		djradio: () => apiRequest('djradio/get/subed', {limit: 1000, offset: 0}),
 		playlist: id => apiRequest('user/playlist', {uid: id || user.id, limit: 100000}),
+		record: id => Promise.all([0, 1].map(type => apiRequest('v1/play/record', {uid: id || user.id, type}))).then(data => Object.assign(data[0], data[1])),
 		likes: () => apiRequest('song/like/get', {}),
 		account: () => user.id
 	},
@@ -55,6 +57,24 @@ const api = {
 			Promise.all([apiRequest(`artist/albums/${id}`, {limit: 1000, offset: 0}), apiRequest(`artist/detail/v4`, {id}), apiRequest(`artist/detail/dynamic`, {id})])
 			.then(data => {data[0].artist.fansNum = data[1].fansNum; data[0].artist.followed = data[2].followed; return data[0]}),
 		subscribe: (id, action) => apiRequest(`artist/${action ? 'sub' : 'unsub'}`, {artistId: id, artistIds: [id]})
+	},
+	djradio: {
+		program: id => apiRequest('dj/program/byradio', {radioId: id, limit: 500})
+		.then(data =>
+			Promise.all(
+				Array.from(Array(Math.ceil(data.programs[0].radio.programCount / 500) - 1).keys()).map(group =>
+				apiRequest('dj/program/byradio', {radioId: id, limit: 500, offset: 500 * (group + 1)}))
+			)
+			.then(rest => rest.forEach(part => Array.prototype.push.apply(data.programs, part.programs)))
+			.then(() => data)
+		),
+		subscribe: (id, action) => apiRequest(`djradio/${action ? 'sub' : 'unsub'}`, {id})
+	},
+	program: {
+		detail: id => apiRequest('dj/program/detail', {id}),
+		listen: id => apiRequest('dj/program/listen', {id}),
+		url: id => api.program.detail(id).then(data => api.song.url(data.program.mainTrackId)),
+		comment: id => apiRequest(`v1/resource/comments/A_DJ_1_${id}`, {rid: `A_DJ_1_${id}`, limit: 50, offset: 0})
 	},
 	album: {
 		detail: id => 
@@ -84,8 +104,8 @@ const api = {
 		like: id => apiRequest('song/like', {trackId: id, like: true, time: 0, userid: 0}),
 		dislike: id => apiRequest('song/like', {trackId: id, like: false, time: 0, userid: 0}),
 		collect: (id, pid) => apiRequest('playlist/manipulate/tracks', {trackIds: [id], pid: pid, op: 'add'}),
-		comment: id => apiRequest(`v1/resource/hotcomments/R_SO_4_${id}`, {rid: id, limit: 50, offset: 0}),
-		log: id => apiRequest('feedback/weblog', {logs: [{action: 'play', json: {id, type: 'song'}}]})
+		comment: id => apiRequest(`v1/resource/comments/R_SO_4_${id}`, {rid: id, limit: 50, offset: 0}),
+		log: data => apiRequest('feedback/weblog', {logs: JSON.stringify([{action: 'play', json: data}])})
 	},
 	recommend: {
 		song: () => apiRequest('v1/discovery/recommend/songs', {limit: 30, offset: 0}),

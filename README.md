@@ -21,22 +21,22 @@
 使用 [Webview](https://code.visualstudio.com/api/extension-guides/webview) 实现，通过 Web Audio API 播放音乐，不依赖[命令行播放器](https://github.com/shime/play-sound#options)，**灵感来自 [kangping/video](https://marketplace.visualstudio.com/items?itemName=kangping.video)**
 
 - 发现音乐 (歌单 / 新歌 / 排行榜)
-- 搜索 (单曲 / 歌手 / 专辑 / 歌单)
+- 搜索 (单曲 / 歌手 / 专辑 / 歌单 / 电台)
 - 用户登录 (手机号 / 邮箱 / Cookie)
-- 用户收藏 (歌单 / 歌手 / 专辑)
-- 每日歌曲推荐 / 推荐歌单 / 私人 FM
-- 喜欢音乐 / 收藏音乐 (单曲 / 歌单 / 专辑 / 歌手)
+- 用户收藏 (歌单 / 歌手 / 专辑 / 电台)
+- 每日歌曲推荐 / 推荐歌单 / 私人 FM / 听歌排行
+- 喜欢音乐 / 收藏音乐 (单曲 / 歌单 / 专辑 / 歌手 / 电台)
 - 播放模式切换 / 音量调节
 - 每日签到
 - 逐行歌词
 - 热门评论
 - 快捷键支持
-- 听歌记录 (不确定有效)
-- 无海外限制
+- 听歌记录
+- 海外使用
 
 ## Requirement
 
-**VS Code for Windows 自 1.31.0 起自带完整的 ffmpeg 动态链接库 (可能是 bug)，无需替换；macOS 与 Linux 平台仍需替换**
+**VS Code for Windows 自 1.31.0 起自带完整的 ffmpeg 动态链接库，无需替换；macOS 与 Linux 平台仍需替换**
 
 [VS Code 使用的 Electron 版本不包含 ffmpeg](https://stackoverflow.com/a/51735036)，需替换自带的 ffmpeg 动态链接库才能正常播放 (每次更新 VS Code 都需重新替换)
 

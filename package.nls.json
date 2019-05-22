@@ -26,6 +26,8 @@
     "command.neteasemusic.user.playlist": "Mix",
     "command.neteasemusic.user.artist": "Artist",
     "command.neteasemusic.user.album": "Album",
+    "command.neteasemusic.user.djradio": "DJ Radio",
+    "command.neteasemusic.user.record": "Play Record",
     "command.neteasemusic.new.song": "New Release Song",
     "command.neteasemusic.new.album": "New Release Album",
     "command.neteasemusic.playlist.highquality": "High Quality Mix",

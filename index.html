@@ -52,6 +52,10 @@
 			postMessage('event', {name: 'load', data: song})
 		}, false)
 
+		audio.addEventListener('loadedmetadata', () => {
+			song.duration = audio.duration
+		}, false)
+
 		const webSocket = new WebSocket('ws://localhost:16363')
 		webSocket.addEventListener('message', event => {
 			let data = JSON.parse(event.data)

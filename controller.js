@@ -69,7 +69,8 @@ const controller = {
 		index = ((typeof(target) != 'undefined' ? target : index) + list.length) % list.length
 		runtime.sceneKeeper.save('index', index)
 		let song = list[index]
-		Promise.all([api.song.url, api.song.lyric].map(call => call(song.id)))
+		let program = song.source.type === 'djradio'
+		Promise.all(program ? [api.program.url(song.id), {nolyric: true}] : [api.song.url, api.song.lyric].map(call => call(song.id)))
 		.then(batch => {
 			let url = batch[0].data[0].url
 			let lyric = (batch[1].nolyric || batch[1].uncollected) ? [] : [batch[1].lrc.lyric, batch[1].tlyric.lyric]
@@ -81,6 +82,7 @@ const controller = {
 			else {
 				if (runtime.preferenceReader.get('CDN.redirect')) url = url.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net')
 				runtime.duplexChannel.postMessage('load', {action, lyric, song: Object.assign({url}, song)})
+				runtime.stateManager.set('program', program)
 				runtime.playerBar.state(likes.includes(song.id) ? 'like' : 'dislike')
 			}
 		})

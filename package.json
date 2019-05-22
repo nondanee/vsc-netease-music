@@ -150,6 +150,16 @@
                 "category": "%category.neteasemusic.my%"
             },
             {
+                "command": "neteasemusic.user.djradio",
+                "title": "%command.neteasemusic.user.djradio%",
+                "category": "%category.neteasemusic.my%"
+            },
+            {
+                "command": "neteasemusic.user.record",
+                "title": "%command.neteasemusic.user.record%",
+                "category": "%category.neteasemusic.my%"
+            },
+            {
                 "command": "neteasemusic.new.song",
                 "title": "%command.neteasemusic.new.song%",
                 "category": "%category.neteasemusic.discover%"
@@ -313,12 +323,20 @@
                     "when": "neteasemusic.on && neteasemusic.logged"
                 },
                 {
+                    "command": "neteasemusic.user.djradio",
+                    "when": "neteasemusic.on && neteasemusic.logged"
+                },
+                {
+                    "command": "neteasemusic.user.record",
+                    "when": "neteasemusic.on && neteasemusic.logged"
+                },
+                {
                     "command": "neteasemusic.user.playlist",
                     "when": "neteasemusic.on && neteasemusic.logged"
                 },
                 {
                     "command": "neteasemusic.like",
-                    "when": "neteasemusic.on && neteasemusic.logged && neteasemusic.track && !neteasemusic.liked"
+                    "when": "neteasemusic.on && neteasemusic.logged && neteasemusic.track && !neteasemusic.liked && !neteasemusic.program"
                 },
                 {
                     "command": "neteasemusic.dislike",
