@@ -1,5 +1,11 @@
 <!DOCTYPE html>
 <html>
+<head>
+	<meta charset="utf-8">
+	<base>
+</head>
+<body>
+	Please interact with the document first otherwise play() will failed
 	<script>
 		const audio = new Audio()
 		const Lyric = lrcs => {
@@ -27,40 +33,40 @@
 		let song = null
 		let lyric = null
 
-		audio.addEventListener('play', () => {
+		audio.onplay = () => {
 			postMessage('event', {name: 'play'})
-		}, false)
+		}
 
-		audio.addEventListener('pause', () => {
+		audio.onpause = () => {
 			postMessage('event', {name: 'pause'})
-		}, false)
+		}
 
-		audio.addEventListener('ended', () => {
+		audio.onended = () => {
 			postMessage('event', {name: 'end', data: song})
-		}, false)
+		}
 
-		audio.addEventListener('timeupdate', () => {
+		audio.ontimeupdate = () => {
 			let update = lyric(audio.currentTime)
 			if (update) postMessage('event', {name: 'lyric', data: update})
-		}, false)
+		}
 
-		audio.addEventListener('volumechange', () => {
+		audio.onvolumechange = () => {
 			postMessage('event', {name: 'volume', data: {muted: audio.muted, value: audio.volume}})
-		})
+		}
 
-		audio.addEventListener('loadstart', () => {
+		audio.onloadstart = () => {
 			postMessage('event', {name: 'load', data: song})
-		}, false)
+		}
 
-		audio.addEventListener('loadedmetadata', () => {
+		audio.onloadedmetadata = () => {
 			song.duration = audio.duration
-		}, false)
+		}
 
-		const webSocket = new WebSocket('ws://localhost:16363')
-		webSocket.addEventListener('message', event => {
+		const webSocket = new WebSocket('ws://127.0.0.1:16363')
+		webSocket.onmessage = event => {
 			let data = JSON.parse(event.data)
 			receiveMessage(data.command, data.data)
-		})
+		}
 
 		const postMessage = (type, body) => webSocket.send(JSON.stringify({type, body}))
 		const receiveMessage = (command, data) => {
@@ -89,17 +95,27 @@
 			}
 		}
 
-		const interacted = () => {
+		const ready = () => {
+			document.onclick = null
+			document.ontouchend = null
 			postMessage('event', {name: 'ready'})
-			document.removeEventListener('click', interacted)
-			document.removeEventListener('touchend', interacted)
 			document.body.innerHTML = 'Please preserve this webview tab'
 		}
 
-		document.addEventListener('click', interacted)
-		document.addEventListener('touchend', interacted)
+		webSocket.onopen = () => {
+			(new Audio('./silence.mp3')).play()
+			.then(ready)
+			.catch(error => {
+				console.log(error.name, error.message)
+				if (error.name === 'NotAllowedError') {
+					document.onclick = ready
+					document.ontouchend = ready
+				}
+				else {
+					postMessage({name: 'echo', data: `${error.name}: ${error.message}`})
+				}
+			})
+		}
 	</script>
-	<body>
-		Please interact with the document first otherwise play() will failed
-	</body>
+</body>
 </html>

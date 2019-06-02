@@ -21,7 +21,7 @@ const selector = (items, title) => {
 }
 
 const utility = {
-	extract: (item, keys = ['id', 'name']) => 
+	extract: (item, keys = ['id', 'name']) =>
 		Object.keys(item).filter(key => keys.includes(key)).reduce((result, key) => Object.assign(result, {[key]: item[key]}), {}),
 	format: {
 		song: (song, source) => {
@@ -55,7 +55,7 @@ const utility = {
 				listen,
 				`(${utility.stringify.duration(song.duration)})`
 			].join('  ') : [
-				flags.artist === false ? null : utility.stringify.artist(song), 
+				flags.artist === false ? null : utility.stringify.artist(song),
 				flags.album === false ? null : song.album.name
 			].filter(item => item).join(' - ') + (flags.listen ? '  ' + listen : '')
 			return song
@@ -118,7 +118,7 @@ const utility = {
 		collect: done => `${done ? '【 $(check) 已收藏 】' : '【 $(plus) 收藏 】'}`
 	},
 	indent: {
-		expand: item => Object.assign(item, {label: `\u2006\u2007\u2006  ${item.label}`})
+		expand: item => Object.assign(item, {label: `\u2002\u2005\u2006  ${item.label}`})
 	}
 }
 
@@ -178,34 +178,28 @@ const interaction = {
 				action: () => interaction.djradio.program(djradio.id)
 			})), '我的电台')
 		}),
-		record: () => api.user.record().then(data => {
-			const show = array => 
+		record: all => api.user.record().then(data => {
+			const show = (array, week) =>
 				array.map(item => Object.assign(item.song, {listen: item.playCount}))
-				.map(song => utility.format.song(song, {type: 'record'}))
+				.map(song => utility.format.song(song, {type: 'record', week}))
 				.map((song, index, track) => utility.lift.song(song, [index, 100], {listen: true}, () => {
 					controller.add(track)
 					controller.play(index)
 					quickPick.hide()
 				}))
-			const record = (week, all) => Array.prototype.concat(
+			const label = week => week ? '最近一周' : '所有时间'
+			const record = week => Array.prototype.concat(
 				[{
-					label: `${utility.indicate.expand(week)}最近一周`,
+					label: `${label(week)}`,
+					description: ` ❘  ${label(!week)}`,
 					action: () => {
-						selector(record(!week, all), '听歌排行')
-						quickPick.activeItems = [quickPick.items[0]]
+						selector(record(!week), '听歌排行')
+						quickPick.activeItems = [quickPick.items[1]]
 					}
 				}],
-				week ? show(data.weekData) : [],
-				[{
-					label: `${utility.indicate.expand(all)}所有时间`,
-					action: () => {
-						selector(record(week, !all), '听歌排行')
-						quickPick.activeItems = [quickPick.items[(week ? data.allData.length : 0) + 1]]
-					}
-				}],
-				all ? show(data.allData) : [],
+				week ? show(data.weekData, week) : show(data.allData, week),
 			)
-			selector(record(true, true), '听歌排行')
+			selector(record(!all), '听歌排行')
 			quickPick.activeItems = [quickPick.items[1]]
 		})
 	},
@@ -574,7 +568,7 @@ const interaction = {
 				},
 				record: {
 					label: `来源: 听歌排行`,
-					action: () => interaction.user.record()
+					action: () => interaction.user.record(!song.source.week)
 				},
 				djradio: {
 					label: `电台节目: ${song.source.name}`,
@@ -607,24 +601,24 @@ const interaction = {
 					let hot = (data.hotComments || []).length
 					selector(Array.prototype.concat(
 						hot ? [{
-							label: '精彩评论 »',
+							label: '精彩评论',
 						}] : null,
 						hot ? (data.hotComments || []).map(comment => ({
-							label: `${utility.stringify.number(comment.likedCount)} $(heart)`,
+							label: `${hot ? '\u2003' : ''}${utility.stringify.number(comment.likedCount)} $(heart)`,
 							description: comment.content,
 						})) : null,
 						hot ? [{
-							label: '最新评论 »',
+							label: '最新评论',
 						}] : null,
 						(data.comments || []).map(comment => ({
-							label: `${utility.stringify.number(comment.likedCount)} $(heart)`,
+							label: `${hot ? '\u2003' : ''}${utility.stringify.number(comment.likedCount)} $(heart)`,
 							description: comment.content,
 						}))
 					), `${hot ? '' : '最新'}评论 (${data.total})`)
 				})
 			},
 			!program && api.user.account() ? {
-				label: '收藏到歌单', 
+				label: '收藏到歌单',
 				action: () => api.user.playlist().then(data => data.playlist).then(playlists => {
 					selector(playlists.filter(playlist => playlist.creator.userId === playlists[0].creator.userId)
 					.map(playlist => ({
@@ -640,7 +634,7 @@ const interaction = {
 				})
 			} : null,
 			{
-				label: '在浏览器中打开', 
+				label: '在浏览器中打开',
 				action: () => vscode.env.openExternal(vscode.Uri.parse(`https://music.163.com/#/${program ? 'program' : 'song'}?id=${song.id}`)) && quickPick.hide()
 			}
 		], `正在播放: ${utility.stringify.song(song)}`)
