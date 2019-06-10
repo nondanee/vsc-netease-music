@@ -11,7 +11,7 @@
 		const Lyric = lrcs => {
 			const parsed = {}
 			const parse = lrc => lrc.trim().split('\n').filter(item => item).forEach(line => {
-				let points = line.match(/\[\d+:\d+\.*\d*\]/g) || []		
+				let points = line.match(/\[\d+:\d+\.*\d*\]/g) || []
 				let text = line.replace(/\[.*:.*\]/g, '').trim()
 				points.map(point => point.slice(1, point.length - 1).split(':').reduce((before, current) => before * 60 + parseFloat(current), 0).toFixed(2))
 				.forEach(point => {

@@ -465,7 +465,7 @@ const interaction = {
 			if (!code) api.search.suggest(text).then(data => display(text, data))
 			else api.search.type(text, code).then(data => display(text, data, type))
 		}
-		
+
 		const display = (text, data, type) => {
 			let songs = (data.result.songs || []).map(song => utility.format.song(song, {type: 'search'}))
 			.map(song => utility.lift.song(song, null, {}, () => {
