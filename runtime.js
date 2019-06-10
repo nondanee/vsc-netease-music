@@ -19,7 +19,7 @@ const GlobalStorage = context => {
 const PreferenceReader = context => {
 	cache = {}
 	return {
-		get: key => cache[key] ? key in cache : cache[key] = vscode.workspace.getConfiguration().get(`NeteaseMusic.${key}`),
+		get: key => key in cache ? cache[key] : cache[key] = vscode.workspace.getConfiguration().get(`NeteaseMusic.${key}`),
 		dispose: () => cache = {}
 	}
 }
@@ -149,14 +149,14 @@ const PlayerBar = context => {
 	}
 
 	const order = [['list'], ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['repeat', 'random', 'loop'], ['mute', 'unmute'], ['volume'], ['more']].reverse()
-	
+
 	const items = order.map((group, index) => {
 		group.forEach(name => buttons[name].index = index)
 		let item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 163 + index)
 		bind(item, buttons[group[0]])
 		return item
 	})
-	
+
 	return {
 		dispose: () => {
 			items.forEach(item => item.dispose())
@@ -191,7 +191,7 @@ const PlayerBar = context => {
 const DuplexChannel = context => {
 	let webSocket = null
 	let activeEditor = ActiveEditor()
-	
+
 	const webSocketd = new ws.Server({port: 16363})
 	.once('connection', connection => {
 		webSocket = connection
@@ -327,7 +327,7 @@ const CommandManager = context => {
 		'mode.repeat': () => controller.mode(2),
 		'mode.random': () => controller.mode(0)
 	}
-	
+
 	const registration = Object.keys(commands).map(name => vscode.commands.registerCommand(`neteasemusic.${name}`, commands[name]))
 	registration.forEach(command => context.subscriptions.push(command))
 
@@ -369,7 +369,7 @@ const runtime = {
 		runtime.commandManager = CommandManager(context)
 
 		process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = runtime.preferenceReader.get('SSL.strict') ? undefined : 0
-		
+
 		runtime.event.on('ready', () => 
 			Promise.all([api, controller].map(component => component.refresh()))
 			.then(() => runtime.sceneKeeper.restore())
