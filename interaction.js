@@ -396,7 +396,7 @@ const interaction = {
 			.then(password => {
 				if (account && password) {
 					api.login(account, password)
-					.then(data => {vscode.window.showInformationMessage(`登录成功: ${data.profile.nickname}(${data.account.id})`)})
+					.then(data => {vscode.window.showInformationMessage(`登录成功: ${data.profile.nickname}(${data.userPoint.userId})`)})
 					.then(() => controller.refresh())
 					.catch(e => {vscode.window.showErrorMessage(`登录失败: ${e.code == 502 ? '账号或密码错误' : '未知错误'}(${e.code})`)})
 				}

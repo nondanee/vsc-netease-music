@@ -127,24 +127,13 @@ const api = {
 		let path = '', data = {password: crypto.createHash('md5').update(password).digest('hex'), rememberLogin: 'true'}
 		account.includes('@') ? (Object.assign(data, {username: account}), path = 'login') : (Object.assign(data, {phone: account.replace(area, ''), countrycode: (area || '').replace('+', '')}), path = 'login/cellphone')
 		return apiRequest(path, data, false)
-		.then(response => {
-			if (response.headers['set-cookie']) user.cookie = response.headers['set-cookie'].map(cookie => cookie.replace(/;.*/,'')).join('; ')
-			return response
-		})
-		.then(json).then(data => {
-			if (data.code === 200) {
-				user.id = data.account.id
-				sync()
-				return Promise.resolve(data)
-			}
-			else {
-				return Promise.reject(data)
-			}
-		})
+		.then(response =>
+			response.headers['set-cookie'] ? api.refresh(response.headers['set-cookie'].map(cookie => cookie.replace(/;.*/, '')).join('; ')) : json(response).then(data => Promise.reject(data))
+		)
 	},
 	logout: () => {
 		user = {}
-		sync()
+		return sync()
 	},
 	sign: () => apiRequest('point/dailyTask', {type: 1}),
 	refresh: cookie => {
