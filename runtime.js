@@ -6,7 +6,9 @@ const vscode = require('vscode')
 
 const ActiveEditor = () => {
 	let activeTextEditor = vscode.window.activeTextEditor
-	return {reveal: () => activeTextEditor ? vscode.window.showTextDocument(activeTextEditor.document, activeTextEditor.viewColumn, false) : undefined}
+	return {
+		reveal: () => activeTextEditor ? vscode.window.showTextDocument(activeTextEditor.document, activeTextEditor.viewColumn, false) : undefined
+	}
 }
 
 const GlobalStorage = context => {
@@ -17,10 +19,10 @@ const GlobalStorage = context => {
 }
 
 const PreferenceReader = context => {
-	cache = {}
+	let preference = {}
 	return {
-		get: key => key in cache ? cache[key] : cache[key] = vscode.workspace.getConfiguration().get(`NeteaseMusic.${key}`),
-		dispose: () => cache = {}
+		get: key => key in preference ? preference[key] : preference[key] = vscode.workspace.getConfiguration().get(`NeteaseMusic.${key}`),
+		dispose: () => preference = null
 	}
 }
 
@@ -41,16 +43,11 @@ const SceneKeeper = context => {
 }
 
 const StateManager = context => {
-	const state = {}
+	let state = {}
 	return {
 		get: key => state[key],
-		set: (key, value) => {
-			state[key] = value
-			vscode.commands.executeCommand('setContext', `neteasemusic.${key}`, value)
-		},
-		dispose: () => Object.keys(state).forEach(key => 
-			vscode.commands.executeCommand('setContext', `neteasemusic.${key}`, undefined)
-		)
+		set: (key, value) => vscode.commands.executeCommand('setContext', `neteasemusic.${key}`, state[key] = value),
+		dispose: () => (Object.keys(state).forEach(key => vscode.commands.executeCommand('setContext', `neteasemusic.${key}`, undefined)), state = null)
 	}
 }
 
@@ -140,7 +137,7 @@ const PlayerBar = context => {
 		}
 	}
 
-	const bind = (item, button) => {
+	const attach = (item, button) => {
 		item.color = button.color || undefined
 		item.text = button.icon
 		item.command = button.command
@@ -153,26 +150,24 @@ const PlayerBar = context => {
 	const items = order.map((group, index) => {
 		group.forEach(name => buttons[name].index = index)
 		let item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 163 + index)
-		bind(item, buttons[group[0]])
+		attach(item, buttons[group[0]])
 		return item
 	})
 
 	return {
-		dispose: () => {
-			items.forEach(item => item.dispose())
-		},
+		dispose: () => items.forEach(item => item.dispose()),
 		state: state => {
 			if (!(state in buttons)) return
 			if (state.includes('like')) (api.user.account() && !runtime.stateManager.get('program')) ? items[buttons.like.index].show() : items[buttons.like.index].hide()
 			let index = buttons[state].index
 			let name = order[index][(order[index].indexOf(state) + 1) % order[index].length]
-			bind(items[index], buttons[name])
+			attach(items[index], buttons[name])
 		},
 		update: text => {
 			items[buttons.list.index].text = text
 		},
 		volume: state => {
-			bind(items[buttons.mute.index], buttons[(state.muted ? 'unmute' : 'mute')])
+			attach(items[buttons.mute.index], buttons[(state.muted ? 'unmute' : 'mute')])
 			items[buttons.volume.index].color = items[buttons.mute.index].color
 			items[buttons.volume.index].text = `${state.value.toFixed(2) * 100}`
 		},
@@ -189,18 +184,11 @@ const PlayerBar = context => {
 }
 
 const DuplexChannel = context => {
-	let webSocket = null
 	let activeEditor = ActiveEditor()
 
-	const webSocketd = new ws.Server({port: 16363})
-	.once('connection', connection => {
-		webSocket = connection
-		.on('message', message => {
-			let data = JSON.parse(message)
-			receiveMessage(data.type, data.body)
-		})
-		.on('close', () => runtime.event.emit('suspend'))
-	})
+	const server = new ws.Server({port: 16363})
+	const connection = new Promise(resolve => server.once('connection', connection => resolve(connection)))
+	connection.then(webSocket => webSocket.on('message', receiveMessage).on('close', () => runtime.event.emit('suspend')))
 
 	const logger = song => {
 		const translation = {'playlist': 'list', 'artist': 'artist', 'album': 'album'}
@@ -219,7 +207,8 @@ const DuplexChannel = context => {
 		return output
 	}
 
-	const receiveMessage = (type, body) => {
+	const receiveMessage = message => {
+		const {type, body} = JSON.parse(message)
 		if (type == 'event') {
 			if (body.name == 'ready') {
 				runtime.event.emit('ready')
@@ -259,10 +248,8 @@ const DuplexChannel = context => {
 	}
 
 	return {
-		dispose: () => webSocketd.close(),
-		postMessage: (command, data) => {
-			if (webSocket) webSocket.send(JSON.stringify({command, data}))
-		}
+		dispose: () => server.close(),
+		postMessage: (command, data) => connection.then(webSocket => webSocket.send(JSON.stringify({command, data})))
 	}
 }
 
@@ -332,7 +319,7 @@ const CommandManager = context => {
 	registration.forEach(command => context.subscriptions.push(command))
 
 	return {
-		execute: name => {if (name in commands) commands[name]()},
+		execute: name => name in commands ? commands[name].call() : null,
 		dispose: () => registration.forEach(command => command.dispose())
 	}
 }

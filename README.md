@@ -36,9 +36,9 @@
 
 ## Requirement
 
-**VS Code for Windows 自 1.31.0 起自带完整的 ffmpeg 动态链接库，无需替换；macOS 与 Linux 平台仍需替换**
-
 [VS Code 使用的 Electron 版本不包含 ffmpeg](https://stackoverflow.com/a/51735036)，需替换自带的 ffmpeg 动态链接库才能正常播放 (每次更新 VS Code 都需重新替换)
+
+*VS Code for Windows 1.31.0 - 1.35.1 不需替换*
 
 <details><summary>
 <b>Manual Replacement</b>
@@ -67,7 +67,7 @@
 <b>Automatic Replacement</b>
 </summary>
 
-使用 Python 脚本替换 (Python 2/3 均可，绝大部分发行版自带环境)
+使用 Python 脚本替换 (使用[淘宝 Electron 镜像](https://npm.taobao.org/mirrors/electron/)，兼容 Python 2/3，绝大部分发行版自带环境)
 
 **默认安装位置下 Linux 和 Windows 需要以管理员身份运行，macOS 不需要**
 
