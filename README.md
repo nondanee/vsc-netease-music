@@ -38,7 +38,7 @@
 
 [VS Code 使用的 Electron 版本不包含 ffmpeg](https://stackoverflow.com/a/51735036)，需替换自带的 ffmpeg 动态链接库才能正常播放 (每次更新 VS Code 都需重新替换)
 
-*VS Code for Windows 1.31.0 - 1.35.1 不需替换*
+*VS Code for Windows 1.31.0 - 1.35.1 不需替换，1.36.0 后无此待遇*
 
 <details><summary>
 <b>Manual Replacement</b>
