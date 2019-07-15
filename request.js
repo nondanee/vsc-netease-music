@@ -12,19 +12,24 @@ const encrypt = object => {
 	return {eparams: Buffer.concat([cipher.update(buffer), cipher.final()]).toString('hex').toUpperCase()}
 }
 
-const request = (method, url, headers, body = null) => new Promise((resolve, reject) => {
-	(url.startsWith('https://') ? https.request : http.request)(Object.assign(parse(url), {method, headers}))
-	.on('response', response => resolve([201, 301, 302, 303, 307, 308].includes(response.statusCode) ? request(method, parse(url).resolve(response.headers.location), headers, body) : response))
-	.on('error', error => reject(error)).end(body)
-})
+const request = (method, url, headers, body = null) =>
+	new Promise((resolve, reject) => {
+		(url.startsWith('https://') ? https.request : http.request)(Object.assign(parse(url), {method, headers}))
+		.on('response', response => resolve([201, 301, 302, 303, 307, 308].includes(response.statusCode) ? request(method, parse(url).resolve(response.headers.location), headers, body) : response))
+		.on('error', error => reject(error)).end(body)
+	})
 
-const json = response => new Promise((resolve, reject) => {
-	let chunks = []
-	response
-	.on('data', chunk => chunks.push(chunk))
-	.on('end', () => {try{resolve(JSON.parse(Buffer.concat(chunks)))}catch(error){reject(error)}})
-	.on('error', error => reject(error))
-})
+const json = response =>
+	new Promise((resolve, reject) => {
+		let chunks = []
+		response
+		.on('data', chunk => chunks.push(chunk))
+		.on('end', () => resolve(Buffer.concat(chunks)))
+		.on('error', error => reject(error))
+	})
+	.then(body =>
+		JSON.parse(body.toString().replace(/([\[|{|:]\s*)(\d{18,})(\s*[\]|}|;])/g, '$1"$2"$3'))
+	)
 
 const apiRequest = (path, data, load = true) => {
 	const method = 'POST'
@@ -55,7 +60,7 @@ const api = {
 		song: id => apiRequest(`v1/artist/${id}`, {top: 50}),
 		album: id =>
 			Promise.all([apiRequest(`artist/albums/${id}`, {limit: 1000, offset: 0}), apiRequest(`artist/detail/v4`, {id}), apiRequest(`artist/detail/dynamic`, {id})])
-			.then(data => {data[0].artist.fansNum = data[1].fansNum; data[0].artist.followed = data[2].followed; return data[0]}),
+			.then(data => (data[0].artist.fansNum = data[1].fansNum, data[0].artist.followed = data[2].followed, false) || data[0]),
 		subscribe: (id, action) => apiRequest(`artist/${action ? 'sub' : 'unsub'}`, {artistId: id, artistIds: [id]})
 	},
 	djradio: {
@@ -79,7 +84,7 @@ const api = {
 	album: {
 		detail: id => 
 			Promise.all([apiRequest(`v1/album/${id}`, {}), apiRequest('album/detail/dynamic', {id})])
-			.then(data => {Object.assign(data[0].album.info, data[1]); return data[0]}),
+			.then(data => (Object.assign(data[0].album.info, data[1]), false) || data[0]),
 		subscribe: (id, action) => apiRequest(`album/${action ? 'sub' : 'unsub'}`, {id})
 	},
 	playlist: {
@@ -138,7 +143,7 @@ const api = {
 	sign: () => apiRequest('point/dailyTask', {type: 1}),
 	refresh: cookie => {
 		user = cookie ? {cookie} : JSON.parse(runtime.globalStorage.get('user') || '{}')
-		return apiRequest('/user/info', {}).then(data => data.code === 200 ? user.id = data.userPoint.userId : user = {}).then(sync)
+		return apiRequest('user/info', {}).then(data => data.code === 200 ? user.id = data.userPoint.userId : user = {}).then(sync)
 	},
 }
 
