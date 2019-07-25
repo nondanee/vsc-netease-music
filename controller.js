@@ -70,10 +70,10 @@ const controller = {
 		runtime.sceneKeeper.save('index', index)
 		let song = list[index]
 		let program = song.source.type === 'djradio'
-		Promise.all(program ? [api.program.url(song.id), {nolyric: true}] : [api.song.url, api.song.lyric].map(call => call(song.id)))
+		Promise.all(program ? [api.program.url(song.id), {}] : [api.song.url, api.song.lyric].map(call => call(song.id)))
 		.then(batch => {
 			let url = batch[0].data[0].url
-			let lyric = (batch[1].nolyric || batch[1].uncollected) ? [] : [batch[1].lrc.lyric, batch[1].tlyric.lyric]
+			let lyric = batch[1].lrc ? [batch[1].lrc.lyric, batch[1].tlyric.lyric] : []
 			if (!url) {
 				vscode.window.showWarningMessage(`无法播放: ${interaction.utility.stringify.song(song)}`)
 				controller.remove(index)
