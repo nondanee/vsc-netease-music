@@ -8,7 +8,7 @@
     "repository": "https://github.com/nondanee/vsc-netease-music.git",
     "license": "MIT",
     "engines": {
-        "vscode": "^1.28.0"
+        "vscode": "^1.34.0"
     },
     "categories": [
         "Other"
@@ -412,7 +412,5 @@
     "devDependencies": {
         "vscode": "^1.1.34"
     },
-    "dependencies": {
-        "ws": "^7.0.1"
-    }
+    "dependencies": {}
 }

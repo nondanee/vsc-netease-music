@@ -82,7 +82,7 @@ const api = {
 		comment: id => apiRequest(`v1/resource/comments/A_DJ_1_${id}`, {rid: `A_DJ_1_${id}`, limit: 50, offset: 0})
 	},
 	album: {
-		detail: id => 
+		detail: id =>
 			Promise.all([apiRequest(`v1/album/${id}`, {}), apiRequest('album/detail/dynamic', {id})])
 			.then(data => (Object.assign(data[0].album.info, data[1]), false) || data[0]),
 		subscribe: (id, action) => apiRequest(`album/${action ? 'sub' : 'unsub'}`, {id})

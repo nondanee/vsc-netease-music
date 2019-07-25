@@ -52,7 +52,7 @@
 替换 `./ffmpeg.dll`
 
 #### macOS
-下载 **electron-%version%-darwin-x64.zip** 
+下载 **electron-%version%-darwin-x64.zip**
 
 替换 `./Electron.app/Contents/Frameworks/Electron\ Framework.framework/Libraries/libffmpeg.dylib`
 
@@ -115,7 +115,7 @@ curl https://gist.githubusercontent.com/nondanee/f157bbbccecfe29e48d87273cd02e21
 - 图标不合适 ([等 VS Code 增加更多图标支持](https://github.com/Microsoft/vscode/issues/10455))
 - 列表对齐可能有问题 (不同字体下字符宽度不等)
 - Webview 标签无法隐藏，使用时请不要关闭标签
-- ~~[Webview API 限制只在前台可见才能接收 postMessage 消息](https://code.visualstudio.com/api/references/vscode-api#Webview)，需要通信时插件会自动切换到 Webview 再复原 Editor，标签切换不可见但会引起编辑器滚动条闪动 (不影响输入)~~ 自 1.31.0 开始 reveal 后 postMessage 会导致可见的切换延迟，已改用 WebSocket 实现双向通信
+- ~~[Webview API 限制只在前台可见才能接收来自插件侧的 postMessage 消息](https://code.visualstudio.com/api/references/vscode-api#Webview)，需要通信时插件会自动切换到 Webview 再复原 Editor，标签切换不可见但会引起编辑器滚动条闪动 (不影响输入)~~ ~~自 1.31.0 开始 reveal 后 postMessage 会导致可见的切换延迟，已改用 WebSocket 实现双向通信~~ 因 [WebSocket 端口无法转发](https://code.visualstudio.com/api/references/vscode-api#WebviewOptions)导致在 remote 环境无法使用，已改为 SSE + postMessage 实现
 - 1.31.0 升级使用 Electron 3.x，受制于 [Chrome 66 内核的 Autoplay Policy](https://developers.google.com/web/updates/2017/09/autoplay-policy-changes)，用户需先与 Webview 交互才能播放
 - ~~播放列表较长时无法定位到当前播放歌曲 (VS Code 未实现 activeItems 处于 quickPick 非可视区域时的滚动聚焦)~~ 长列表定位问题 VS Code 已修复
-- 只显示中文命令是因为使用中文系统语言而未装中文语言包，应是 VS Code 对 nls 支持的 bug，请在应用商店安装中文语言包。如果习惯英文的话，可将显示语言改回英文。
+- 只显示中文命令是因为使用中文系统语言而未装中文语言包，应是 VS Code 对 nls 支持的 bug，请在应用商店安装中文语言包。如果习惯英文的话，可将显示语言改回英文

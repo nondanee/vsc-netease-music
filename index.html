@@ -17,7 +17,7 @@
 				.forEach(point => {
 					if (!(point in parsed)) parsed[point] = []
 					parsed[point].push(text)
-				}) 
+				})
 			})
 			lrcs.filter(lrc => lrc).forEach(parse)
 			const timeline = Object.keys(parsed).sort((x, y) => parseFloat(x) - parseFloat(y))
@@ -62,14 +62,23 @@
 			song.duration = audio.duration
 		}
 
-		const webSocket = new WebSocket('ws://127.0.0.1:16363')
-		webSocket.onmessage = event => {
-			let data = JSON.parse(event.data)
-			receiveMessage(data.command, data.data)
-		}
+		// const webSocket = new WebSocket('ws://localhost:16363')
+		// webSocket.onmessage = event => receiveMessage(event.data)
 
-		const postMessage = (type, body) => webSocket.send(JSON.stringify({type, body}))
-		const receiveMessage = (command, data) => {
+		// const connect = () => fetch('http://localhost:16363').then(response => response.status === 204 ? connect() : response.json()).catch(() => connect())
+		// const polling = () => connect().then(message => (receiveMessage(message), polling()))
+		// polling()
+
+		const eventSource = new EventSource('http://localhost:16363')
+		eventSource.onmessage = event => receiveMessage(event.data)
+
+		const native = acquireVsCodeApi()
+		const postMessage = (type, body) => native.postMessage({type, body})
+		// const postMessage = (type, body) => webSocket.send(JSON.stringify({type, body}))
+
+		const receiveMessage = message => {
+			message = typeof(message) === 'object' ? message : JSON.parse(message)
+			const {command, data} = message
 			if (command === 'load') {
 				song = data.song
 				lyric = Lyric(data.lyric)
@@ -102,7 +111,7 @@
 			document.body.innerHTML = 'Please preserve this webview tab'
 		}
 
-		webSocket.onopen = () => {
+		const prepare = () =>
 			(new Audio('./silence.mp3')).play()
 			.then(ready)
 			.catch(error => {
@@ -115,7 +124,10 @@
 					postMessage({name: 'echo', data: `${error.name}: ${error.message}`})
 				}
 			})
-		}
+
+		// webSocket.onopen = prepare
+		// window.onload = prepare
+		eventSource.onopen = () => prepare().then(() => eventSource.onopen = null)
 	</script>
 </body>
 </html>

@@ -1,5 +1,4 @@
 const fs = require('fs')
-const ws = require('ws')
 const path = require('path')
 const events = require('events')
 const vscode = require('vscode')
@@ -186,14 +185,10 @@ const PlayerBar = context => {
 const DuplexChannel = context => {
 	let activeEditor = ActiveEditor()
 
-	const server = new ws.Server({port: 16363})
-	const connection = new Promise(resolve => server.once('connection', connection => resolve(connection)))
-	connection.then(webSocket => webSocket.on('message', receiveMessage).on('close', () => runtime.event.emit('suspend')))
-
 	const logger = song => {
 		const translation = {'playlist': 'list', 'artist': 'artist', 'album': 'album'}
 		const output = {
-			id: song.id, 
+			id: song.id,
 			type: 'song',
 			wifi: 0,
 			download: 0,
@@ -207,8 +202,56 @@ const DuplexChannel = context => {
 		return output
 	}
 
+	/**
+	 * Websocket
+	 */
+	// const server = new (require('ws')).Server({port: 16363, host: '127.0.0.1'})
+	// const connection = new Promise(resolve => server.once('connection', connection => resolve(connection)))
+	// connection.then(webSocket => webSocket.on('message', receiveMessage))
+	// const postMessage = (command, data) => connection.then(webSocket => webSocket.send(JSON.stringify({command, data})))
+
+	/**
+	 * Long Polling
+	 */
+	// const caller = new events.EventEmitter()
+	// const queue = []
+
+	// const server = require('http').createServer((req, res) => {
+	// 	if (req.url != '/') return
+	// 	new Promise(resolve => {
+	// 		let timer
+	// 		if (queue.length > 0) return resolve(queue.shift())
+	// 		const shift = () => {
+	// 			caller.removeListener('message', shift)
+	// 			clearTimeout(timer)
+	// 			resolve(queue.shift())
+	// 		}
+	// 		caller.once('message', shift)
+	// 		timer = setTimeout(shift, 5000)
+	// 	})
+	// 	.then(message => {
+	// 		res.writeHead(message ? 200 : 204, {'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*'})
+	// 		res.end(message ? JSON.stringify(message) : undefined)
+	// 	})
+	// })
+	// .listen(16363, '127.0.0.1')
+	// const postMessage = (command, data) => (queue.push({command, data}), caller.emit('message'))
+
+	/**
+	 * Server-Sent Events
+	 */
+	const caller = new events.EventEmitter()
+	const server = require('http').createServer().listen(16363, '127.0.0.1')
+	server.on('request', (req, res) => {
+		if (req.url != '/') return
+		res.writeHead(200, {'Content-Type': 'text/event-stream', 'Access-Control-Allow-Origin': '*'}), res.write(': \n\n')
+		caller.on('message', message => res.write('data: ' + JSON.stringify(message) + '\n\n'))
+	})
+	const postMessage = (command, data) => caller.emit('message', {command, data})
+
 	const receiveMessage = message => {
-		const {type, body} = JSON.parse(message)
+		message = typeof(message) === 'object' ? message : JSON.parse(message)
+		const {type, body} = message
 		if (type == 'event') {
 			if (body.name == 'ready') {
 				runtime.event.emit('ready')
@@ -249,7 +292,8 @@ const DuplexChannel = context => {
 
 	return {
 		dispose: () => server.close(),
-		postMessage: (command, data) => connection.then(webSocket => webSocket.send(JSON.stringify({command, data})))
+		postMessage,
+		receiveMessage
 	}
 }
 
@@ -258,12 +302,16 @@ const WebviewPanel = context => {
 	const panel = vscode.window.createWebviewPanel(
 		'neteasemusic', 'NeteaseMusic',
 		{preserveFocus: true, viewColumn: vscode.ViewColumn.One},
-		{enableScripts: true, retainContextWhenHidden: true}
+		{enableScripts: true, retainContextWhenHidden: true, portMapping: [{webviewPort: 16363, extensionHostPort: 16363}]}
 	)
 	panel.iconPath = ['light', 'dark'].reduce((uri, theme) => Object.assign(uri, {[theme]: vscode.Uri.file(path.join(context.extensionPath, `${theme}.svg`))}), {})
 	panel.webview.html =
 		fs.readFileSync(vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath, 'utf-8')
 		.replace('<base>', `<base href="${vscode.Uri.file(path.join(context.extensionPath, '/')).with({scheme: 'vscode-resource'})}">`)
+
+	panel.webview.onDidReceiveMessage(runtime.duplexChannel.receiveMessage, undefined, context.subscriptions)
+	panel.onDidDispose(() => runtime.event.emit('suspend'), null, context.subscriptions)
+
 	return {
 		dispose: () => panel.dispose()
 	}
@@ -357,12 +405,12 @@ const runtime = {
 
 		process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = runtime.preferenceReader.get('SSL.strict') ? undefined : 0
 
-		runtime.event.on('ready', () => 
+		runtime.event.once('ready', () =>
 			Promise.all([api, controller].map(component => component.refresh()))
 			.then(() => runtime.sceneKeeper.restore())
 			.then(() => runtime.stateManager.set('on', true))
 		)
-		runtime.event.on('suspend', () => runtime.dispose())
+		runtime.event.once('suspend', () => runtime.dispose())
 	}
 }
 
