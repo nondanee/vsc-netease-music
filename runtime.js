@@ -245,8 +245,9 @@ const DuplexChannel = context => {
 	server.on('request', (req, res) => {
 		if (req.url != '/') return
 		res.writeHead(200, {'Content-Type': 'text/event-stream', 'Access-Control-Allow-Origin': '*'}), res.write(': \n\n')
-		caller.removeAllListeners('message')
-		caller.on('message', message => res.write('data: ' + JSON.stringify(message) + '\n\n'))
+		const listener = message => res.write('data: ' + JSON.stringify(message) + '\n\n')
+		caller.on('message', listener)
+		res.once('close', () => caller.removeListener('message', listener))
 	})
 	const postMessage = (command, data) => caller.emit('message', {command, data})
 
