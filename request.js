@@ -28,7 +28,7 @@ const json = response =>
 		.on('error', error => reject(error))
 	})
 	.then(body =>
-		JSON.parse(body.toString().replace(/([\[|{|:]\s*)(\d{16,})(\s*[\]|}|,])/g, '$1"$2"$3'))
+		JSON.parse(body.toString().replace(/([^\\]"\s*:\s*)(\d{16,})(\s*[}|,])/g, '$1"$2"$3'))
 	)
 
 const apiRequest = (path, data, load = true) => {
