@@ -150,7 +150,7 @@ const api = {
 const sync = () => {
 	runtime.globalStorage.set('user', JSON.stringify(user))
 	runtime.stateManager.set('logged', !!user.id)
-	return user.id ? api.user.detail().then(data => runtime.stateManager.set('signed', !!data.pcSign) || data) : Promise.resolve()
+	return user.id ? api.user.detail().then(data => (runtime.stateManager.set('signed', !!data.pcSign), false) || data) : Promise.resolve()
 }
 
 module.exports = api
