@@ -68,32 +68,32 @@ const PlayerBar = context => {
 		},
 		repeat: {
 			command: 'neteasemusic.mode.loop',
-			icon: ' $(sync) ',
+			icon: '\u2006$(sync)\u2006',
 			title: '播放模式: 循环播放',
 			state: {mode: 0}
 		},
 		random: {
 			command: 'neteasemusic.mode.repeat',
-			icon: ' $(pin) ',
+			icon: '$(pin)',
 			title: '播放模式: 单曲循环',
 			state: {mode: 1}
 		},
 		intelligent: { // action to intelligent or loop
 			command: 'neteasemusic.mode.random',
-			icon: ' $(light-bulb) ',
+			icon: '\u2006$(light-bulb)\u2006',
 			title: '播放模式: 随机播放',
 			state: {mode: 2}
 		},
 		loop: {
 			command: 'neteasemusic.mode.intelligent',
-			icon: ' $(pulse) ',
+			icon: '\u2006$(pulse)',
 			title: '播放模式: 心动模式',
 			state: {mode: 3}
 		},
 		play: {
 			command: 'neteasemusic.play',
 			// icon: '▶'
-			icon: ' $(triangle-right) ',
+			icon: '\u2004$(triangle-right)\u2004',
 			title: '播放',
 			state: {playing: false}
 		},
@@ -106,14 +106,14 @@ const PlayerBar = context => {
 		},
 		like: {
 			command: 'neteasemusic.like',
-			icon: ' $(heart) ',
+			icon: '\u2006$(heart)\u2006',
 			title: '红心',
 			color: 'rgba(255,255,255,0.5)',
 			state: {liked: false}
 		},
 		dislike: {
 			command: 'neteasemusic.dislike',
-			icon: ' $(heart) ',
+			icon: '\u2006$(heart)\u2006',
 			title: '取消红心',
 			state: {liked: true}
 		},
@@ -141,7 +141,7 @@ const PlayerBar = context => {
 		},
 		more: {
 			command: 'neteasemusic.more',
-			icon: '$(kebab-horizontal)',
+			icon: '\u2006$(kebab-horizontal)\u2006',
 			title: '更多操作'
 		}
 	}
