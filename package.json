@@ -203,6 +203,11 @@
                 "command": "neteasemusic.mode.random",
                 "title": "%command.neteasemusic.mode.random%",
                 "category": "%category.neteasemusic.mode%"
+            },
+            {
+                "command": "neteasemusic.mode.intelligent",
+                "title": "%command.neteasemusic.mode.intelligent%",
+                "category": "%category.neteasemusic.mode%"
             }
         ],
         "keybindings": [
@@ -401,6 +406,10 @@
                 {
                     "command": "neteasemusic.mode.random",
                     "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode == 2 && !neteasemusic.radio"
+                },
+                {
+                    "command": "neteasemusic.mode.intelligent",
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.mode == 3 && !neteasemusic.radio"
                 }
             ]
         }

@@ -51,10 +51,11 @@ const api = {
 		artist: () => apiRequest(`artist/sublist`, {limit: 1000, offset: 0}),
 		album: () => apiRequest(`album/sublist`, {limit: 1000, offset: 0}),
 		djradio: () => apiRequest('djradio/get/subed', {limit: 1000, offset: 0}),
-		playlist: id => apiRequest('user/playlist', {uid: id || user.id, limit: 100000}),
+		playlist: (id, compact) => apiRequest('user/playlist', {uid: id || user.id, limit: compact ? 1 : 100000}),
 		record: id => Promise.all([0, 1].map(type => apiRequest('v1/play/record', {uid: id || user.id, type}))).then(data => Object.assign(data[0], data[1])),
 		likes: () => apiRequest('song/like/get', {}),
-		account: () => user.id
+		account: id => id ? user.id === id : user.id,
+		favorite: id => id ? user.favor === id : user.favor
 	},
 	artist: {
 		song: id => apiRequest(`v1/artist/${id}`, {top: 50}),
@@ -99,7 +100,8 @@ const api = {
 		),
 		highquality: () => apiRequest('playlist/highquality/list', {cat: '全部', limit: 50}),
 		hot: () => apiRequest('playlist/list', {cat: '全部', limit: 50, offset: 0, order: 'hot'}),
-		subscribe: (id, action) => apiRequest(`playlist/${action ? 'subscribe' : 'unsubscribe'}`, {id})
+		subscribe: (id, action) => apiRequest(`playlist/${action ? 'subscribe' : 'unsubscribe'}`, {id}),
+		intelligence: (id, pid) => apiRequest('playmode/intelligence/list', {songId: id, startMusicId: id, playlistId: pid || user.favor, count: 1, type: 'fromPlayAll'})
 	},
 	toplist: () => apiRequest('toplist', {}),
 	song: {
@@ -150,7 +152,7 @@ const api = {
 const sync = () => {
 	runtime.globalStorage.set('user', JSON.stringify(user))
 	runtime.stateManager.set('logged', !!user.id)
-	return user.id ? api.user.detail().then(data => (runtime.stateManager.set('signed', !!data.pcSign), false) || data) : Promise.resolve()
+	return user.id ? Promise.all([api.user.detail(), api.user.playlist(null, true)]).then(data => (runtime.stateManager.set('signed', !!data[0].pcSign), user.favor = data[1].playlist[0].id, false) || data[0]) : Promise.resolve()
 }
 
 module.exports = api

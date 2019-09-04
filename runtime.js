@@ -31,12 +31,16 @@ const SceneKeeper = context => {
 		restore: () => {
 			const load = (key, preset) => JSON.parse(runtime.globalStorage.get(key) || preset)
 			let list = load('list', '[]')
+			let origin = load('origin', '[]')
+			let start = load('start', '0')
 			let radio = load('radio', 'false')
 			let index = load('index', '0')
-			controller.mode(load('mode', '0'))
+			let mode = load('mode', '0')
 			controller.volumeChange(load('volume', '1'))
 			if (load('muted', 'false')) controller.mute()
-			if (list.length) controller.add(list, radio), controller.play(index, false)
+			if (mode === 3) controller.mode(mode, {origin, start, list})
+			else if (list.length) controller.add(list, radio)
+			controller.play(index, false)
 		}
 	}
 }
@@ -74,11 +78,17 @@ const PlayerBar = context => {
 			title: '播放模式: 单曲循环',
 			state: {mode: 1}
 		},
-		loop: {
+		intelligent: { // action to intelligent or loop
 			command: 'neteasemusic.mode.random',
 			icon: ' $(light-bulb) ',
 			title: '播放模式: 随机播放',
 			state: {mode: 2}
+		},
+		loop: {
+			command: 'neteasemusic.mode.intelligent',
+			icon: ' $(pulse) ',
+			title: '播放模式: 心动模式',
+			state: {mode: 3}
 		},
 		play: {
 			command: 'neteasemusic.play',
@@ -144,7 +154,7 @@ const PlayerBar = context => {
 		if (button.state) Object.keys(button.state).forEach(key => runtime.stateManager.set(key, button.state[key]))
 	}
 
-	const order = [['list'], ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['repeat', 'random', 'loop'], ['mute', 'unmute'], ['volume'], ['more']].reverse()
+	const order = [['list'], ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['repeat', 'random', 'intelligent', 'loop'], ['mute', 'unmute'], ['volume'], ['more']].reverse()
 
 	const items = order.map((group, index) => {
 		group.forEach(name => buttons[name].index = index)
@@ -362,7 +372,8 @@ const CommandManager = context => {
 
 		'mode.loop': () => controller.mode(1),
 		'mode.repeat': () => controller.mode(2),
-		'mode.random': () => controller.mode(0)
+		'mode.random': () => controller.mode(controller.favorite() ? 3 : 0),
+		'mode.intelligent': () => controller.mode(0)
 	}
 
 	const registration = Object.keys(commands).map(name => vscode.commands.registerCommand(`neteasemusic.${name}`, commands[name]))

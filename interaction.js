@@ -57,7 +57,7 @@ const utility = {
 			].join('  ') : [
 				flags.artist === false ? null : utility.stringify.artist(song),
 				flags.album === false ? null : song.album.name
-			].filter(item => item).join(' - ') + (flags.listen ? '  ' + listen : '')
+			].filter(item => item).join(' - ') + (flags.listen ? '  ' + listen : '') + ((song.source || {}).type === 'intelligence' ? ' 【荐】' : '')
 			return song
 		}
 	},
@@ -128,7 +128,7 @@ const interaction = {
 		playlist: id => api.user.playlist(id).then(data => {
 			id = id || data.playlist[0].creator.userId
 			const show = (playlist, creator) => ({
-				label: playlist.name,
+				label: api.user.favorite(playlist.id) ? '我喜欢的音乐' : playlist.name,
 				description: `${(playlist.trackCount || 0)}首${creator ? ' by ' + playlist.creator.nickname : ''}`,
 				action: () => interaction.playlist.detail(playlist.id)
 			})
@@ -305,7 +305,8 @@ const interaction = {
 	}),
 	playlist: {
 		detail: id => api.playlist.detail(id).then(data => {
-			let self = data.playlist.creator.userId == api.user.account()
+			let self = api.user.account(data.playlist.creator.userId)
+			let name = api.user.favorite(id) ? '我喜欢的音乐' : data.playlist.name
 			const refresh = () => {
 				selector(Array.prototype.concat(
 					!self ? [{
@@ -319,13 +320,13 @@ const interaction = {
 							refresh()
 						}), refresh)
 					}] : [],
-					data.playlist.tracks.map(song => utility.format.song(song, {type: 'playlist', id, name: data.playlist.name}))
+					data.playlist.tracks.map(song => utility.format.song(song, {type: 'playlist', id, name}))
 					.map((song, index, track) => utility.lift.song(song, [index, track.length], {}, () => {
 						controller.add(track)
 						controller.play(index)
 						quickPick.hide()
 					}))
-				), `${data.playlist.name} by ${data.playlist.creator.nickname}`)
+				), `${name} by ${data.playlist.creator.nickname}`)
 				quickPick.activeItems = [quickPick.items[self ? 0 : 1]]
 			}
 			refresh()
@@ -582,6 +583,9 @@ const interaction = {
 				},
 				program: {
 					label: `来源: 节目包含歌曲`
+				},
+				intelligence: {
+					label: `来源: 心动模式`
 				}
 			}[song.source.type]) : null,
 			program ? {
@@ -622,7 +626,7 @@ const interaction = {
 				action: () => api.user.playlist().then(data => data.playlist).then(playlists => {
 					selector(playlists.filter(playlist => playlist.creator.userId === playlists[0].creator.userId)
 					.map(playlist => ({
-						label: playlist.name,
+						label: api.user.favorite(playlist.id) ? '我喜欢的音乐' : playlist.name,
 						description: `${(playlist.trackCount || 0)}首`,
 						action: () => api.song.collect(song.id, playlist.id).then(data => {
 							if (data.code === 200) vscode.window.showInformationMessage('收藏成功')

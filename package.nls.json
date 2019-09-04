@@ -36,6 +36,7 @@
     "command.neteasemusic.mode.loop": "Loop",
     "command.neteasemusic.mode.repeat": "Repeat",
     "command.neteasemusic.mode.random": "Random",
+    "command.neteasemusic.mode.intelligent": "Intelligent",
     "category.neteasemusic": "NeteaseMusic",
     "category.neteasemusic.mode": "NeteaseMusic Mode",
     "category.neteasemusic.my": "NeteaseMusic My",
