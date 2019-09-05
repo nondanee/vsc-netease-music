@@ -6,7 +6,7 @@ quickPick.matchOnDescription = true
 quickPick.matchOnDetail = true
 quickPick.onDidAccept(() => {
 	let item = quickPick.selectedItems[0]
-	if (typeof item.action === 'function'  && !quickPick.busy) {
+	if (typeof item.action === 'function' && !quickPick.busy) {
 		quickPick.busy = true
 		item.action()
 	}

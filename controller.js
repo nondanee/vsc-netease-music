@@ -12,8 +12,8 @@ const compact = song => interaction.utility.extract(song, ['id', 'name', 'album'
 const intelligence = (state = {}) => {
 	let origin = list, start = state.start || index
 	let loading = true, cancelled = false
-	const cancel = () => (cancelled = true, loading = false)
-	const save = () => Object.entries({origin, start, list}).forEach(entry => runtime.sceneKeeper.save.apply(null, entry))
+	const save = object => Object.entries(object).forEach(entry => runtime.globalStorage.set.apply(null, entry))
+	const cancel = () => (cancelled = true, loading = false, save({origin: [], start: 0}))
 
 	index = 0
 	list = [origin[start]]
@@ -21,20 +21,18 @@ const intelligence = (state = {}) => {
 	if (state.origin && state.origin.length) origin = state.origin
 	if (state.list && state.list.length) list = state.list, loading = false, runtime.playerBar.show()
 
-	const promise = loading ? api.playlist.intelligence(origin[start].id)
-	.then(data => {
+	const promise = loading ? api.playlist.intelligence(origin[start].id).then(data => {
 		loading = false
 		if (cancelled) return
 		list = list.concat(data.data.map(item => interaction.utility.format.song(item.songInfo, {type: item.recommended ? 'intelligence' : origin[start].source})))
-		save()
+		save({origin, start, list, intelligence: true})
 	}) : Promise.resolve()
 
 	const exit = () => {
 		cancel()
 		let current = list[index]
 		list = origin, index = start
-		origin = [], start = 0
-		save()
+		save({list, intelligence: false})
 		let position = list.findIndex(song => song.id === current.id)
 		position === -1 ? controller.play() : index = position
 	}
@@ -45,7 +43,7 @@ const controller = {
 	add: (track, radio = false) => {
 		if (radio != runtime.stateManager.get('radio')) list = []
 		runtime.stateManager.set('radio', radio)
-		runtime.sceneKeeper.save('radio', radio)
+		runtime.globalStorage.set('radio', radio)
 		if (Array.isArray(track)) {
 			list = track.map(compact)
 			index = 0
@@ -57,7 +55,7 @@ const controller = {
 		}
 		let sequence = Array.from(list.keys())
 		random = Array.from(list.keys()).map(() => sequence.splice(Math.floor(Math.random() * sequence.length), 1)[0])
-		runtime.sceneKeeper.save('list', list)
+		runtime.globalStorage.set('list', list)
 		runtime.playerBar.show(radio)
 	},
 	remove: target => {
@@ -65,7 +63,7 @@ const controller = {
 		random = random.filter(value => value != target).map(value => value < target ? value : value - 1)
 		index = target < index ? index - 1 : index
 		index = index < list.length ? index : 0
-		runtime.sceneKeeper.save('list', list)
+		runtime.globalStorage.set('list', list)
 		if (list.length == 0) runtime.playerBar.hide()
 	},
 	previous: () => {
@@ -83,9 +81,9 @@ const controller = {
 	mode: (type, state, keep) => {
 		if (type === 3 && (controller.favorite() || state)) dynamic = intelligence(state)
 		else if (type === 3) return
-		else if (mode === 3 && dynamic) keep ? dynamic.cancel() : (dynamic.exit(), dynamic = null)
+		else if (mode === 3 && dynamic) dynamic[keep ? 'cancel' : 'exit'](), dynamic = null
 		mode = type
-		runtime.sceneKeeper.save('mode', mode)
+		runtime.globalStorage.set('mode', mode)
 		runtime.playerBar.state(['loop', 'repeat', 'random', 'intelligent'][mode])
 	},
 	resume: () => {
@@ -100,10 +98,10 @@ const controller = {
 	},
 	play: (target, action = true) => {
 		index = ((target == null ? index : target) + list.length) % list.length
-		if (controller.favorite() && dynamic && mode != 3) controller.mode(3)
+		if (target != null && controller.favorite() && mode != 3 && runtime.globalStorage.get('intelligence')) controller.mode(3)
 		return ((mode === 3 && dynamic) ? dynamic.promise : Promise.resolve())
 		.then(() => {
-			runtime.sceneKeeper.save('index', index)
+			runtime.globalStorage.set('index', index)
 			let song = list[index]
 			let program = song.source.type === 'djradio'
 			return Promise.all(program ? [api.program.url(song.id), {}] : [api.song.url, api.song.lyric].map(call => call(song.id)))
@@ -174,6 +172,16 @@ const controller = {
 		return api.user.likes().then(data => {
 			if (data.ids) likes = data.ids
 		})
+	},
+	restore: () => {
+		const load = runtime.globalStorage.get
+		let list = load('list') || [], origin = load('origin') || []
+		let index = load('index') || 0, start = load('start') || 0, mode = load('mode') || 0
+		controller.volumeChange(load('volume') || 1)
+		if (load('muted') || false) controller.mute()
+		if (mode === 3) controller.mode(mode, {origin, start, list})
+		else if (list.length) controller.add(list, load('radio') || false), controller.mode(mode)
+		controller.play(index, false)
 	}
 }
 
@@ -181,7 +189,7 @@ const proxy = new Proxy(controller, {
 	get: (target, property) => (...payload) => {
 		if (['remove', 'previous', 'next', 'resume', 'pause', 'play', 'current', 'favorite', 'list', 'like', 'dislike'].includes(property)) {
 			if (list.length === 0) return property === 'list' ? [] : undefined
-			if (['previous', 'next'].includes(property) && dynamic.loading()) return
+			if (['previous', 'next'].includes(property) && (dynamic && dynamic.loading())) return
 		}
 		return target[property].apply(null, payload)
 	}

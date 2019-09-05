@@ -144,13 +144,13 @@ const api = {
 	},
 	sign: () => apiRequest('point/dailyTask', {type: 1}),
 	refresh: cookie => {
-		user = cookie ? {cookie} : JSON.parse(runtime.globalStorage.get('user') || '{}')
+		user = cookie ? {cookie} : (runtime.globalStorage.get('user') || {})
 		return apiRequest('user/info', {}).then(data => data.code === 200 ? user.id = data.userPoint.userId : user = {}).then(sync)
-	},
+	}
 }
 
 const sync = () => {
-	runtime.globalStorage.set('user', JSON.stringify(user))
+	runtime.globalStorage.set('user', user)
 	runtime.stateManager.set('logged', !!user.id)
 	return user.id ? Promise.all([api.user.detail(), api.user.playlist(null, true)]).then(data => (runtime.stateManager.set('signed', !!data[0].pcSign), user.favor = data[1].playlist[0].id, false) || data[0]) : Promise.resolve()
 }

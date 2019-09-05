@@ -12,8 +12,8 @@ const ActiveEditor = () => {
 
 const GlobalStorage = context => {
 	return {
-		get: key => context.globalState.get(key),
-		set: (key, value) => context.globalState.update(key, value)
+		get: key => JSON.parse(context.globalState.get(key) || 'null'),
+		set: (key, value) => context.globalState.update(key, JSON.stringify(value))
 	}
 }
 
@@ -22,26 +22,6 @@ const PreferenceReader = context => {
 	return {
 		get: key => key in preference ? preference[key] : preference[key] = vscode.workspace.getConfiguration().get(`NeteaseMusic.${key}`),
 		dispose: () => preference = null
-	}
-}
-
-const SceneKeeper = context => {
-	return {
-		save: (key, value) => runtime.globalStorage.set(key, JSON.stringify(value)),
-		restore: () => {
-			const load = (key, preset) => JSON.parse(runtime.globalStorage.get(key) || preset)
-			let list = load('list', '[]')
-			let origin = load('origin', '[]')
-			let start = load('start', '0')
-			let radio = load('radio', 'false')
-			let index = load('index', '0')
-			let mode = load('mode', '0')
-			controller.volumeChange(load('volume', '1'))
-			if (load('muted', 'false')) controller.mute()
-			if (mode === 3) controller.mode(mode, {origin, start, list})
-			else if (list.length) controller.add(list, radio)
-			controller.play(index, false)
-		}
 	}
 }
 
@@ -151,7 +131,7 @@ const PlayerBar = context => {
 		item.text = button.icon
 		item.command = button.command
 		item.tooltip = button.title || undefined
-		if (button.state) Object.keys(button.state).forEach(key => runtime.stateManager.set(key, button.state[key]))
+		if (button.state) Object.entries(button.state).forEach(entry => runtime.stateManager.set.apply(null, entry))
 	}
 
 	const order = [['list'], ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['repeat', 'random', 'intelligent', 'loop'], ['mute', 'unmute'], ['volume'], ['more']].reverse()
@@ -290,8 +270,8 @@ const DuplexChannel = context => {
 			}
 			else if (body.name == 'volume') {
 				runtime.playerBar.volume(body.data)
-				runtime.sceneKeeper.save('muted', body.data.muted)
-				runtime.sceneKeeper.save('volume', body.data.value)
+				runtime.globalStorage.set('muted', body.data.muted)
+				runtime.globalStorage.set('volume', body.data.value)
 			}
 			else if (['play', 'pause'].includes(body.name)) {
 				runtime.playerBar.state(body.name)
@@ -390,7 +370,6 @@ const runtime = {
 	stateManager: null,
 	globalStorage: null,
 	preferenceReader: null,
-	sceneKeeper: null,
 	playerBar: null,
 	webviewPanel: null,
 	duplexChannel: null,
@@ -404,13 +383,11 @@ const runtime = {
 	},
 	activate: context => {
 		if (runtime.webviewPanel) return
-		// console.log('global state', context.globalState.get('user'))
 
 		runtime.event = new events.EventEmitter()
 		runtime.stateManager = StateManager(context)
 		runtime.globalStorage = GlobalStorage(context)
 		runtime.preferenceReader = PreferenceReader(context)
-		runtime.sceneKeeper = SceneKeeper(context)
 		runtime.playerBar = PlayerBar(context)
 		runtime.duplexChannel = DuplexChannel(context)
 		runtime.webviewPanel = WebviewPanel(context)
@@ -420,7 +397,7 @@ const runtime = {
 
 		runtime.event.once('ready', () =>
 			Promise.all([api, controller].map(component => component.refresh()))
-			.then(() => runtime.sceneKeeper.restore())
+			.then(() => controller.restore())
 			.then(() => runtime.stateManager.set('on', true))
 		)
 		runtime.event.once('suspend', () => runtime.dispose())
