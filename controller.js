@@ -49,7 +49,7 @@ const controller = {
 		if (Array.isArray(track)) {
 			list = track.map(compact)
 			index = 0
-			if (!radio && mode == 3 && !controller.favorite()) controller.mode(0, null, true), (dynamic && dynamic.cancel())
+			if (!radio && mode == 3 && !controller.favorite()) controller.mode(0, null, true)
 		}
 		else {
 			index = list.length
@@ -83,7 +83,7 @@ const controller = {
 	mode: (type, state, keep) => {
 		if (type === 3 && (controller.favorite() || state)) dynamic = intelligence(state)
 		else if (type === 3) return
-		else if (mode === 3 && !keep) dynamic && (dynamic.exit(), dynamic = null)
+		else if (mode === 3 && dynamic) keep ? dynamic.cancel() : (dynamic.exit(), dynamic = null)
 		mode = type
 		runtime.sceneKeeper.save('mode', mode)
 		runtime.playerBar.state(['loop', 'repeat', 'random', 'intelligent'][mode])
