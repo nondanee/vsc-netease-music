@@ -41,7 +41,7 @@ const intelligence = (state = {}) => {
 
 const controller = {
 	add: (track, radio = false) => {
-		if (radio != runtime.stateManager.get('radio')) list = []
+		if (radio !== !!runtime.stateManager.get('radio')) list = []
 		runtime.stateManager.set('radio', radio)
 		runtime.globalStorage.set('radio', radio)
 		if (Array.isArray(track)) {
