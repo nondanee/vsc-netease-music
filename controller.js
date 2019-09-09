@@ -98,7 +98,7 @@ const controller = {
 	},
 	play: (target, action = true) => {
 		index = ((target == null ? index : target) + list.length) % list.length
-		if (target != null && controller.favorite() && mode != 3 && runtime.globalStorage.get('intelligence')) controller.mode(3)
+		if (target != null && controller.favorite() && runtime.globalStorage.get('intelligence')) controller.mode(3)
 		return ((mode === 3 && dynamic) ? dynamic.promise : Promise.resolve())
 		.then(() => {
 			runtime.globalStorage.set('index', index)
