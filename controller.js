@@ -7,7 +7,7 @@ let mode = 0
 let index = 0
 let dynamic = null
 
-const compact = song => interaction.utility.extract(song, ['id', 'name', 'album', 'artists', 'source'])
+const compact = song => interaction.utility.extract(song, ['id', 'name', 'cover', 'album', 'artists', 'source'])
 
 const intelligence = (state = {}) => {
 	let origin = list, start = state.start || index

@@ -1,4 +1,5 @@
 const vscode = require('vscode')
+const crypto = require('crypto')
 
 const quickPick = vscode.window.createQuickPick()
 quickPick.canSelectMany = false
@@ -28,6 +29,7 @@ const utility = {
 			let item = utility.extract(song, ['id', 'name', 'listen'])
 			item.album = utility.extract(song.al || song.album)
 			item.artists = (song.ar || song.artists).map(artist => utility.extract(artist))
+			item.cover = utility.stringify.uri((song.al || song.album).pic) + '.jpg'
 			item.source = source
 			return item
 		},
@@ -37,6 +39,7 @@ const utility = {
 			item.artists = [{id: 0, name: program.dj.nickname}]
 			item.create = program.createTime
 			item.listen = program.listenerCount
+			item.cover = program.coverUrl
 			item.source = source
 			return item
 		}
@@ -50,18 +53,21 @@ const utility = {
 				song.label = (new Array(Math.max(index[1].toString().length, 2) - indicate.length + 1)).join('\u2007') + indicate + '   ' + song.label
 			}
 			let listen = `${utility.stringify.number(song.listen)}次播放`
-			song.description = flags.program ? [
-				utility.stringify.date(song.create),
-				listen,
-				`(${utility.stringify.duration(song.duration)})`
-			].join('  ') : [
-				flags.artist === false ? null : utility.stringify.artist(song),
-				flags.album === false ? null : song.album.name
-			].filter(item => item).join(' - ') + (flags.listen ? '  ' + listen : '') + ((song.source || {}).type === 'intelligence' ? ' 【荐】' : '')
+			song.description = flags.program ?
+				[utility.stringify.date(song.create), listen, `(${utility.stringify.duration(song.duration)})`].join('  ') :
+				[flags.artist === false ? null : utility.stringify.artist(song), flags.album === false ? null : song.album.name].filter(item => item).join(' - ') +
+				(flags.listen ? '  ' + listen : '') + ((song.source || {}).type === 'intelligence' ? ' 【荐】' : '')
 			return song
 		}
 	},
 	stringify: {
+		uri: id => {
+			id = id.toString().trim()
+			const key = '3go8&$8*3*3h0k(2)2'
+			let string = Array.from(Array(id.length).keys()).map(index => String.fromCharCode(id.charCodeAt(index) ^ key.charCodeAt(index % key.length))).join('')
+			let result = crypto.createHash('md5').update(string).digest('base64').replace(/\//g, '_').replace(/\+/g, '-')
+			return `http://p1.music.126.net/${result}/${id}`
+		},
 		date: timestamp => {
 			if (!timestamp) return ''
 			let date = new Date(timestamp)
