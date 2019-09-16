@@ -70,8 +70,9 @@
 		// const polling = () => connect().then(message => (receiveMessage(message), polling()))
 		// polling()
 
-		const eventSource = new EventSource('http://localhost:16363')
-		eventSource.onmessage = event => receiveMessage(event.data)
+		// const eventSource = new EventSource('http://localhost:16363')
+		// eventSource.onmessage = event => receiveMessage(event.data)
+		window.onmessage = event => receiveMessage(event.data)
 
 		const native = acquireVsCodeApi()
 		const postMessage = (type, body) => native.postMessage({type, body})
@@ -127,8 +128,8 @@
 			})
 
 		// webSocket.onopen = prepare
-		// window.onload = prepare
-		eventSource.onopen = () => prepare().then(() => eventSource.onopen = null)
+		window.onload = prepare
+		// eventSource.onopen = () => prepare().then(() => eventSource.onopen = null)
 	</script>
 </body>
 </html>

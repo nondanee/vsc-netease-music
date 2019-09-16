@@ -230,16 +230,16 @@ const DuplexChannel = context => {
 	/**
 	 * Server-Sent Events
 	 */
-	const caller = new events.EventEmitter()
-	const server = require('http').createServer().listen(16363, '127.0.0.1')
-	server.on('request', (req, res) => {
-		if (req.url != '/') return
-		res.writeHead(200, {'Content-Type': 'text/event-stream', 'Access-Control-Allow-Origin': '*'}), res.write(': \n\n')
-		const listener = message => res.write('data: ' + JSON.stringify(message) + '\n\n')
-		caller.on('message', listener)
-		res.once('close', () => caller.removeListener('message', listener))
-	})
-	const postMessage = (command, data) => caller.emit('message', {command, data})
+	// const caller = new events.EventEmitter()
+	// const server = require('http').createServer().listen(16363, '127.0.0.1')
+	// server.on('request', (req, res) => {
+	// 	if (req.url != '/') return
+	// 	res.writeHead(200, {'Content-Type': 'text/event-stream', 'Access-Control-Allow-Origin': '*'}), res.write(': \n\n')
+	// 	const listener = message => res.write('data: ' + JSON.stringify(message) + '\n\n')
+	// 	caller.on('message', listener)
+	// 	res.once('close', () => caller.removeListener('message', listener))
+	// })
+	// const postMessage = (command, data) => caller.emit('message', {command, data})
 
 	const receiveMessage = message => {
 		message = typeof(message) === 'object' ? message : JSON.parse(message)
@@ -282,8 +282,11 @@ const DuplexChannel = context => {
 		}
 	}
 
+	const postMessage = (command, data) => runtime.webviewPanel.panel.postMessage({command, data})
+	runtime.webviewPanel.panel.webview.onDidReceiveMessage(receiveMessage, undefined, context.subscriptions)
+
 	return {
-		dispose: () => server.close(),
+		// dispose: () => server.close(),
 		postMessage,
 		receiveMessage
 	}
@@ -301,10 +304,11 @@ const WebviewPanel = context => {
 		fs.readFileSync(vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath, 'utf-8')
 		.replace('<base>', `<base href="${vscode.Uri.file(path.join(context.extensionPath, '/')).with({scheme: 'vscode-resource'})}">`)
 
-	panel.webview.onDidReceiveMessage(runtime.duplexChannel.receiveMessage, undefined, context.subscriptions)
+	// panel.webview.onDidReceiveMessage(runtime.duplexChannel.receiveMessage, undefined, context.subscriptions)
 	panel.onDidDispose(() => runtime.event.emit('suspend'), null, context.subscriptions)
 
 	return {
+		panel,
 		dispose: () => panel.dispose()
 	}
 }
@@ -389,8 +393,9 @@ const runtime = {
 		runtime.globalStorage = GlobalStorage(context)
 		runtime.preferenceReader = PreferenceReader(context)
 		runtime.playerBar = PlayerBar(context)
-		runtime.duplexChannel = DuplexChannel(context)
+		// runtime.duplexChannel = DuplexChannel(context)
 		runtime.webviewPanel = WebviewPanel(context)
+		runtime.duplexChannel = DuplexChannel(context)
 		runtime.commandManager = CommandManager(context)
 
 		process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = runtime.preferenceReader.get('SSL.strict') ? undefined : 0
