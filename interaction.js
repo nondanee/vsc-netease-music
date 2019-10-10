@@ -63,6 +63,7 @@ const utility = {
 	},
 	stringify: {
 		uri: id => {
+			if (!id) return null
 			id = id.toString().trim()
 			const key = '3go8&$8*3*3h0k(2)2'
 			let string = Array.from(Array(id.length).keys()).map(index => String.fromCharCode(id.charCodeAt(index) ^ key.charCodeAt(index % key.length))).join('')
