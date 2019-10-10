@@ -38,17 +38,17 @@ const PlayerBar = context => {
 	const buttons = {
 		previous: {
 			command: 'neteasemusic.previous',
-			icon: ' $(chevron-left) ',
+			icon: '$(chevron-left)',
 			title: '上一首'
 		},
 		next: {
 			command: 'neteasemusic.next',
-			icon: ' $(chevron-right) ',
+			icon: '$(chevron-right)',
 			title: '下一首'
 		},
 		repeat: {
 			command: 'neteasemusic.mode.loop',
-			icon: '\u2006$(sync)\u2006',
+			icon: '$(sync)',
 			title: '播放模式: 循环播放',
 			state: {mode: 0}
 		},
@@ -60,40 +60,40 @@ const PlayerBar = context => {
 		},
 		intelligent: { // action to intelligent or loop
 			command: 'neteasemusic.mode.random',
-			icon: '\u2006$(light-bulb)\u2006',
+			icon: '$(question)',
 			title: '播放模式: 随机播放',
 			state: {mode: 2}
 		},
 		loop: {
 			command: 'neteasemusic.mode.intelligent',
-			icon: '\u2006$(pulse)',
+			icon: '$(pulse)',
 			title: '播放模式: 心动模式',
 			state: {mode: 3}
 		},
 		play: {
 			command: 'neteasemusic.play',
 			// icon: '▶'
-			icon: '\u2004$(triangle-right)\u2004',
+			icon: '$(play)',
 			title: '播放',
 			state: {playing: false}
 		},
 		pause: {
 			command: 'neteasemusic.pause',
 			// icon: ' ❚❚ '
-			icon: ' $(primitive-square) ',
+			icon: '$(primitive-square)',
 			title: '暂停',
 			state: {playing: true}
 		},
 		like: {
 			command: 'neteasemusic.like',
-			icon: '\u2006$(heart)\u2006',
+			icon: '$(heart)',
 			title: '红心',
 			color: 'rgba(255,255,255,0.5)',
 			state: {liked: false}
 		},
 		dislike: {
 			command: 'neteasemusic.dislike',
-			icon: '\u2006$(heart)\u2006',
+			icon: '$(heart)',
 			title: '取消红心',
 			state: {liked: true}
 		},
@@ -121,7 +121,7 @@ const PlayerBar = context => {
 		},
 		more: {
 			command: 'neteasemusic.more',
-			icon: '\u2006$(kebab-horizontal)\u2006',
+			icon: '$(kebab-horizontal)',
 			title: '更多操作'
 		}
 	}

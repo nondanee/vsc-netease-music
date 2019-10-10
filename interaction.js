@@ -121,11 +121,11 @@ const utility = {
 		}
 	},
 	indicate: {
-		expand: fill => `${fill ? '⯆' : '⯈'}  `,
-		collect: done => `${done ? '【 $(check) 已收藏 】' : '【 $(plus) 收藏 】'}`
+		expand: fill => `${fill ? '$(chevron-down)' : '$(chevron-right)'}  `,
+		collect: done => `${done ? '〖 $(check) 已收藏 〗' : '〖 $(plus) 收藏 〗'}`
 	},
 	indent: {
-		expand: item => Object.assign(item, {label: `\u2002\u2005\u2006  ${item.label}`})
+		expand: item => Object.assign(item, {label: `\u2003\u2005  ${item.label}`})
 	}
 }
 
