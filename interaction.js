@@ -26,10 +26,11 @@ const utility = {
 		Object.keys(item).filter(key => keys.includes(key)).reduce((result, key) => Object.assign(result, {[key]: item[key]}), {}),
 	format: {
 		song: (song, source) => {
+			let album = song.al || song.album
 			let item = utility.extract(song, ['id', 'name', 'listen'])
-			item.album = utility.extract(song.al || song.album)
+			item.album = utility.extract(album)
 			item.artists = (song.ar || song.artists).map(artist => utility.extract(artist))
-			item.cover = utility.stringify.uri((song.al || song.album).pic) + '.jpg'
+			item.cover = utility.stringify.uri(album.pic || album.picId) + '.jpg'
 			item.source = source
 			return item
 		},
