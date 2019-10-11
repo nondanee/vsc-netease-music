@@ -233,11 +233,24 @@ const DuplexChannel = context => {
 	// const caller = new events.EventEmitter()
 	// const server = require('http').createServer().listen(16363, '127.0.0.1')
 	// server.on('request', (req, res) => {
-	// 	if (req.url != '/') return
-	// 	res.writeHead(200, {'Content-Type': 'text/event-stream', 'Access-Control-Allow-Origin': '*'}), res.write(': \n\n')
-	// 	const listener = message => res.write('data: ' + JSON.stringify(message) + '\n\n')
-	// 	caller.on('message', listener)
-	// 	res.once('close', () => caller.removeListener('message', listener))
+	// 	if (req.url === '/sender') {
+	// 		res.writeHead(200, {'Content-Type': 'text/event-stream', 'Access-Control-Allow-Origin': '*'}), res.write(': \n\n')
+	// 		const listener = message => res.write('data: ' + JSON.stringify(message) + '\n\n')
+	// 		caller.on('message', listener)
+	// 		res.once('close', () => caller.removeListener('message', listener))
+	// 	}
+	// 	else if (req.url === '/receiver') {
+	// 		new Promise((resolve, reject) => {
+	// 			let chunks = []
+	// 			req
+	// 			.on('data', chunk => chunks.push(chunk))
+	// 			.on('end', () => resolve(Buffer.concat(chunks).toString()))
+	// 			.on('error', error => reject(error))
+	// 		})
+	// 		.then(receiveMessage)
+	// 		.then(() => 204).catch(() => 400)
+	// 		.then(code => (res.writeHead(code, {'Access-Control-Allow-Origin': '*'}), res.end()))
+	// 	}
 	// })
 	// const postMessage = (command, data) => caller.emit('message', {command, data})
 
