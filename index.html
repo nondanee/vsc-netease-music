@@ -24,7 +24,7 @@
 			lrcs.filter(lrc => lrc).forEach(parse)
 			const timeline = Object.entries(parsed).map(entry => [secondify(entry[0]), entry[1]]).sort((x, y) => x[0] - y[0])
 			let cursor = 0
-			return timeline.length ? second => second > timeline[cursor][0] ? timeline[cursor ++][1].join('  ') : null : () => null
+			return timeline.length ? second => (timeline[cursor] && second > timeline[cursor][0]) ? timeline[cursor ++][1].join('  ') : null : () => null
 		}
 
 		let song = null
