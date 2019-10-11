@@ -57,7 +57,7 @@ const utility = {
 			song.description = flags.program ?
 				[utility.stringify.date(song.create), listen, `(${utility.stringify.duration(song.duration)})`].join('  ') :
 				[flags.artist === false ? null : utility.stringify.artist(song), flags.album === false ? null : song.album.name].filter(item => item).join(' - ') +
-				(flags.listen ? '  ' + listen : '') + ((song.source || {}).type === 'intelligence' ? ' 【荐】' : '')
+				(flags.listen ? '  ' + listen : '') + ((song.source || {}).type === 'intelligence' ? ' 〖荐〗' : '')
 			return song
 		}
 	},
@@ -331,7 +331,7 @@ const interaction = {
 					data.playlist.tracks.map(song => utility.format.song(song, {type: 'playlist', id, name}))
 					.map((song, index, track) => utility.lift.song(song, [index, track.length], {}, () => {
 						controller.add(track)
-						controller.play(index)
+						controller.play(index, true, true)
 						quickPick.hide()
 					}))
 				), `${name} by ${data.playlist.creator.nickname}`)

@@ -24,7 +24,7 @@ const intelligence = (state = {}) => {
 	const promise = loading ? api.playlist.intelligence(origin[start].id).then(data => {
 		loading = false
 		if (cancelled) return
-		list = list.concat(data.data.map(item => interaction.utility.format.song(item.songInfo, {type: item.recommended ? 'intelligence' : origin[start].source})))
+		list = list.concat(data.data.map(item => interaction.utility.format.song(item.songInfo, item.recommended ? {type: 'intelligence'} : origin[start].source)))
 		save({origin, start, list, intelligence: true})
 	}) : Promise.resolve()
 
@@ -96,9 +96,9 @@ const controller = {
 		if (playing) runtime.duplexChannel.postMessage('pause')
 		return playing
 	},
-	play: (target, action = true) => {
+	play: (target, action = true, potential = false) => {
 		index = ((target == null ? index : target) + list.length) % list.length
-		if (target != null && controller.favorite() && runtime.globalStorage.get('intelligence')) controller.mode(3)
+		if (potential && controller.favorite() && runtime.globalStorage.get('intelligence')) controller.mode(3)
 		return ((mode === 3 && dynamic) ? dynamic.promise : Promise.resolve())
 		.then(() => {
 			runtime.globalStorage.set('index', index)
