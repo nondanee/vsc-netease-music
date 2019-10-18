@@ -181,7 +181,7 @@ const controller = {
 		if (load('muted') || false) controller.mute()
 		if (mode === 3) controller.mode(mode, {origin, start, list})
 		else if (list.length) controller.add(list, load('radio') || false), controller.mode(mode)
-		controller.play(index, false)
+		proxy.play(index, false)
 	}
 }
 
