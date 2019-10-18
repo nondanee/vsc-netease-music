@@ -310,12 +310,12 @@ const WebviewPanel = context => {
 	const panel = vscode.window.createWebviewPanel(
 		'neteasemusic', 'NeteaseMusic',
 		{preserveFocus: true, viewColumn: vscode.ViewColumn.One},
-		{enableScripts: true, retainContextWhenHidden: true, portMapping: [{webviewPort: 16363, extensionHostPort: 16363}]}
+		{enableScripts: true, retainContextWhenHidden: true, portMapping: [{webviewPort: 16363, extensionHostPort: 16363}], localResourceRoots: [vscode.Uri.file(context.extensionPath)]}
 	)
 	panel.iconPath = ['light', 'dark'].reduce((uri, theme) => Object.assign(uri, {[theme]: vscode.Uri.file(path.join(context.extensionPath, `${theme}.svg`))}), {})
 	panel.webview.html =
 		fs.readFileSync(vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath, 'utf-8')
-		.replace('<base>', `<base href="${vscode.Uri.file(path.join(context.extensionPath, '/')).with({scheme: 'vscode-resource'})}">`)
+		// .replace('<base>', `<base href="${vscode.Uri.file(path.join(context.extensionPath, '/')).with({scheme: 'vscode-resource'})}">`)
 
 	// panel.webview.onDidReceiveMessage(runtime.duplexChannel.receiveMessage, undefined, context.subscriptions)
 	panel.onDidDispose(() => runtime.event.emit('suspend'), null, context.subscriptions)
