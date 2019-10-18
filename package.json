@@ -14,11 +14,17 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:neteasemusic.start"
+        "onCommand:neteasemusic.start",
+        "onCommand:neteasemusic.reset"
     ],
     "main": "./extension",
     "contributes": {
         "commands": [
+            {
+                "command": "neteasemusic.reset",
+                "title": "%command.neteasemusic.reset%",
+                "category": "%category.neteasemusic%"
+            },
             {
                 "command": "neteasemusic.start",
                 "title": "%command.neteasemusic.start%",
@@ -243,22 +249,35 @@
                 "NeteaseMusic.API.SSL": {
                     "type": "boolean",
                     "default": true,
+                    "scope": "machine",
                     "description": "%description.neteasemusic.api.ssl%"
                 },
                 "NeteaseMusic.SSL.strict": {
                     "type": "boolean",
                     "default": true,
+                    "scope": "machine",
                     "description": "%description.neteasemusic.ssl.strict%"
                 },
                 "NeteaseMusic.CDN.redirect": {
                     "type": "boolean",
                     "default": true,
+                    "scope": "machine",
                     "description": "%description.neteasemusic.cdn.redirect%"
+                },
+                "NeteaseMusic.reset.control": {
+                    "type": "boolean",
+                    "default": false,
+                    "scope": "machine",
+                    "description": "%description.neteasemusic.reset.control%"
                 }
             }
         },
         "menus": {
             "commandPalette": [
+                {
+                    "command": "neteasemusic.reset",
+                    "when": "!neteasemusic.on && config.NeteaseMusic.reset.control"
+                },
                 {
                     "command": "neteasemusic.start",
                     "when": "!neteasemusic.on"
