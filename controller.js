@@ -173,7 +173,13 @@ const controller = {
 			if (data.ids) likes = data.ids
 		})
 	},
+	reset: () => {
+		list = [], random = []
+		index = 0, mode = 0
+		dynamic = null
+	},
 	restore: () => {
+		controller.reset()
 		const load = runtime.globalStorage.get
 		let list = load('list') || [], origin = load('origin') || []
 		let index = load('index') || 0, start = load('start') || 0, mode = load('mode') || 0
