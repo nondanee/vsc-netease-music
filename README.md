@@ -12,7 +12,7 @@
 [![Visual Studio Marketplace Rating](https://img.shields.io/visual-studio-marketplace/stars/nondanee.vsc-netease-music.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=nondanee.vsc-netease-music)
 [![GitHub Stars](https://img.shields.io/github/stars/nondanee/vsc-netease-music.svg?style=flat-square)](https://github.com/nondanee/vsc-netease-music)
 
-![demo](https://user-images.githubusercontent.com/26399680/50915155-240ae880-1473-11e9-91b6-731183a6b26a.gif)
+![demo](https://user-images.githubusercontent.com/26399680/67140787-b22cbe80-f290-11e9-9d6a-77d50179de43.gif)
 
 </div>
 
