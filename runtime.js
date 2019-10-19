@@ -415,7 +415,6 @@ const runtime = {
 
 		runtime.event.once('ready', () =>
 			Promise.all([api, controller].map(component => component.refresh()))
-			.then(() => controller.restore())
 			.then(() => runtime.stateManager.set('on', true))
 		)
 		runtime.event.once('suspend', () => runtime.dispose())

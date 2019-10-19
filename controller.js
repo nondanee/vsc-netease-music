@@ -165,30 +165,20 @@ const controller = {
 		let muted = !!runtime.stateManager.get('muted')
 		if (muted) runtime.duplexChannel.postMessage('unmute')
 	},
-	volumeChange: value => {
-		runtime.duplexChannel.postMessage('volumeChange', {value})
-	},
-	refresh: () => {
-		return api.user.likes().then(data => {
-			if (data.ids) likes = data.ids
+	volumeChange: value => runtime.duplexChannel.postMessage('volumeChange', {value}),
+	refresh: () =>
+		api.user.likes().then(data => likes = data.ids ? data.ids : [])
+		.then(() => {
+			list = [], random = [], index = 0, mode = 0, dynamic = null
+			const load = runtime.globalStorage.get
+			let _list = load('list') || [], _origin = load('origin') || []
+			let _index = load('index') || 0, _start = load('start') || 0, _mode = load('mode') || 0
+			controller.volumeChange(load('volume') || 1)
+			if (load('muted') || false) controller.mute()
+			if (_mode === 3) controller.mode(_mode, {origin: _origin, start: _start, list: _list})
+			else if (_list.length) controller.add(_list, load('radio') || false), controller.mode(_mode)
+			proxy.play(_index, false)
 		})
-	},
-	reset: () => {
-		list = [], random = []
-		index = 0, mode = 0
-		dynamic = null
-	},
-	restore: () => {
-		controller.reset()
-		const load = runtime.globalStorage.get
-		let list = load('list') || [], origin = load('origin') || []
-		let index = load('index') || 0, start = load('start') || 0, mode = load('mode') || 0
-		controller.volumeChange(load('volume') || 1)
-		if (load('muted') || false) controller.mute()
-		if (mode === 3) controller.mode(mode, {origin, start, list})
-		else if (list.length) controller.add(list, load('radio') || false), controller.mode(mode)
-		proxy.play(index, false)
-	}
 }
 
 const proxy = new Proxy(controller, {
