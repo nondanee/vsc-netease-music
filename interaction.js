@@ -426,7 +426,7 @@ const interaction = {
 			}
 		})
 	},
-	logout: () => api.logout(),
+	logout: () => (api.logout(), runtime.playerBar.state('dislike')),
 	sign: () => api.sign().then(data => {
 		if ([-2, 200].includes(data.code)) {
 			vscode.window.showInformationMessage('签到成功')
@@ -569,7 +569,7 @@ const interaction = {
 				},
 				recommend: {
 					label: `来源: 每日推荐`,
-					action: () => interaction.recommend.song()
+					action: api.user.account() ? () => interaction.recommend.song() : null
 				},
 				new: {
 					label: `来源: 新歌速递`,
@@ -577,7 +577,7 @@ const interaction = {
 				},
 				record: {
 					label: `来源: 听歌排行`,
-					action: () => interaction.user.record(!song.source.week)
+					action: api.user.account() ? () => interaction.user.record(!song.source.week) : null
 				},
 				djradio: {
 					label: `电台节目: ${song.source.name}`,
