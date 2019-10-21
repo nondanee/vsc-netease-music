@@ -166,7 +166,7 @@ const controller = {
 		if (muted) runtime.duplexChannel.postMessage('unmute')
 	},
 	volumeChange: value => runtime.duplexChannel.postMessage('volumeChange', {value}),
-	refresh: () => api.user.likes().then(data => likes = data.ids ? data.ids : []),
+	refresh: () => api.user.likes().then(data => ((likes = data.ids ? data.ids : []), runtime.playerBar.state(likes.includes((list[index] || {}).id) ? 'like' : 'dislike'))),
 	restore: () => {
 		list = [], random = [], index = 0, mode = 0, dynamic = null
 		const load = runtime.globalStorage.get
