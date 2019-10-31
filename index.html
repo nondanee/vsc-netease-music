@@ -120,7 +120,7 @@
 					document.ontouchend = ready
 				}
 				else {
-					postMessage({name: 'echo', data: `${error.name}: ${error.message}`})
+					postMessage('echo', `${error.name}: ${error.message}`)
 				}
 			})
 
