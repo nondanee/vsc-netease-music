@@ -64,7 +64,7 @@ const controller = {
 		index = target < index ? index - 1 : index
 		index = index < list.length ? index : 0
 		runtime.globalStorage.set('list', list)
-		if (list.length == 0) runtime.playerBar.hide()
+		if (list.length === 0) (runtime.playerBar.hide(), runtime.duplexChannel.postMessage('stop'))
 	},
 	previous: () => {
 		let mapped = random[(random.indexOf(index) - 1 + random.length) % random.length]
@@ -185,6 +185,7 @@ const proxy = new Proxy(controller, {
 		if (['remove', 'previous', 'next', 'resume', 'pause', 'play', 'current', 'favorite', 'list', 'like', 'dislike'].includes(property)) {
 			if (list.length === 0) return property === 'list' ? [] : undefined
 			if (['previous', 'next'].includes(property) && (dynamic && dynamic.loading())) return
+			if (property === 'previous' && !!runtime.stateManager.get('radio')) return
 		}
 		return target[property].apply(null, payload)
 	}

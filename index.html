@@ -24,7 +24,7 @@
 			lrcs.filter(lrc => lrc).forEach(parse)
 			const timeline = Object.entries(parsed).map(entry => [secondify(entry[0]), entry[1]]).sort((x, y) => x[0] - y[0])
 			let cursor = 0
-			return timeline.length ? second => (timeline[cursor] && second > timeline[cursor][0]) ? timeline[cursor ++][1].join('  ') : null : () => null
+			return timeline.length ? second => (timeline[cursor] && second > timeline[cursor][0]) ? timeline[cursor ++][1].join('  ') : null : null
 		}
 
 		let song = null
@@ -43,7 +43,7 @@
 		}
 
 		audio.ontimeupdate = () => {
-			let update = lyric(audio.currentTime)
+			let update = lyric ? lyric(audio.currentTime) : null
 			if (update) postMessage('event', {name: 'lyric', data: update})
 		}
 
@@ -52,6 +52,15 @@
 		}
 
 		audio.onloadstart = () => {
+			if ('mediaSession' in navigator) {
+				navigator.mediaSession.metadata = new MediaMetadata({
+					title: song.name,
+					artist: song.artists.map(artist => artist.name).join(' / '),
+					album: song.album.name,
+					artwork: [{src: song.cover + '?param=200y200',  sizes: '200x200', type: 'image/jpeg'}]
+				})
+				navigator.mediaSession.setActionHandler('previoustrack', song.source.type === 'radio' ? null : () => postMessage('command', {action: 'previous'}))
+			}
 			postMessage('event', {name: 'load', data: song})
 		}
 
@@ -75,6 +84,12 @@
 		// const postMessage = (type, body) => webSocket.send(JSON.stringify({type, body}))
 		// const postMessage = (type, body) => fetch('http://localhost:16363/receiver', {method: 'POST', body: JSON.stringify({type, body})})
 
+		if ('mediaSession' in navigator) {
+			// navigator.mediaSession.setActionHandler('play', () => audio.play())
+			// navigator.mediaSession.setActionHandler('pause', () => audio.pause())
+			navigator.mediaSession.setActionHandler('nexttrack', () => postMessage('command', {action: 'next'}))
+		}
+
 		const receiveMessage = message => {
 			message = typeof(message) === 'object' ? message : JSON.parse(message)
 			const {command, data} = message
@@ -83,6 +98,11 @@
 				lyric = Lyric(data.lyric)
 				audio.src = song.url
 				if (data.action) audio.play()
+			}
+			else if (command === 'stop') {
+				song = null
+				lyric = null
+				audio.src = ''
 			}
 			else if (command === 'play') {
 				if (audio.paused) audio.play()

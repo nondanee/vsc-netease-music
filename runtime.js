@@ -290,6 +290,9 @@ const DuplexChannel = context => {
 				runtime.playerBar.state(body.name)
 			}
 		}
+		else if (type == 'command') {
+			controller[body.action]()
+		}
 		else if (type == 'echo') {
 			vscode.window.showInformationMessage(body.toString())
 		}
