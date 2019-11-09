@@ -61,7 +61,7 @@ const api = {
 		song: id => apiRequest(`v1/artist/${id}`, {top: 50}),
 		album: id =>
 			Promise.all([apiRequest(`artist/albums/${id}`, {limit: 1000, offset: 0}), apiRequest(`artist/detail/v4`, {id}), apiRequest(`artist/detail/dynamic`, {id})])
-			.then(data => (data[0].artist.fansNum = data[1].fansNum, data[0].artist.followed = data[2].followed, false) || data[0]),
+			.then(data => (data[0].artist.fansNum = data[1].fansNum, data[0].artist.followed = data[2].followed, data[0])),
 		subscribe: (id, action) => apiRequest(`artist/${action ? 'sub' : 'unsub'}`, {artistId: id, artistIds: [id]})
 	},
 	djradio: {
@@ -85,7 +85,7 @@ const api = {
 	album: {
 		detail: id =>
 			Promise.all([apiRequest(`v1/album/${id}`, {}), apiRequest('album/detail/dynamic', {id})])
-			.then(data => (Object.assign(data[0].album.info, data[1]), false) || data[0]),
+			.then(data => (Object.assign(data[0].album.info, data[1]), data[0])),
 		subscribe: (id, action) => apiRequest(`album/${action ? 'sub' : 'unsub'}`, {id})
 	},
 	playlist: {
@@ -152,7 +152,7 @@ const api = {
 const sync = () => {
 	runtime.globalStorage.set('user', user)
 	runtime.stateManager.set('logged', !!user.id)
-	return user.id ? Promise.all([api.user.detail(), api.user.playlist(null, true)]).then(data => (runtime.stateManager.set('signed', !!data[0].pcSign), user.favor = data[1].playlist[0].id, false) || data[0]) : Promise.resolve()
+	return user.id ? Promise.all([api.user.detail(), api.user.playlist(null, true)]).then(data => (runtime.stateManager.set('signed', !!data[0].pcSign), user.favor = data[1].playlist[0].id, data[0])) : Promise.resolve()
 }
 
 module.exports = api
