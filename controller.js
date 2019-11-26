@@ -59,6 +59,7 @@ const controller = {
 		runtime.playerBar.show(radio)
 	},
 	remove: target => {
+		target = target == null ? index : target
 		list.splice(target, 1)
 		random = random.filter(value => value != target).map(value => value < target ? value : value - 1)
 		index = target < index ? index - 1 : index
@@ -104,21 +105,12 @@ const controller = {
 			runtime.globalStorage.set('index', index)
 			let song = list[index]
 			let program = song.source.type === 'djradio'
-			return Promise.all(program ? [api.program.url(song.id), {}] : [api.song.url, api.song.lyric].map(call => call(song.id)))
-			.then(batch => {
-				let url = batch[0].data[0].url
-				let lyric = batch[1].lrc ? [batch[1].lrc.lyric, batch[1].tlyric.lyric] : []
-				if (!url) {
-					vscode.window.showWarningMessage(`无法播放: ${interaction.utility.stringify.song(song)}`)
-					controller.remove(index)
-					controller.play()
-				}
-				else {
-					if (runtime.preferenceReader.get('CDN.redirect')) url = url.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net')
-					runtime.duplexChannel.postMessage('load', {action, lyric, song: Object.assign({url}, song)})
-					runtime.stateManager.set('program', program)
-					runtime.playerBar.state(likes.includes(song.id) ? 'like' : 'dislike')
-				}
+			return Promise.resolve(program ? {} : api.song.lyric(song.id))
+			.then(data => {
+				const lyric = data.lrc ? [data.lrc.lyric, data.tlyric.lyric] : []
+				runtime.duplexChannel.postMessage('load', {action, lyric, song})
+				runtime.stateManager.set('program', program)
+				runtime.playerBar.state(likes.includes(song.id) ? 'like' : 'dislike')
 			})
 		})
 	},

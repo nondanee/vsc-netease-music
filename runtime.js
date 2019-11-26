@@ -289,6 +289,11 @@ const DuplexChannel = context => {
 			else if (['play', 'pause'].includes(body.name)) {
 				runtime.playerBar.state(body.name)
 			}
+			else if (body.name == 'error') {
+				vscode.window.showWarningMessage(`无法播放: ${interaction.utility.stringify.song(body.data)}`)
+				controller.remove()
+				controller.play()
+			}
 		}
 		else if (type == 'command') {
 			controller[body.action]()
@@ -305,6 +310,41 @@ const DuplexChannel = context => {
 		// dispose: () => server.close(),
 		postMessage,
 		receiveMessage
+	}
+}
+
+const AssistServer = context => {
+	const urlParse = require('url').parse
+	const queryify = require('querystring').stringify
+	const queryParse = require('querystring').parse
+
+	const server = require('http').createServer()
+	.on('request', (req, res) => {
+		if (req.method === 'option') return res.end()
+		const url = urlParse(req.url)
+		const query = queryParse(url.query)
+		const headers = Object.assign({}, req.headers)
+		
+		const [, type, id] = (url.pathname.match(/^\/(song|program)\/(\d+)$/) || [])
+		if (id) {
+			['host', 'referer'].filter(key => key in headers).forEach(key => delete headers[key])
+			Promise.resolve(query.url ? api.request('GET', query.url, headers) : Promise.reject(new Error('initial')))
+			.then(response => response.statusCode.toString().startsWith('20') ? response : Promise.reject(new Error('expire')))
+			.then(response => (res.writeHead(response.statusCode, response.headers), response.pipe(res), Promise.reject(new Error('end'))))
+			.catch(error => ['initial', 'expire'].includes(error.message) ? api[type].url(id) : error)
+			.then(body => body.data[0].url ? body.data[0].url : Promise.reject(new Error('empty')))
+			.then(link => runtime.preferenceReader.get('CDN.redirect') ? link.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net') : link)
+			.then(link => (res.writeHead(302, {location: url.pathname + '?' + queryify({url: link})}), res.end()))
+			.catch(error => ['empty'].includes(error.message) ? (res.writeHead(404, {'content-type': 'audio/mpeg'}), res.end()) : error)
+		}
+		else {
+			res.socket.destroy()
+		}
+	})
+	.listen(16363, '127.0.0.1')
+
+	return {
+		dispose: () => server.close()
 	}
 }
 
@@ -391,6 +431,7 @@ const runtime = {
 	globalStorage: null,
 	preferenceReader: null,
 	playerBar: null,
+	assistServer: null,
 	webviewPanel: null,
 	duplexChannel: null,
 	commandManager: null,
@@ -410,6 +451,7 @@ const runtime = {
 		runtime.preferenceReader = PreferenceReader(context)
 		runtime.playerBar = PlayerBar(context)
 		// runtime.duplexChannel = DuplexChannel(context)
+		runtime.assistServer = AssistServer(context)
 		runtime.webviewPanel = WebviewPanel(context)
 		runtime.duplexChannel = DuplexChannel(context)
 		runtime.commandManager = CommandManager(context)

@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="referrer" content="never">
     <meta name="referrer" content="no-referrer">
-	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; connect-src *; media-src * vscode-resource:">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; connect-src *; media-src * vscode-resource: blob:">
 	<base>
 </head>
 <body>
@@ -51,7 +51,8 @@
 			postMessage('event', {name: 'volume', data: {muted: audio.muted, value: audio.volume}})
 		}
 
-		audio.onloadstart = () => {
+		audio.onloadedmetadata = () => {
+			song.duration = audio.duration
 			if ('mediaSession' in navigator) {
 				navigator.mediaSession.metadata = new MediaMetadata({
 					title: song.name,
@@ -64,8 +65,8 @@
 			postMessage('event', {name: 'load', data: song})
 		}
 
-		audio.onloadedmetadata = () => {
-			song.duration = audio.duration
+		audio.onerror = event => {
+			if (event.target.error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) postMessage('event', {name: 'error', data: song})
 		}
 
 		// const webSocket = new WebSocket('ws://localhost:16363')
@@ -96,7 +97,7 @@
 			if (command === 'load') {
 				song = data.song
 				lyric = Lyric(data.lyric)
-				audio.src = song.url
+				audio.src = `http://127.0.0.1:16363/${song.source.type === 'djradio' ? 'program' : 'song'}/${song.id}`
 				if (data.action) audio.play()
 			}
 			else if (command === 'stop') {
@@ -122,6 +123,19 @@
 				audio.volume + 0.2 > 1 ? audio.volume = 0 : audio.volume += 0.2
 			}
 		}
+
+		// const cache = url => {
+		// 	fetch(url)
+		// 	.then(response => response.blob())
+		// 	.then(blob => {
+		// 		if (url != audio.src) return
+		// 		let src = window.URL.createObjectURL(blob)
+		// 		let currentTime = audio.currentTime
+		// 		audio.src = src
+		// 		audio.currentTime = currentTime
+		// 		audio.play()
+		// 	})
+		// }
 
 		const ready = () => {
 			document.onclick = null

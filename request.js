@@ -46,6 +46,7 @@ const apiRequest = (path, data, load = true) => {
 }
 
 const api = {
+	request,
 	user: {
 		detail: id => apiRequest(`v1/user/detail/${id || user.id}`, {}),
 		artist: () => apiRequest(`artist/sublist`, {limit: 1000, offset: 0}),
