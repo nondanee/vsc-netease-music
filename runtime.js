@@ -335,7 +335,19 @@ const AssistServer = context => {
 			.then(body => body.data[0].url ? body.data[0].url : Promise.reject(new Error('empty')))
 			.then(link => runtime.preferenceReader.get('CDN.redirect') ? link.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net') : link)
 			.then(link => (res.writeHead(302, {location: url.pathname + '?' + queryify({url: link})}), res.end()))
-			.catch(error => ['empty'].includes(error.message) ? (res.writeHead(404, {'content-type': 'audio/mpeg'}), res.end()) : error)
+			.catch(error => ['empty'].includes(error.message) ? (res.writeHead(404, {'content-type': 'audio/*'}), res.end()) : error)
+		}
+		else if (url.pathname === '/song/file' && query.path) {
+			let file = decodeURIComponent(urlParse(query.path).pathname), meta = {}
+			file = process.platform === 'win32' ? file.replace(/^\//, '') : file
+			try {meta = fs.statSync(file)} 
+			catch(error) {return (res.writeHead(404, {'content-type': 'audio/*'}), res.end())}
+			let [start, end] = (headers['range'] || '').split('-')
+			start = parseInt(start) || 0
+			end = parseInt(end) || Infinity
+			const bytes = `bytes ${start}-${end === Infinity ? meta.size - 1 : end}/${meta.size}`
+			res.writeHead(headers['range'] ? 206 : 200, {'content-type': 'audio/*', 'content-range': headers['range'] ? bytes : null})
+			fs.createReadStream(file, {start, end}).pipe(res)
 		}
 		else {
 			res.socket.destroy()
