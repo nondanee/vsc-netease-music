@@ -113,7 +113,8 @@ const api = {
 		dislike: id => apiRequest('song/like', {trackId: id, like: false, time: 0, userid: 0}),
 		collect: (id, pid) => apiRequest('playlist/manipulate/tracks', {trackIds: [id], pid: pid, op: 'add'}),
 		comment: id => apiRequest(`v1/resource/comments/R_SO_4_${id}`, {rid: id, limit: 50, offset: 0}),
-		log: data => apiRequest('feedback/weblog', {logs: JSON.stringify([{action: 'play', json: data}])})
+		log: data => apiRequest('feedback/weblog', {logs: JSON.stringify([{action: 'play', json: data}])}),
+		trash: (id, time = 0) => apiRequest('v1/radio/trash/add', {alg: 'itembased', songId: `${id}`, time: `${time}`})
 	},
 	recommend: {
 		song: () => apiRequest('v1/discovery/recommend/songs', {limit: 30, offset: 0}),

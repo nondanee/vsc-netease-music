@@ -122,6 +122,10 @@
 				if (audio.muted) audio.muted = false
 				audio.volume + 0.2 > 1 ? audio.volume = 0 : audio.volume += 0.2
 			}
+			else if (command === 'trash') {
+				let data = {id: (song || {}).id, time: parseInt((audio || {}).currentTime)}
+				postMessage('event', {name: 'trash', data})
+			}
 		}
 
 		// const cache = url => {

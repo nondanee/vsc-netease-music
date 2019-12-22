@@ -129,6 +129,16 @@ const controller = {
 		copy[index].play = true
 		return copy
 	},
+	trash: song => {
+		if (!song || !song.id) return runtime.duplexChannel.postMessage('trash') // require currentTime callback
+		api.song.trash(song.id, song.time).then(() => {
+			let last = index === list.length - 1
+			if (last)
+				interaction.recommend.radio()
+			else
+				controller.remove(), controller.play()
+		})
+	},
 	like: () => {
 		let id = list[index].id
 		if (likes.includes(id)) return

@@ -91,6 +91,11 @@
                 "category": "%category.neteasemusic%"
             },
             {
+                "command": "neteasemusic.trash",
+                "title": "%command.neteasemusic.trash%",
+                "category": "%category.neteasemusic%"
+            },
+            {
                 "command": "neteasemusic.like",
                 "title": "%command.neteasemusic.like%",
                 "category": "%category.neteasemusic%"
@@ -365,6 +370,10 @@
                 {
                     "command": "neteasemusic.dislike",
                     "when": "neteasemusic.on && neteasemusic.logged && neteasemusic.track && neteasemusic.liked"
+                },
+                {
+                    "command": "neteasemusic.trash",
+                    "when": "neteasemusic.on && neteasemusic.track && neteasemusic.radio"
                 },
                 {
                     "command": "neteasemusic.list",

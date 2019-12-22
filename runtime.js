@@ -46,6 +46,7 @@ const PlayerBar = context => {
 			icon: '$(chevron-right)',
 			title: '下一首'
 		},
+		// /* button name indicates the next state
 		repeat: {
 			command: 'neteasemusic.mode.loop',
 			icon: '$(sync)',
@@ -58,8 +59,8 @@ const PlayerBar = context => {
 			title: '播放模式: 单曲循环',
 			state: {mode: 1}
 		},
-		intelligent: { // action to intelligent or loop
-			command: 'neteasemusic.mode.random',
+		intelligent: {
+			command: 'neteasemusic.mode.random', // action to intelligent or loop
 			icon: '$(question)',
 			title: '播放模式: 随机播放',
 			state: {mode: 2}
@@ -70,19 +71,23 @@ const PlayerBar = context => {
 			title: '播放模式: 心动模式',
 			state: {mode: 3}
 		},
+		// */
 		play: {
 			command: 'neteasemusic.play',
-			// icon: '▶'
 			icon: '$(play)',
 			title: '播放',
 			state: {playing: false}
 		},
 		pause: {
 			command: 'neteasemusic.pause',
-			// icon: ' ❚❚ '
-			icon: '$(primitive-square)',
+			icon: '$(primitive-square)', // $(debug-pause) cannot override color
 			title: '暂停',
 			state: {playing: true}
+		},
+		trash: {
+			command: 'neteasemusic.trash',
+			icon: '$(trash)',
+			title: '不喜欢'
 		},
 		like: {
 			command: 'neteasemusic.like',
@@ -134,7 +139,7 @@ const PlayerBar = context => {
 		if (button.state) Object.entries(button.state).forEach(entry => runtime.stateManager.set.apply(null, entry))
 	}
 
-	const order = [['list'], ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['repeat', 'random', 'intelligent', 'loop'], ['mute', 'unmute'], ['volume'], ['more']].reverse()
+	const order = [['list'], ['trash'], ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['repeat', 'random', 'intelligent', 'loop'], ['mute', 'unmute'], ['volume'], ['more']].reverse()
 
 	const items = order.map((group, index) => {
 		group.forEach(name => buttons[name].index = index)
@@ -164,6 +169,7 @@ const PlayerBar = context => {
 			runtime.stateManager.set('track', true)
 			items.forEach(item => item.show())
 			if (radio) ['previous', 'repeat'].map(name => buttons[name].index).forEach(index => items[index].hide())
+			items[buttons['trash'].index][radio ? 'show' : 'hide']()
 		},
 		hide: () => {
 			runtime.stateManager.set('track', false)
@@ -288,6 +294,9 @@ const DuplexChannel = context => {
 			}
 			else if (['play', 'pause'].includes(body.name)) {
 				runtime.playerBar.state(body.name)
+			}
+			else if (body.name == 'trash') {
+				controller.trash(body.data)
 			}
 			else if (body.name == 'error') {
 				vscode.window.showWarningMessage(`无法播放: ${interaction.utility.stringify.song(body.data)}`)
@@ -414,6 +423,7 @@ const CommandManager = context => {
 
 		'like': controller.like,
 		'dislike': controller.dislike,
+		'trash': controller.trash,
 
 		'mute': controller.mute,
 		'unmute': controller.unmute,

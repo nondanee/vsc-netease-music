@@ -15,6 +15,7 @@
     "command.neteasemusic.more": "更多操作",
     "command.neteasemusic.like": "红心",
     "command.neteasemusic.dislike": "取消红心",
+    "command.neteasemusic.trash": "不喜欢",
     "command.neteasemusic.search": "搜索",
     "command.neteasemusic.login": "登录",
     "command.neteasemusic.login.cookie": "登录 (Cookie)",
