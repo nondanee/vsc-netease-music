@@ -30,10 +30,10 @@ const intelligence = (state = {}) => {
 
 	const exit = () => {
 		cancel()
-		let current = list[index]
+		const current = list[index]
 		list = origin, index = start
 		save({list, intelligence: false})
-		let position = list.findIndex(song => song.id === current.id)
+		const position = list.findIndex(song => song.id === current.id)
 		position === -1 ? controller.play() : index = position
 	}
 	return {loading: () => loading, promise, exit, cancel}
@@ -53,7 +53,7 @@ const controller = {
 			index = list.length
 			list.splice(index, 0, compact(track))
 		}
-		let sequence = Array.from(list.keys())
+		const sequence = Array.from(list.keys())
 		random = Array.from(list.keys()).map(() => sequence.splice(Math.floor(Math.random() * sequence.length), 1)[0])
 		runtime.globalStorage.set('list', list)
 		runtime.playerBar.show(radio)
@@ -68,14 +68,14 @@ const controller = {
 		if (list.length === 0) (runtime.playerBar.hide(), runtime.duplexChannel.postMessage('stop'))
 	},
 	previous: () => {
-		let mapped = random[(random.indexOf(index) - 1 + random.length) % random.length]
+		const mapped = random[(random.indexOf(index) - 1 + random.length) % random.length]
 		index = (mode === 2 ? mapped : index - 1)
 		controller.play()
 	},
 	next: auto => {
-		let radio = runtime.stateManager.get('radio')
+		const radio = runtime.stateManager.get('radio')
 		if (radio && index === list.length - 1) return interaction.recommend.radio()
-		let mapped = random[(random.indexOf(index) + 1 + random.length) % random.length]
+		const mapped = random[(random.indexOf(index) + 1 + random.length) % random.length]
 		index = radio ? index + 1 : ((auto && mode === 1) ? index : (mode === 2 ? mapped : index + 1))
 		controller.play()
 	},
@@ -88,12 +88,12 @@ const controller = {
 		runtime.playerBar.state(['loop', 'repeat', 'random', 'intelligent'][mode])
 	},
 	resume: () => {
-		let paused = !runtime.stateManager.get('playing')
+		const paused = !runtime.stateManager.get('playing')
 		if (paused) runtime.duplexChannel.postMessage('play')
 		return paused
 	},
 	pause: () => {
-		let playing = !!runtime.stateManager.get('playing')
+		const playing = !!runtime.stateManager.get('playing')
 		if (playing) runtime.duplexChannel.postMessage('pause')
 		return playing
 	},
@@ -103,8 +103,8 @@ const controller = {
 		return ((mode === 3 && dynamic) ? dynamic.promise : Promise.resolve())
 		.then(() => {
 			runtime.globalStorage.set('index', index)
-			let song = list[index]
-			let program = song.source.type === 'djradio'
+			const song = list[index]
+			const program = song.source.type === 'djradio'
 			return Promise.resolve(program ? {} : api.song.lyric(song.id))
 			.then(data => {
 				const lyric = data.lrc ? [data.lrc.lyric, data.tlyric.lyric] : []
@@ -115,7 +115,7 @@ const controller = {
 		})
 	},
 	current: item => {
-		let song = list[index]
+		const song = list[index]
 		if (item.id === song.id && item.source.type === song.source.type) {
 			if (!('id' in song.source))
 				return true
@@ -125,14 +125,14 @@ const controller = {
 	},
 	favorite: () => list[index] && list[index].source.type === 'playlist' && api.user.favorite(list[index].source.id),
 	list: () => {
-		let copy = JSON.parse(JSON.stringify(list))
+		const copy = JSON.parse(JSON.stringify(list))
 		copy[index].play = true
 		return copy
 	},
 	trash: song => {
 		if (!song || !song.id) return runtime.duplexChannel.postMessage('trash') // require currentTime callback
 		api.song.trash(song.id, song.time).then(() => {
-			let last = index === list.length - 1
+			const last = index === list.length - 1
 			if (last)
 				interaction.recommend.radio()
 			else
@@ -140,7 +140,7 @@ const controller = {
 		})
 	},
 	like: () => {
-		let id = list[index].id
+		const {id} = list[index]
 		if (likes.includes(id)) return
 		api.song.like(id).then(data => {
 			if (data.code == 200) {
@@ -150,7 +150,7 @@ const controller = {
 		})
 	},
 	dislike: () => {
-		let id = list[index].id
+		const {id} = list[index]
 		if (!likes.includes(id)) return
 		api.song.dislike(id).then(data => {
 			if (data.code == 200) {
@@ -160,11 +160,11 @@ const controller = {
 		})
 	},
 	mute: () => {
-		let muted = !!runtime.stateManager.get('muted')
+		const muted = !!runtime.stateManager.get('muted')
 		if (!muted) runtime.duplexChannel.postMessage('mute')
 	},
 	unmute: () => {
-		let muted = !!runtime.stateManager.get('muted')
+		const muted = !!runtime.stateManager.get('muted')
 		if (muted) runtime.duplexChannel.postMessage('unmute')
 	},
 	volumeChange: value => runtime.duplexChannel.postMessage('volumeChange', {value}),
@@ -172,8 +172,7 @@ const controller = {
 	restore: () => {
 		list = [], random = [], index = 0, mode = 0, dynamic = null
 		const load = runtime.globalStorage.get
-		let _list = load('list') || [], _origin = load('origin') || []
-		let _index = load('index') || 0, _start = load('start') || 0, _mode = load('mode') || 0
+		const _list = load('list') || [], _origin = load('origin') || [], _index = load('index') || 0, _start = load('start') || 0, _mode = load('mode') || 0
 		controller.volumeChange(load('volume') || 1)
 		if (load('muted') || false) controller.mute()
 		if (_mode === 3) controller.mode(_mode, {origin: _origin, start: _start, list: _list})

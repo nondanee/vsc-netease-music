@@ -143,7 +143,7 @@ const PlayerBar = context => {
 
 	const items = order.map((group, index) => {
 		group.forEach(name => buttons[name].index = index)
-		let item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 163 + index)
+		const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 163 + index)
 		attach(item, buttons[group[0]])
 		return item
 	})
@@ -153,8 +153,8 @@ const PlayerBar = context => {
 		state: state => {
 			if (!(state in buttons)) return
 			if (state.includes('like')) (api.user.account() && !runtime.stateManager.get('program')) ? items[buttons.like.index].show() : items[buttons.like.index].hide()
-			let index = buttons[state].index
-			let name = order[index][(order[index].indexOf(state) + 1) % order[index].length]
+			const {index} = buttons[state]
+			const name = order[index][(order[index].indexOf(state) + 1) % order[index].length]
 			attach(items[index], buttons[name])
 		},
 		update: text => {
@@ -247,7 +247,7 @@ const DuplexChannel = context => {
 	// 	}
 	// 	else if (req.url === '/receiver') {
 	// 		new Promise((resolve, reject) => {
-	// 			let chunks = []
+	// 			const chunks = []
 	// 			req
 	// 			.on('data', chunk => chunks.push(chunk))
 	// 			.on('end', () => resolve(Buffer.concat(chunks).toString()))
@@ -271,15 +271,14 @@ const DuplexChannel = context => {
 			}
 			else if (body.name == 'end') {
 				controller.next(true)
-				let song = body.data
+				const song = body.data
 				if (song.source.type != 'djradio') api.song.log(logger(song))
 			}
 			else if (body.name == 'load') {
-				let song = body.data
-				let program = song.source.type === 'djradio'
-				let artist = interaction.utility.stringify.artist(song)
-				let album = song.album.name
-				let playing = [program ? album : artist, song.name].join(' - ')
+				const song = body.data
+				const program = song.source.type === 'djradio'
+				const artist = interaction.utility.stringify.artist(song), album = song.album.name
+				const playing = [program ? album : artist, song.name].join(' - ')
 				vscode.window.showInformationMessage(`正在播放: ${playing}`)
 				runtime.playerBar.update(playing)
 				if (song.source.type == 'djradio') api.program.listen(song.id)

@@ -6,7 +6,7 @@ quickPick.canSelectMany = false
 quickPick.matchOnDescription = true
 quickPick.matchOnDetail = true
 quickPick.onDidAccept(() => {
-	let item = quickPick.selectedItems[0]
+	const item = quickPick.selectedItems[0]
 	if (typeof item.action === 'function' && !quickPick.busy) {
 		quickPick.busy = true
 		item.action()
@@ -26,8 +26,7 @@ const utility = {
 		Object.keys(item).filter(key => keys.includes(key)).reduce((result, key) => Object.assign(result, {[key]: item[key]}), {}),
 	format: {
 		song: (song, source) => {
-			let album = song.al || song.album
-			let item = utility.extract(song, ['id', 'name', 'listen'])
+			const item = utility.extract(song, ['id', 'name', 'listen']), album = (song.al || song.album)
 			item.album = utility.extract(album)
 			item.artists = (song.ar || song.artists).map(artist => utility.extract(artist))
 			item.cover = utility.stringify.uri(album.pic || album.picId) + '.jpg'
@@ -35,7 +34,7 @@ const utility = {
 			return item
 		},
 		program: (program, source) => {
-			let item = utility.extract(program, ['id', 'name', 'duration'])
+			const item = utility.extract(program, ['id', 'name', 'duration'])
 			item.album = utility.extract(program.radio)
 			item.artists = [{id: 0, name: program.dj.nickname}]
 			item.create = program.createTime
@@ -50,10 +49,10 @@ const utility = {
 			song.label = song.name
 			song.action = action
 			if (index) {
-				let indicate = controller.current(song) ? '\u2006♬' : (index[0] + 1).toString()
+				const indicate = controller.current(song) ? '\u2006♬' : (index[0] + 1).toString()
 				song.label = (new Array(Math.max(index[1].toString().length, 2) - indicate.length + 1)).join('\u2007') + indicate + '   ' + song.label
 			}
-			let listen = `${utility.stringify.number(song.listen)}次播放`
+			const listen = `${utility.stringify.number(song.listen)}次播放`
 			song.description = flags.program ?
 				[utility.stringify.date(song.create), listen, `(${utility.stringify.duration(song.duration)})`].join('  ') :
 				[flags.artist === false ? null : utility.stringify.artist(song), flags.album === false ? null : song.album.name].filter(item => item).join(' - ') +
@@ -66,21 +65,19 @@ const utility = {
 			if (!id) return null
 			id = id.toString().trim()
 			const key = '3go8&$8*3*3h0k(2)2'
-			let string = Array.from(Array(id.length).keys()).map(index => String.fromCharCode(id.charCodeAt(index) ^ key.charCodeAt(index % key.length))).join('')
-			let result = crypto.createHash('md5').update(string).digest('base64').replace(/\//g, '_').replace(/\+/g, '-')
+			const string = Array.from(Array(id.length).keys()).map(index => String.fromCharCode(id.charCodeAt(index) ^ key.charCodeAt(index % key.length))).join('')
+			const result = crypto.createHash('md5').update(string).digest('base64').replace(/\//g, '_').replace(/\+/g, '-')
 			return `http://p1.music.126.net/${result}/${id}`
 		},
 		date: timestamp => {
 			if (!timestamp) return ''
-			let date = new Date(timestamp)
-			let year = date.getFullYear()
-			let month = date.getMonth() + 1
-			let day = date.getDate()
+			const date = new Date(timestamp)
+			const year = date.getFullYear(), month = date.getMonth() + 1, day = date.getDate()
 			return `${year}.${month}.${day}`
 		},
 		interval: timestamp => {
-			let date = new Date(timestamp)
-			let delta = parseInt((Date.now() - date) / 1000)
+			const date = new Date(timestamp)
+			const delta = parseInt((Date.now() - date) / 1000)
 			if (delta < 60)
 				return '刚刚'
 			else if (delta < 3600)
@@ -103,8 +100,8 @@ const utility = {
 		duration: value => {
 			value = value / 1000
 			const pad = number => ('0' + number).slice(-2)
-			let minute = Math.floor(value / 60)
-			let second = Math.floor(value - minute * 60)
+			const minute = Math.floor(value / 60)
+			const second = Math.floor(value - minute * 60)
 			return `${minute}:${pad(second)}`
 		},
 		artist: item => item.artists.map(artist => artist.name).join(' / '),
@@ -140,8 +137,8 @@ const interaction = {
 				description: `${(playlist.trackCount || 0)}首${creator ? ' by ' + playlist.creator.nickname : ''}`,
 				action: () => interaction.playlist.detail(playlist.id)
 			})
-			let users = data.playlist.filter(playlist => playlist.creator.userId === id)
-			let others = data.playlist.filter(playlist => playlist.creator.userId != id)
+			const users = data.playlist.filter(playlist => playlist.creator.userId === id)
+			const others = data.playlist.filter(playlist => playlist.creator.userId != id)
 			const playlists = (created, collected) => Array.prototype.concat(
 				[{
 					label: `${utility.indicate.expand(created)}创建的歌单`,
@@ -313,8 +310,8 @@ const interaction = {
 	}),
 	playlist: {
 		detail: id => api.playlist.detail(id).then(data => {
-			let self = api.user.account(data.playlist.creator.userId)
-			let name = api.user.favorite(id) ? '我喜欢的音乐' : data.playlist.name
+			const self = api.user.account(data.playlist.creator.userId)
+			const name = api.user.favorite(id) ? '我喜欢的音乐' : data.playlist.name
 			const refresh = () => {
 				selector(Array.prototype.concat(
 					!self ? [{
@@ -435,8 +432,8 @@ const interaction = {
 	}),
 	list: {
 		show: () => {
-			let track = controller.list()
-			let play = track.findIndex(song => song.play)
+			const track = controller.list()
+			const play = track.findIndex(song => song.play)
 			selector(track.map((song, index) => utility.lift.song(song, [index, track.length], {}, () => {
 				song.play ? (controller.pause() || controller.resume()) : controller.play(index)
 				quickPick.hide()
@@ -444,8 +441,8 @@ const interaction = {
 			quickPick.activeItems = [quickPick.items[play]]
 		},
 		edit: () => {
-			let track = controller.list()
-			let play = track.findIndex(song => song.play)
+			const track = controller.list()
+			const play = track.findIndex(song => song.play)
 			selector(track.map((song, index) => utility.lift.song(song, [index, track.length], {}, () => {
 				controller.remove(index)
 				if (index == play) controller.play(undefined, runtime.stateManager.get('playing'))
@@ -454,15 +451,13 @@ const interaction = {
 		}
 	},
 	search: () => {
-		let hot = []
-		let timer = 0
-		let autoComplete = {}
+		let hot = [], timer = 0, autoComplete = {}
 		const operation = item => Object.assign(item, {alwaysShow: true, action: () => search(item.label)})
 		const suggest = () => {
 			const value = quickPick.value
 			if (!value) quickPick.items = hot
 			else api.search.keyword(value).then(data => {
-				let items = (data.result && data.result.allMatch) ? data.result.allMatch.map(item => ({label: item.keyword})) : []
+				const items = (data.result && data.result.allMatch) ? data.result.allMatch.map(item => ({label: item.keyword})) : []
 				if (!items.length || items[0].label != value) items.unshift({label: value})
 				quickPick.items = items.map(operation)
 			})
@@ -470,33 +465,33 @@ const interaction = {
 
 		const search = (text, type) => {
 			autoComplete.dispose()
-			let code = {song: 1, artist: 100, album: 10, playlist: 1000, djradio: 1009}[type]
+			const code = {song: 1, artist: 100, album: 10, playlist: 1000, djradio: 1009}[type]
 			if (!code) api.search.suggest(text).then(data => display(text, data))
 			else api.search.type(text, code).then(data => display(text, data, type))
 		}
 
 		const display = (text, data, type) => {
-			let songs = (data.result.songs || []).map(song => utility.format.song(song, {type: 'search'}))
+			const songs = (data.result.songs || []).map(song => utility.format.song(song, {type: 'search'}))
 			.map(song => utility.lift.song(song, null, {}, () => {
 				controller.add(song)
 				controller.play()
 				quickPick.hide()
 			}))
-			let artists = (data.result.artists || []).map(artist => ({
+			const artists = (data.result.artists || []).map(artist => ({
 				label: artist.name,
 				action: () => interaction.artist.album(artist.id)
 			}))
-			let albums = (data.result.albums || []).map(album => ({
+			const albums = (data.result.albums || []).map(album => ({
 				label: album.name,
 				description: `${album.artist.name} ${album.size}首`,
 				action: () => interaction.album(album.id)
 			}))
-			let playlists = (data.result.playlists || []).map(playlist => ({
+			const playlists = (data.result.playlists || []).map(playlist => ({
 				label: playlist.name,
 				description: `${utility.stringify.number(playlist.playCount)}次播放  ${utility.stringify.number(playlist.bookCount)}次收藏`,
 				action: () => interaction.playlist.detail(playlist.id)
 			}))
-			let djradios = (data.result.djRadios || []).map(djradio => ({
+			const djradios = (data.result.djRadios || []).map(djradio => ({
 				label: djradio.name,
 				description: `by ${djradio.dj.nickname}`,
 				action: () => interaction.djradio.program(djradio.id)
@@ -540,8 +535,8 @@ const interaction = {
 		})
 	},
 	more: () => {
-		let song = controller.list().find(song => song.play)
-		let program = song.source.type === 'djradio'
+		const song = controller.list().find(song => song.play)
+		const program = song.source.type === 'djradio'
 		selector([
 			!program ? {
 				label: `专辑: ${song.album.name}`,
@@ -610,7 +605,7 @@ const interaction = {
 			{
 				label: `查看评论`,
 				action: () => api[program ? 'program' : 'song'].comment(song.id).then(data => {
-					let hot = (data.hotComments || []).length
+					const hot = (data.hotComments || []).length
 					selector(Array.prototype.concat(
 						hot ? [{
 							label: '精彩评论',
