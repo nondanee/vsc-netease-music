@@ -27,7 +27,7 @@
 			return timeline.length ? second => (timeline[cursor] && second > timeline[cursor][0]) ? timeline[cursor ++][1].join('  ') : null : null
 		}
 
-		let song = null, lyric = null
+		let song = null, lyric = null, mpris = window.navigator.userAgent.includes('Linux')
 
 		audio.onplay = () => {
 			postMessage('event', {name: 'play'})
@@ -52,7 +52,7 @@
 
 		audio.onloadedmetadata = () => {
 			song.duration = audio.duration
-			if ('mediaSession' in navigator) {
+			if ('mediaSession' in navigator && !mpris) {
 				navigator.mediaSession.metadata = new MediaMetadata({
 					title: song.name,
 					artist: song.artists.map(artist => artist.name).join(' / '),
@@ -84,7 +84,11 @@
 		// const postMessage = (type, body) => webSocket.send(JSON.stringify({type, body}))
 		// const postMessage = (type, body) => fetch('http://localhost:16363/receiver', {method: 'POST', body: JSON.stringify({type, body})})
 
-		if ('mediaSession' in navigator) {
+		if (mpris) {
+			navigator.mediaSession.setActionHandler('play', null)
+			navigator.mediaSession.setActionHandler('pause', null)
+		}
+		else if ('mediaSession' in navigator) {
 			// navigator.mediaSession.setActionHandler('play', () => audio.play())
 			// navigator.mediaSession.setActionHandler('pause', () => audio.pause())
 			navigator.mediaSession.setActionHandler('nexttrack', () => postMessage('command', {action: 'next'}))

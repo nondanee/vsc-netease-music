@@ -2,6 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const events = require('events')
 const vscode = require('vscode')
+const dbus = require('dbus-native')
 
 const ActiveEditor = () => {
 	let activeTextEditor = vscode.window.activeTextEditor
@@ -178,6 +179,165 @@ const PlayerBar = context => {
 	}
 }
 
+const MprisBridge = context => {
+	let bus = null
+	try {bus = dbus.sessionBus()} catch(e) {bus = null}
+	const {displayName} = require('./package')
+
+	const sender = {
+		set: (target, property, value) => {
+			if (!(property in target.description.properties)) return
+			const entry = [property, [target.description.properties[property], target.interface[property] = value]]
+			bus && bus.sendSignal(
+				'/org/mpris/MediaPlayer2',
+				'org.freedesktop.DBus.Properties',
+				'PropertiesChanged',
+				'sa{sv}as',
+				[target.description.name, [entry], []]
+			)
+		}
+	}
+
+	const receiver = {
+		set: (target, property, value) => {
+			if (!(property in target.description.properties)) return
+			target.interface[property] = value
+			const event = `onChange${value}`
+			if (event in target.interface) target.interface[event](value)
+		},
+		get: (target, property) => {
+			if (property === 'emit')
+				return (event, ...payload) => target.interface[event] && target.interface[event].apply(null, payload)
+			else
+				return target.interface[property]
+		}
+	}
+
+	const mediaPlayer2 = {
+		description: {
+			name: 'org.mpris.MediaPlayer2',
+			properties: {
+				CanQuit: 'b',
+				CanRaise: 'b',
+				HasTrackList: 'b',
+				Identity: 's',
+				DesktopEntry: 's'
+			},
+			methods: {
+				Quit: ['', '', [], []],
+				Raise: ['', '', [], []]
+			}
+		},
+		interface: {
+			CanQuit: true,
+			CanRaise: false,
+			HasTrackList: false,
+			Identity: displayName,
+			DesktopEntry: displayName,
+
+			Quit: () => runtime.dispose(),
+			Raise: () => null
+		}
+	}
+
+	const mediaPlayer2Player = {
+		description: {
+			name: 'org.mpris.MediaPlayer2.Player',
+			properties: {
+				PlaybackStatus: 's',
+				LoopStatus: 's',
+				Rate: 'd',
+				Shuffle: 'b',
+				Metadata: 'a{sv}',
+				Volume: 'd',
+				Position: 'x',
+				MinimumRate: 'd',
+				MaximumRate: 'd',
+				CanGoNext: 'b',
+				CanGoPrevious: 'b',
+				CanPlay: 'b',
+				CanPause: 'b',
+				CanSeek: 'b',
+				CanControl: 'b',
+			},
+			methods: {
+				Next: ['', '', [], []],
+				Previous: ['', '', [], []],
+				Pause: ['', '', [], []],
+				Play: ['', '', [], []],
+				PlayPause: ['', '', [], []],
+				Stop: ['', '', [], []],
+				Seek: ['x', '', ['Offset'], []],
+				SetPosition: ['ox', '', ['TrackId', 'Position'], []]
+			},
+			signals: {
+				Seeked: ['x', 'Position']
+			}
+		},
+		interface: {
+			PlaybackStatus: 'Stopped',
+			LoopStatus: 'None',
+			Rate: 1.0,
+			Shuffle: false,
+			Metadata: [],
+			Volume: 1.0,
+			// onChangeVolume: value => null,
+			Position: 0,
+			MinimumRate: 1.0,
+			MaximumRate: 1.0,
+			CanGoNext: true,
+			CanGoPrevious: true,
+			CanPlay: true,
+			CanPause: true,
+			CanSeek: false,
+			CanControl: true,
+
+			Next: () => runtime.commandManager.execute('next'),
+			Previous: () => runtime.commandManager.execute('previous'),
+			Pause: () => runtime.commandManager.execute('pause'),
+			Play: () => runtime.commandManager.execute('play'),
+			PlayPause: () => runtime.commandManager.execute('auto.play.pause'),
+			Stop: () => runtime.duplexChannel.postMessage('stop'),
+			Seek: () => null,
+			SetPosition: (trackId, position) => null,
+
+			Seeked: position => null
+		}
+	}
+
+	bus && bus.requestName(`org.mpris.MediaPlayer2.${displayName.replace(/\s+/g, '')}`, 0x4, (error, code) => {
+		if (code === 1) {
+			bus.exportInterface(mediaPlayer2.interface, '/org/mpris/MediaPlayer2', mediaPlayer2.description)
+			bus.exportInterface(new Proxy(mediaPlayer2Player, receiver), '/org/mpris/MediaPlayer2', mediaPlayer2Player.description)
+		}
+	})
+
+	const mediaPlayer2PlayerInterface = new Proxy(mediaPlayer2Player, sender)
+
+	return {
+		sync: song => {
+			mediaPlayer2PlayerInterface.Metadata = [
+				['mpris:length', ['x', parseInt(song.duration * 1e3)]],
+				['mpris:artUrl', ['s', song.cover + '?param=200y200' || 'file:///dev/null']],
+				['xesam:album', ['s', song.album.name || '未知专辑']],
+				['xesam:artist', ['as', [interaction.utility.stringify.artist(song) || '未知歌手']]],
+				['xesam:title', ['s', song.name || '未知歌曲']]
+			]
+			mediaPlayer2PlayerInterface.CanGoPrevious = !(song.source.type === 'radio')
+		},
+		state: state => {
+			if (['play', 'pause'].includes(state)) {
+				mediaPlayer2PlayerInterface.PlaybackStatus = {play: 'Playing', pause: 'Paused'}[state]
+			}
+		},
+		volume: value => mediaPlayer2PlayerInterface.Volume = value,
+		dispose: () => {
+			bus && bus.connection.end()
+			bus = null
+		}
+	}
+}
+
 const DuplexChannel = context => {
 	let activeEditor = ActiveEditor()
 
@@ -281,6 +441,7 @@ const DuplexChannel = context => {
 				const playing = [program ? album : artist, song.name].join(' - ')
 				vscode.window.showInformationMessage(`正在播放: ${playing}`)
 				runtime.playerBar.update(playing)
+				runtime.mprisBridge.sync(song)
 				if (song.source.type == 'djradio') api.program.listen(song.id)
 			}
 			else if (body.name == 'lyric') {
@@ -288,11 +449,13 @@ const DuplexChannel = context => {
 			}
 			else if (body.name == 'volume') {
 				runtime.playerBar.volume(body.data)
+				runtime.mprisBridge.volume(body.data.value)
 				runtime.globalStorage.set('muted', body.data.muted)
 				runtime.globalStorage.set('volume', body.data.value)
 			}
 			else if (['play', 'pause'].includes(body.name)) {
 				runtime.playerBar.state(body.name)
+				runtime.mprisBridge.state(body.name)
 			}
 			else if (body.name == 'trash') {
 				controller.trash(body.data)
@@ -471,6 +634,7 @@ const runtime = {
 		runtime.globalStorage = GlobalStorage(context)
 		runtime.preferenceReader = PreferenceReader(context)
 		runtime.playerBar = PlayerBar(context)
+		runtime.mprisBridge = MprisBridge(context)
 		// runtime.duplexChannel = DuplexChannel(context)
 		runtime.assistServer = AssistServer(context)
 		runtime.webviewPanel = WebviewPanel(context)
