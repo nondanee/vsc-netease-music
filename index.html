@@ -123,7 +123,9 @@
 			else if (command === 'volumeChange') {
 				if (data.value != null) return audio.volume = data.value
 				if (audio.muted) audio.muted = false
-				audio.volume + 0.2 > 1 ? audio.volume = 0 : audio.volume += 0.2
+				const step = 0.2
+				const volume = (parseInt(audio.volume / step) + 1) * step
+				audio.volume = volume > 1 ? 0 : volume
 			}
 			else if (command === 'trash') {
 				const data = {id: (song || {}).id, time: parseInt((audio || {}).currentTime)}
