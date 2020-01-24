@@ -191,8 +191,7 @@ const MprisBridge = context => {
 			supportedInterfaces: ['player']
 		})
 	}
-	catch(e) {
-		console.log(e)
+	catch(error) {
 		return new Proxy({}, {get: () => () => null})
 	}
 
