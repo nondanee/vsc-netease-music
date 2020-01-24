@@ -450,6 +450,6 @@
         "vscode": "^1.1.34"
     },
     "dependencies": {
-        "dbus-native": "^0.4.0"
+        "mpris-service": "^2.1.0"
     }
 }
