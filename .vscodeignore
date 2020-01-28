@@ -4,4 +4,3 @@ test/**
 .gitignore
 jsconfig.json
 .eslintrc.json
-node_modules/
