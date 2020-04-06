@@ -21,12 +21,14 @@ const intelligence = (history = {}) => {
 	if ((history.origin || []).length) origin = history.origin
 	if ((history.list || []).length) list = history.list, loading = false, runtime.playerBar.show()
 
-	const promise = loading ? api.playlist.intelligence(origin[start].id).then(data => {
-		loading = false
-		if (cancelled) return
-		list = list.concat(data.data.map(item => interaction.utility.format.song(item.songInfo, item.recommended ? {type: 'intelligence'} : origin[start].source)))
-		save({origin, start, list, intelligence: true})
-	}) : Promise.resolve()
+	const promise = loading
+		? api.playlist.intelligence(origin[start].id).then(data => {
+			loading = false
+			if (cancelled) return
+			list = list.concat(data.data.map(item => interaction.utility.format.song(item.songInfo, item.recommended ? {type: 'intelligence'} : origin[start].source)))
+			save({origin, start, list, intelligence: true})
+		})
+		: Promise.resolve()
 
 	const exit = () => {
 		cancel()
@@ -173,7 +175,7 @@ const controller = {
 		if (muted) runtime.duplexChannel.postMessage('unmute')
 	},
 	volumeChange: value => runtime.duplexChannel.postMessage('volumeChange', {value}),
-	refresh: () => api.user.likes().then(data => ((likes = data.ids ? data.ids : []), runtime.playerBar.state(likes.includes((list[index] || {}).id) ? 'like' : 'dislike'))),
+	refresh: () => api.user.likes().then(data => ((likes = data.ids || []), runtime.playerBar.state(likes.includes((list[index] || {}).id) ? 'like' : 'dislike'))),
 	restore: () => {
 		list = [], random = [], index = 0, mode = 0, dynamic = null
 		const history = ['list', 'origin', 'index', 'start', 'mode', 'volume', 'muted', 'radio'].reduce((result, key) => Object.assign(result, {[key]: runtime.globalStorage.get(key)}), {})

@@ -26,7 +26,8 @@ const utility = {
 		Object.keys(item).filter(key => keys.includes(key)).reduce((result, key) => Object.assign(result, {[key]: item[key]}), {}),
 	format: {
 		song: (song, source) => {
-			const item = utility.extract(song, ['id', 'name', 'listen']), album = (song.al || song.album)
+			const item = utility.extract(song, ['id', 'name', 'listen'])
+			const album = (song.al || song.album)
 			item.album = utility.extract(album)
 			item.artists = (song.ar || song.artists).map(artist => utility.extract(artist))
 			item.cover = utility.stringify.uri(album.pic || album.picId) + '.jpg'
@@ -53,9 +54,9 @@ const utility = {
 				song.label = (new Array(Math.max(index[1].toString().length, 2) - indicate.length + 1)).join('\u2007') + indicate + '   ' + song.label
 			}
 			const listen = `${utility.stringify.number(song.listen)}次播放`
-			song.description = flags.program ?
-				[utility.stringify.date(song.create), listen, `(${utility.stringify.duration(song.duration)})`].join('  ') :
-				[flags.artist === false ? null : utility.stringify.artist(song), flags.album === false ? null : song.album.name].filter(item => item).join(' - ') +
+			song.description = flags.program
+				? [utility.stringify.date(song.create), listen, `(${utility.stringify.duration(song.duration)})`].join('  ')
+				: [flags.artist === false ? null : utility.stringify.artist(song), flags.album === false ? null : song.album.name].filter(item => item).join(' - ') +
 				(flags.listen ? '  ' + listen : '') + ((song.source || {}).type === 'intelligence' ? ' 〖荐〗' : '')
 			return song
 		}
@@ -202,7 +203,7 @@ const interaction = {
 						quickPick.activeItems = [quickPick.items[1]]
 					}
 				}],
-				week ? show(data.weekData, week) : show(data.allData, week),
+				show(data[week ? 'weekData' : 'allData'], week)
 			)
 			selector(record(!all), '听歌排行')
 			quickPick.activeItems = [quickPick.items[1]]
@@ -314,7 +315,9 @@ const interaction = {
 			const name = api.user.favorite(id) ? '我喜欢的音乐' : data.playlist.name
 			const refresh = () => {
 				selector(Array.prototype.concat(
-					!self ? [{
+					self
+					? []
+					: [{
 						label: utility.indicate.collect(data.playlist.subscribed),
 						description: `${utility.stringify.number(data.playlist.subscribedCount)}人收藏`,
 						action: () => utility.check.logged(api.playlist.subscribe(id, !data.playlist.subscribed).then(result => {
@@ -324,7 +327,7 @@ const interaction = {
 							}
 							refresh()
 						}), refresh)
-					}] : [],
+					}],
 					data.playlist.tracks.map(song => utility.format.song(song, {type: 'playlist', id, name}))
 					.map((song, index, track) => utility.lift.song(song, [index, track.length], {}, () => {
 						controller.add(track)
@@ -538,18 +541,24 @@ const interaction = {
 		const song = controller.list().find(song => song.play)
 		const program = song.source.type === 'djradio'
 		selector([
-			!program ? {
+			program
+			? null
+			: {
 				label: `专辑: ${song.album.name}`,
 				action: () => interaction.album(song.album.id)
-			} : null,
-			!program ? {
+			},
+			program
+			? null
+			: {
 				label: `歌手: ${utility.stringify.artist(song)}`,
 				action: () => song.artists.length > 1 ? selector(song.artists.map(artist => ({
 					label: artist.name,
 					action: () => interaction.artist.album(artist.id)
 				})), '查看歌手') : interaction.artist.album(song.artists[0].id)
-			} : null,
-			song.source ? ({
+			},
+			!song.source
+			? null
+			: ({
 				playlist: {
 					label: `来源: 歌单「${song.source.name}」`,
 					action: () => interaction.playlist.detail(song.source.id)
@@ -590,8 +599,10 @@ const interaction = {
 				intelligence: {
 					label: `来源: 心动模式`
 				}
-			}[song.source.type]) : null,
-			program ? {
+			}[song.source.type]),
+			!program
+			? null
+			: {
 				label: '节目包含歌曲',
 				action: () => api.program.detail(song.id).then(data => {
 					selector(data.program.songs.map(song => utility.format.song(song, {type: 'program'}))
@@ -601,7 +612,7 @@ const interaction = {
 						quickPick.hide()
 					})), `${song.name} 包含歌曲(${data.program.songs.length})`)
 				})
-			} : null,
+			},
 			{
 				label: `查看评论`,
 				action: () => api[program ? 'program' : 'song'].comment(song.id).then(data => {
@@ -624,7 +635,9 @@ const interaction = {
 					), `${hot ? '' : '最新'}评论 (${data.total})`)
 				})
 			},
-			!program && api.user.account() ? {
+			program || !api.user.account()
+			? null
+			: {
 				label: '收藏到歌单',
 				action: () => api.user.playlist().then(data => data.playlist).then(playlists => {
 					selector(playlists.filter(playlist => playlist.creator.userId === playlists[0].creator.userId)
@@ -639,7 +652,7 @@ const interaction = {
 						})
 					})), '添加到歌单')
 				})
-			} : null,
+			},
 			{
 				label: '在浏览器中打开',
 				action: () => vscode.env.openExternal(vscode.Uri.parse(`https://music.163.com/#/${program ? 'program' : 'song'}?id=${song.id}`)) && quickPick.hide()

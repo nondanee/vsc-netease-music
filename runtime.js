@@ -7,7 +7,7 @@ const mpris = require('mpris-service')
 const ActiveEditor = () => {
 	let activeTextEditor = vscode.window.activeTextEditor
 	return {
-		reveal: () => activeTextEditor ? vscode.window.showTextDocument(activeTextEditor.document, activeTextEditor.viewColumn, false) : undefined
+		reveal: () => activeTextEditor && (vscode.window.showTextDocument(activeTextEditor.document, activeTextEditor.viewColumn, false), activeTextEditor = null)
 	}
 }
 
@@ -153,7 +153,7 @@ const PlayerBar = context => {
 		dispose: () => items.forEach(item => item.dispose()),
 		state: state => {
 			if (!(state in buttons)) return
-			if (state.includes('like')) (api.user.account() && !runtime.stateManager.get('program')) ? items[buttons.like.index].show() : items[buttons.like.index].hide()
+			if (state.includes('like')) items[buttons.like.index][(api.user.account() && !runtime.stateManager.get('program')) ? 'show' : 'hide']()
 			const {index} = buttons[state]
 			const name = order[index][(order[index].indexOf(state) + 1) % order[index].length]
 			attach(items[index], buttons[name])
@@ -162,7 +162,7 @@ const PlayerBar = context => {
 			items[buttons.list.index].text = text
 		},
 		volume: state => {
-			attach(items[buttons.mute.index], buttons[(state.muted ? 'unmute' : 'mute')])
+			attach(items[buttons.mute.index], buttons[state.muted ? 'unmute' : 'mute'])
 			items[buttons.volume.index].color = items[buttons.mute.index].color
 			items[buttons.volume.index].text = parseInt(state.value * 100).toString()
 		},
@@ -501,7 +501,7 @@ const CommandManager = context => {
 	registration.forEach(command => context.subscriptions.push(command))
 
 	return {
-		execute: name => name in commands ? commands[name].call() : null,
+		execute: name => name in commands && commands[name].call(),
 		dispose: () => registration.forEach(command => command.dispose())
 	}
 }

@@ -14,7 +14,7 @@ const encrypt = object => {
 
 const request = (method, url, headers, body = null) =>
 	new Promise((resolve, reject) => {
-		(url.startsWith('https://') ? https.request : http.request)(Object.assign(parse(url), {method, headers}))
+		(url.startsWith('https://') ? https : http).request(Object.assign(parse(url), {method, headers}))
 		.on('response', response => resolve([201, 301, 302, 303, 307, 308].includes(response.statusCode) ? request(method, parse(url).resolve(response.headers.location), headers, body) : response))
 		.on('error', error => reject(error)).end(body)
 	})
