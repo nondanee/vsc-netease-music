@@ -13,7 +13,7 @@ const intelligence = (history = {}) => {
 	let origin = list, start = history.start == null ? index : history.start
 	let loading = true, cancelled = false
 	const save = object => Object.entries(object).forEach(entry => runtime.globalStorage.set.apply(null, entry))
-	const cancel = () => (cancelled = true, loading = false, save({origin: [], start: 0}))
+	const cancel = () => (cancelled = true, loading = false, save({ origin: [], start: 0 }))
 
 	index = 0
 	list = [origin[start]]
@@ -25,8 +25,8 @@ const intelligence = (history = {}) => {
 		? api.playlist.intelligence(origin[start].id).then(data => {
 			loading = false
 			if (cancelled) return
-			list = list.concat(data.data.map(item => interaction.utility.format.song(item.songInfo, item.recommended ? {type: 'intelligence'} : origin[start].source)))
-			save({origin, start, list, intelligence: true})
+			list = list.concat(data.data.map(item => interaction.utility.format.song(item.songInfo, item.recommended ? { type: 'intelligence' } : origin[start].source)))
+			save({ origin, start, list, intelligence: true })
 		})
 		: Promise.resolve()
 
@@ -34,11 +34,11 @@ const intelligence = (history = {}) => {
 		cancel()
 		const current = list[index]
 		list = origin, index = start
-		save({list, intelligence: false})
+		save({ list, intelligence: false })
 		const position = list.findIndex(song => song.id === current.id)
 		position === -1 ? controller.play() : index = position
 	}
-	return {loading: () => loading, promise, exit, cancel}
+	return { loading: () => loading, promise, exit, cancel }
 }
 
 const controller = {
@@ -49,7 +49,7 @@ const controller = {
 		if (Array.isArray(track)) {
 			list = track.map(compact)
 			index = 0
-			if (!radio && mode == 3 && !controller.favorite()) controller.mode(0, {keep: true})
+			if (!radio && mode == 3 && !controller.favorite()) controller.mode(0, { keep: true })
 		}
 		else {
 			index = list.length
@@ -115,7 +115,7 @@ const controller = {
 			return Promise.resolve(program ? {} : api.song.lyric(song.id))
 			.then(data => {
 				const lyric = data.lrc ? [data.lrc.lyric, data.tlyric.lyric] : []
-				runtime.duplexChannel.postMessage('load', {action, lyric, song})
+				runtime.duplexChannel.postMessage('load', { action, lyric, song })
 				runtime.stateManager.set('program', program)
 				runtime.playerBar.state(likes.includes(song.id) ? 'like' : 'dislike')
 			})
@@ -147,7 +147,7 @@ const controller = {
 		})
 	},
 	like: () => {
-		const {id} = list[index]
+		const { id } = list[index]
 		if (likes.includes(id)) return
 		api.song.like(id).then(data => {
 			if (data.code == 200) {
@@ -157,7 +157,7 @@ const controller = {
 		})
 	},
 	dislike: () => {
-		const {id} = list[index]
+		const { id } = list[index]
 		if (!likes.includes(id)) return
 		api.song.dislike(id).then(data => {
 			if (data.code == 200) {
@@ -174,14 +174,14 @@ const controller = {
 		const muted = !!runtime.stateManager.get('muted')
 		if (muted) runtime.duplexChannel.postMessage('unmute')
 	},
-	volumeChange: value => runtime.duplexChannel.postMessage('volumeChange', {value}),
+	volumeChange: value => runtime.duplexChannel.postMessage('volumeChange', { value }),
 	refresh: () => api.user.likes().then(data => ((likes = data.ids || []), runtime.playerBar.state(likes.includes((list[index] || {}).id) ? 'like' : 'dislike'))),
 	restore: () => {
 		list = [], random = [], index = 0, mode = 0, dynamic = null
-		const history = ['list', 'origin', 'index', 'start', 'mode', 'volume', 'muted', 'radio'].reduce((result, key) => Object.assign(result, {[key]: runtime.globalStorage.get(key)}), {})
+		const history = ['list', 'origin', 'index', 'start', 'mode', 'volume', 'muted', 'radio'].reduce((result, key) => Object.assign(result, { [key]: runtime.globalStorage.get(key) }), {})
 		controller.volumeChange(history.volume || 1)
 		if (history.muted) controller.mute()
-		if (history.mode === 3) controller.mode(3, {history})
+		if (history.mode === 3) controller.mode(3, { history })
 		else if ((history.list || []).length) controller.add(history.list, history.radio || false), controller.mode(history.mode || 0)
 		proxy.play(history.index || 0, false)
 	}

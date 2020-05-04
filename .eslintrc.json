@@ -7,7 +7,7 @@
     },
     "parserOptions": {
         "ecmaFeatures": {
-            "jsx": true
+            "jsx": false
         },
         "sourceType": "module"
     },
@@ -18,6 +18,7 @@
         "no-unreachable": "warn",
         "no-unused-vars": "warn",
         "constructor-super": "warn",
-        "valid-typeof": "warn"
+        "valid-typeof": "warn",
+        "object-curly-spacing": ["error", "always"]
     }
 }

@@ -52,38 +52,38 @@ const PlayerBar = context => {
 			command: 'neteasemusic.mode.loop',
 			icon: '$(sync)',
 			title: '播放模式: 循环播放',
-			state: {mode: 0}
+			state: { mode: 0 }
 		},
 		random: {
 			command: 'neteasemusic.mode.repeat',
 			icon: '$(pin)',
 			title: '播放模式: 单曲循环',
-			state: {mode: 1}
+			state: { mode: 1 }
 		},
 		intelligent: {
 			command: 'neteasemusic.mode.random', // action to intelligent or loop
 			icon: '$(question)',
 			title: '播放模式: 随机播放',
-			state: {mode: 2}
+			state: { mode: 2 }
 		},
 		loop: {
 			command: 'neteasemusic.mode.intelligent',
 			icon: '$(pulse)',
 			title: '播放模式: 心动模式',
-			state: {mode: 3}
+			state: { mode: 3 }
 		},
 		// */
 		play: {
 			command: 'neteasemusic.play',
 			icon: '$(play)',
 			title: '播放',
-			state: {playing: false}
+			state: { playing: false }
 		},
 		pause: {
 			command: 'neteasemusic.pause',
 			icon: '$(primitive-square)', // $(debug-pause) cannot override color
 			title: '暂停',
-			state: {playing: true}
+			state: { playing: true }
 		},
 		trash: {
 			command: 'neteasemusic.trash',
@@ -95,26 +95,26 @@ const PlayerBar = context => {
 			icon: '$(heart)',
 			title: '红心',
 			color: 'rgba(255,255,255,0.5)',
-			state: {liked: false}
+			state: { liked: false }
 		},
 		dislike: {
 			command: 'neteasemusic.dislike',
 			icon: '$(heart)',
 			title: '取消红心',
-			state: {liked: true}
+			state: { liked: true }
 		},
 		mute: {
 			command: 'neteasemusic.mute',
 			icon: '$(unmute)',
 			title: '静音',
-			state: {muted: false}
+			state: { muted: false }
 		},
 		unmute: {
 			command: 'neteasemusic.unmute',
 			icon: '$(mute)',
 			title: '取消静音',
 			color: 'rgba(255,255,255,0.5)',
-			state: {muted: true}
+			state: { muted: true }
 		},
 		volume: {
 			command: 'neteasemusic.volume',
@@ -154,7 +154,7 @@ const PlayerBar = context => {
 		state: state => {
 			if (!(state in buttons)) return
 			if (state.includes('like')) items[buttons.like.index][(api.user.account() && !runtime.stateManager.get('program')) ? 'show' : 'hide']()
-			const {index} = buttons[state]
+			const { index } = buttons[state]
 			const name = order[index][(order[index].indexOf(state) + 1) % order[index].length]
 			attach(items[index], buttons[name])
 		},
@@ -180,7 +180,7 @@ const PlayerBar = context => {
 }
 
 const MprisBridge = context => {
-	const {displayName} = require('./package')
+	const { displayName } = require('./package')
 	let player = null
 
 	try {
@@ -192,7 +192,7 @@ const MprisBridge = context => {
 		})
 	}
 	catch(error) {
-		return new Proxy({}, {get: () => () => null})
+		return new Proxy({}, { get: () => () => null })
 	}
 
 	player.getPosition = () => 0 // TODO
@@ -224,7 +224,7 @@ const MprisBridge = context => {
 		},
 		state: state => {
 			if (['play', 'pause'].includes(state)) {
-				player.playbackStatus = {play: 'Playing', pause: 'Paused'}[state]
+				player.playbackStatus = { play: 'Playing', pause: 'Paused' }[state]
 			}
 		},
 		volume: value => player.volume = value,
@@ -239,7 +239,7 @@ const DuplexChannel = context => {
 	let activeEditor = ActiveEditor()
 
 	const logger = song => {
-		const translation = {'playlist': 'list', 'artist': 'artist', 'album': 'album'}
+		const translation = { playlist: 'list', artist: 'artist', album: 'album' }
 		const output = {
 			id: song.id,
 			type: 'song',
@@ -319,7 +319,7 @@ const DuplexChannel = context => {
 
 	const receiveMessage = message => {
 		message = typeof(message) === 'object' ? message : JSON.parse(message)
-		const {type, body} = message
+		const { type, body } = message
 		if (type == 'event') {
 			if (body.name == 'ready') {
 				runtime.event.emit('ready')
@@ -371,7 +371,7 @@ const DuplexChannel = context => {
 		}
 	}
 
-	const postMessage = (command, data) => runtime.webviewPanel.panel.postMessage({command, data})
+	const postMessage = (command, data) => runtime.webviewPanel.panel.postMessage({ command, data })
 	runtime.webviewPanel.panel.webview.onDidReceiveMessage(receiveMessage, undefined, context.subscriptions)
 
 	return {
@@ -402,20 +402,20 @@ const AssistServer = context => {
 			.catch(error => ['initial', 'expire'].includes(error.message) ? api[type].url(id) : error)
 			.then(body => body.data[0].url ? body.data[0].url : Promise.reject(new Error('empty')))
 			.then(link => runtime.preferenceReader.get('CDN.redirect') ? link.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net') : link)
-			.then(link => (res.writeHead(302, {location: url.pathname + '?' + queryify({url: link})}), res.end()))
-			.catch(error => ['empty'].includes(error.message) ? (res.writeHead(404, {'content-type': 'audio/*'}), res.end()) : error)
+			.then(link => (res.writeHead(302, { location: url.pathname + '?' + queryify({ url: link }) }), res.end()))
+			.catch(error => ['empty'].includes(error.message) ? (res.writeHead(404, { 'content-type': 'audio/*' }), res.end()) : error)
 		}
 		else if (url.pathname === '/song/file' && query.path) {
 			let file = decodeURIComponent(urlParse(query.path).pathname), meta = {}
 			file = process.platform === 'win32' ? file.replace(/^\//, '') : file
 			try {meta = fs.statSync(file)} 
-			catch(error) {return (res.writeHead(404, {'content-type': 'audio/*'}), res.end())}
+			catch(error) {return (res.writeHead(404, { 'content-type': 'audio/*' }), res.end())}
 			let [start, end] = (headers['range'] || '').split('-')
 			start = parseInt(start) || 0
 			end = parseInt(end) || Infinity
 			const bytes = `bytes ${start}-${end === Infinity ? meta.size - 1 : end}/${meta.size}`
-			res.writeHead(headers['range'] ? 206 : 200, {'content-type': 'audio/*', 'content-range': headers['range'] ? bytes : null})
-			fs.createReadStream(file, {start, end}).pipe(res)
+			res.writeHead(headers['range'] ? 206 : 200, { 'content-type': 'audio/*', 'content-range': headers['range'] ? bytes : null })
+			fs.createReadStream(file, { start, end }).pipe(res)
 		}
 		else {
 			res.socket.destroy()
@@ -432,10 +432,10 @@ const WebviewPanel = context => {
 	// const panel = vscode.env.openExternal(vscode.Uri.file(path.join(context.extensionPath, 'index.html')))
 	const panel = vscode.window.createWebviewPanel(
 		'neteasemusic', 'NeteaseMusic',
-		{preserveFocus: true, viewColumn: vscode.ViewColumn.One},
-		{enableScripts: true, retainContextWhenHidden: true, portMapping: [{webviewPort: 16363, extensionHostPort: 16363}]}
+		{ preserveFocus: true, viewColumn: vscode.ViewColumn.One },
+		{ enableScripts: true, retainContextWhenHidden: true, portMapping: [{ webviewPort: 16363, extensionHostPort: 16363 }] }
 	)
-	panel.iconPath = ['light', 'dark'].reduce((uri, theme) => Object.assign(uri, {[theme]: vscode.Uri.file(path.join(context.extensionPath, `${theme}.svg`))}), {})
+	panel.iconPath = ['light', 'dark'].reduce((uri, theme) => Object.assign(uri, { [theme]: vscode.Uri.file(path.join(context.extensionPath, `${theme}.svg`)) }), {})
 	panel.webview.html =
 		fs.readFileSync(vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath, 'utf-8')
 		.replace('<base>', `<base href="${panel.webview.asWebviewUri(vscode.Uri.file(path.join(context.extensionPath, '/')))}">`)

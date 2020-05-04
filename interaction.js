@@ -23,7 +23,7 @@ const selector = (items, title) => {
 
 const utility = {
 	extract: (item, keys = ['id', 'name']) =>
-		Object.keys(item).filter(key => keys.includes(key)).reduce((result, key) => Object.assign(result, {[key]: item[key]}), {}),
+		Object.keys(item).filter(key => keys.includes(key)).reduce((result, key) => Object.assign(result, { [key]: item[key] }), {}),
 	format: {
 		song: (song, source) => {
 			const item = utility.extract(song, ['id', 'name', 'listen'])
@@ -37,7 +37,7 @@ const utility = {
 		program: (program, source) => {
 			const item = utility.extract(program, ['id', 'name', 'duration'])
 			item.album = utility.extract(program.radio)
-			item.artists = [{id: 0, name: program.dj.nickname}]
+			item.artists = [{ id: 0, name: program.dj.nickname }]
 			item.create = program.createTime
 			item.listen = program.listenerCount
 			item.cover = program.coverUrl
@@ -124,7 +124,7 @@ const utility = {
 		collect: done => `${done ? '〖 $(check) 已收藏 〗' : '〖 $(plus) 收藏 〗'}`
 	},
 	indent: {
-		expand: item => Object.assign(item, {label: `\u2003\u2005  ${item.label}`})
+		expand: item => Object.assign(item, { label: `\u2003\u2005  ${item.label}` })
 	}
 }
 
@@ -186,9 +186,9 @@ const interaction = {
 		}),
 		record: all => api.user.record().then(data => {
 			const show = (array, week) =>
-				array.map(item => Object.assign(item.song, {listen: item.playCount}))
-				.map(song => utility.format.song(song, {type: 'record', week}))
-				.map((song, index, track) => utility.lift.song(song, [index, 100], {listen: true}, () => {
+				array.map(item => Object.assign(item.song, { listen: item.playCount }))
+				.map(song => utility.format.song(song, { type: 'record', week }))
+				.map((song, index, track) => utility.lift.song(song, [index, 100], { listen: true }, () => {
 					controller.add(track)
 					controller.play(index)
 					quickPick.hide()
@@ -226,8 +226,8 @@ const interaction = {
 							refresh()
 						}), refresh)
 					}],
-					data.programs.map(program => utility.format.program(program, {type: 'djradio', id, name: radio.name}))
-					.map((program, index, track) => utility.lift.song(program, [track.length - index - 1, track.length], {program: true}, () => {
+					data.programs.map(program => utility.format.program(program, { type: 'djradio', id, name: radio.name }))
+					.map((program, index, track) => utility.lift.song(program, [track.length - index - 1, track.length], { program: true }, () => {
 						controller.add(track)
 						controller.play(index)
 						quickPick.hide()
@@ -240,8 +240,8 @@ const interaction = {
 	},
 	artist: {
 		song: id => api.artist.song(id).then(data => {
-			selector(data.hotSongs.map(song => utility.format.song(song, {type: 'artist', id, name: data.artist.name}))
-			.map((song, index, track) => utility.lift.song(song, [index, track.length], {artist: false}, () => {
+			selector(data.hotSongs.map(song => utility.format.song(song, { type: 'artist', id, name: data.artist.name }))
+			.map((song, index, track) => utility.lift.song(song, [index, track.length], { artist: false }, () => {
 				controller.add(track)
 				controller.play(index)
 				quickPick.hide()
@@ -291,8 +291,8 @@ const interaction = {
 						refresh()
 					}), refresh)
 				}],
-				data.songs.map(song => utility.format.song(song, {type: 'album', id, name: data.album.name}))
-				.map((song, index, track) => utility.lift.song(song, [index, track.length], {album: false}, () => {
+				data.songs.map(song => utility.format.song(song, { type: 'album', id, name: data.album.name }))
+				.map((song, index, track) => utility.lift.song(song, [index, track.length], { album: false }, () => {
 					controller.add(track)
 					controller.play(index)
 					quickPick.hide()
@@ -328,7 +328,7 @@ const interaction = {
 							refresh()
 						}), refresh)
 					}],
-					data.playlist.tracks.map(song => utility.format.song(song, {type: 'playlist', id, name}))
+					data.playlist.tracks.map(song => utility.format.song(song, { type: 'playlist', id, name }))
 					.map((song, index, track) => utility.lift.song(song, [index, track.length], {}, () => {
 						controller.add(track)
 						controller.play(index, true, true)
@@ -356,7 +356,7 @@ const interaction = {
 	},
 	recommend: {
 		song: () => api.recommend.song().then(data => {
-			selector(data.recommend.map(song => utility.format.song(song, {type: 'recommend'}))
+			selector(data.recommend.map(song => utility.format.song(song, { type: 'recommend' }))
 			.map((song, index, track) => utility.lift.song(song, [index, track.length], {}, () => {
 				controller.add(track)
 				controller.play(index)
@@ -371,13 +371,13 @@ const interaction = {
 			})), '推荐歌单')
 		}),
 		radio: () => api.recommend.radio().then(data => {
-			controller.add(data.data.map(song => utility.format.song(song, {type: 'radio'})), true)
+			controller.add(data.data.map(song => utility.format.song(song, { type: 'radio' })), true)
 			controller.play(0)
 		})
 	},
 	new: {
 		song: () => api.new.song().then(data => {
-			selector(data.data.map(song => utility.format.song(song, {type: 'new'}))
+			selector(data.data.map(song => utility.format.song(song, { type: 'new' }))
 			.map(song => utility.lift.song(song, null, {}, () => {
 				controller.add(song)
 				controller.play()
@@ -455,26 +455,26 @@ const interaction = {
 	},
 	search: () => {
 		let hot = [], timer = 0, autoComplete = {}
-		const operation = item => Object.assign(item, {alwaysShow: true, action: () => search(item.label)})
+		const operation = item => Object.assign(item, { alwaysShow: true, action: () => search(item.label) })
 		const suggest = () => {
 			const value = quickPick.value
 			if (!value) quickPick.items = hot
 			else api.search.keyword(value).then(data => {
-				const items = (data.result && data.result.allMatch) ? data.result.allMatch.map(item => ({label: item.keyword})) : []
-				if (!items.length || items[0].label != value) items.unshift({label: value})
+				const items = (data.result && data.result.allMatch) ? data.result.allMatch.map(item => ({ label: item.keyword })) : []
+				if (!items.length || items[0].label != value) items.unshift({ label: value })
 				quickPick.items = items.map(operation)
 			})
 		}
 
 		const search = (text, type) => {
 			autoComplete.dispose()
-			const code = {song: 1, artist: 100, album: 10, playlist: 1000, djradio: 1009}[type]
+			const code = { song: 1, artist: 100, album: 10, playlist: 1000, djradio: 1009 }[type]
 			if (!code) api.search.suggest(text).then(data => display(text, data))
 			else api.search.type(text, code).then(data => display(text, data, type))
 		}
 
 		const display = (text, data, type) => {
-			const songs = (data.result.songs || []).map(song => utility.format.song(song, {type: 'search'}))
+			const songs = (data.result.songs || []).map(song => utility.format.song(song, { type: 'search' }))
 			.map(song => utility.lift.song(song, null, {}, () => {
 				controller.add(song)
 				controller.play()
@@ -525,11 +525,11 @@ const interaction = {
 					action: type != 'djradio' ? () => search(text, 'djradio') : null
 				}],
 				djradios.map(utility.indent.expand)
-			), `“${text}”的${{song: '歌曲', artist: '歌手', album: '专辑', playlist: '歌单', djradio: '电台'}[type] || ''}搜索结果`)
-			quickPick.activeItems = [quickPick.items[{song: 0, artist: 1, album: 2, playlist: 3, djradio: 4}[type] || 0]]
+			), `“${text}”的${{ song: '歌曲', artist: '歌手', album: '专辑', playlist: '歌单', djradio: '电台' }[type] || ''}搜索结果`)
+			quickPick.activeItems = [quickPick.items[{ song: 0, artist: 1, album: 2, playlist: 3, djradio: 4 }[type] || 0]]
 		}
 		api.search.hot().then(data => {
-			hot = data.result.hots.map(item => ({label: item.first})).map(operation)
+			hot = data.result.hots.map(item => ({ label: item.first })).map(operation)
 			selector(hot, '搜索歌曲、歌手、专辑、歌单')
 			autoComplete = quickPick.onDidChangeValue(() => {
 				clearTimeout(timer)
@@ -605,7 +605,7 @@ const interaction = {
 			: {
 				label: '节目包含歌曲',
 				action: () => api.program.detail(song.id).then(data => {
-					selector(data.program.songs.map(song => utility.format.song(song, {type: 'program'}))
+					selector(data.program.songs.map(song => utility.format.song(song, { type: 'program' }))
 					.map((song, index, track) => utility.lift.song(song, [index, track.length], {}, () => {
 						controller.add(track)
 						controller.play(index)
