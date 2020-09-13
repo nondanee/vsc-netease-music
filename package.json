@@ -443,12 +443,12 @@
         }
     },
     "scripts": {
-        "postinstall": "node ./node_modules/vscode/bin/install",
         "test": "node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
+        "@types/vscode": "^1.35.0",
         "eslint": "^6.8.0",
-        "vscode": "^1.1.34"
+        "vscode-test": "^1.4.0"
     },
     "dependencies": {
         "mpris-service": "^2.1.0"
