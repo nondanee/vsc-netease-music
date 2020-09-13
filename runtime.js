@@ -371,7 +371,7 @@ const DuplexChannel = context => {
 		}
 	}
 
-	const postMessage = (command, data) => runtime.webviewPanel.panel.postMessage({ command, data })
+	const postMessage = (command, data) => runtime.webviewPanel.panel.webview.postMessage({ command, data })
 	runtime.webviewPanel.panel.webview.onDidReceiveMessage(receiveMessage, undefined, context.subscriptions)
 
 	return {
