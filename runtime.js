@@ -386,6 +386,26 @@ const AssistServer = context => {
 	const queryify = require('querystring').stringify
 	const queryParse = require('querystring').parse
 
+	const state = { song: {}, program: {} }
+	const mediaResponse = async (type, id, headers) => {
+		const cache = (state[type] || {})[id]
+		if (cache) {
+			const response = await api.request('GET', cache, headers)
+			if (response.statusCode < 300) return response
+			delete state[type][id]
+			return mediaResponse(type, id, headers)
+		}
+
+		const body = await api[type].url(id)
+		let { url } = ((body || {}).data || [])[0] || {}
+		if (!url) throw Error('empty')
+		if (runtime.preferenceReader.get('CDN.redirect')) {
+			url = url.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net')
+		}
+		state[type][id] = url
+		return mediaResponse(type, id, headers)
+	}
+
 	const server = require('http').createServer()
 	.on('request', (req, res) => {
 		if (req.method === 'option') return res.end()
@@ -396,13 +416,8 @@ const AssistServer = context => {
 		const [, type, id] = (url.pathname.match(/^\/(song|program)\/(\d+)$/) || [])
 		if (id) {
 			['host', 'referer'].filter(key => key in headers).forEach(key => delete headers[key])
-			Promise.resolve(query.url ? api.request('GET', query.url, headers) : Promise.reject(new Error('initial')))
-			.then(response => response.statusCode.toString().startsWith('20') ? response : Promise.reject(new Error('expire')))
-			.then(response => (res.writeHead(response.statusCode, response.headers), response.pipe(res), Promise.reject(new Error('end'))))
-			.catch(error => ['initial', 'expire'].includes(error.message) ? api[type].url(id) : error)
-			.then(body => body.data[0].url ? body.data[0].url : Promise.reject(new Error('empty')))
-			.then(link => runtime.preferenceReader.get('CDN.redirect') ? link.replace(/(m\d+?)(?!c)\.music\.126\.net/, '$1c.music.126.net') : link)
-			.then(link => (res.writeHead(302, { location: url.pathname + '?' + queryify({ url: link }) }), res.end()))
+			mediaResponse(type, id, headers)
+			.then(response => (res.writeHead(response.statusCode, response.headers), response.pipe(res)))
 			.catch(error => ['empty'].includes(error.message) ? (res.writeHead(404, { 'content-type': 'audio/*' }), res.end()) : error)
 		}
 		else if (url.pathname === '/song/file' && query.path) {
