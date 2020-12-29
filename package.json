@@ -359,7 +359,7 @@
                 },
                 {
                     "command": "neteasemusic.recommend.radio",
-                    "when": "neteasemusic.on && neteasemusic.logged"
+                    "when": "neteasemusic.on && neteasemusic.logged && !neteasemusic.radio"
                 },
                 {
                     "command": "neteasemusic.user.artist",
