@@ -111,7 +111,12 @@
 				case 'load': {
 					song = data.song
 					lyric = Lyric(data.lyric)
-					audio.src = `http://${host}/${song.source.type === 'djradio' ? 'program' : 'song'}/${song.id}`
+					const path = song.source.type === 'djradio'
+						? `program/${song.id}`
+						: `song/${song.id}`
+					audio.src = (window.origin || '').startsWith('vscode')
+						? `http://${host}/${path}`
+						: `/proxy/${host.split(':')[1]}/${path}`
 					if (data.action) audio.play()
 					return
 				}
