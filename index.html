@@ -6,9 +6,6 @@
     <meta name="referrer" content="no-referrer">
 	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; connect-src *; media-src * vscode-resource: blob:">
 	<base>
-</head>
-<body>
-	Please interact with the document first otherwise play() will failed
 	<script>
 		const audio = new Audio()
 		const Lyric = lrcs => {
@@ -198,5 +195,8 @@
 		window.onload = prepare
 		// eventSource.onopen = () => prepare().then(() => eventSource.onopen = null)
 	</script>
+</head>
+<body>
+	Please interact with the document first otherwise play() will failed
 </body>
 </html>
