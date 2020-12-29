@@ -36,11 +36,13 @@ const StateManager = context => {
 }
 
 const PlayerBar = context => {
+	let color = [255, 255, 255]
 	const buttons = {
 		previous: {
 			command: 'neteasemusic.previous',
 			icon: '$(chevron-left)',
-			title: '上一首'
+			title: '上一首',
+			state: { radio: false }
 		},
 		next: {
 			command: 'neteasemusic.next',
@@ -88,13 +90,14 @@ const PlayerBar = context => {
 		trash: {
 			command: 'neteasemusic.trash',
 			icon: '$(trash)',
-			title: '不喜欢'
+			title: '不喜欢',
+			state: { radio: true }
 		},
 		like: {
 			command: 'neteasemusic.like',
 			icon: '$(heart)',
 			title: '红心',
-			color: 'rgba(255,255,255,0.5)',
+			opacity: 0.5,
 			state: { liked: false }
 		},
 		dislike: {
@@ -113,17 +116,16 @@ const PlayerBar = context => {
 			command: 'neteasemusic.unmute',
 			icon: '$(mute)',
 			title: '取消静音',
-			color: 'rgba(255,255,255,0.5)',
+			opacity: 0.5,
 			state: { muted: true }
 		},
 		volume: {
 			command: 'neteasemusic.volume',
-			icon: '100',
+			text: '100',
 			title: '音量调节'
 		},
 		list: {
 			command: 'neteasemusic.list',
-			icon: ''
 		},
 		more: {
 			command: 'neteasemusic.more',
@@ -133,11 +135,10 @@ const PlayerBar = context => {
 	}
 
 	const attach = (item, button) => {
-		item.color = button.color || undefined
-		item.text = button.icon
+		item.text = button.icon || button.text || ''
 		item.command = button.command
 		item.tooltip = button.title || undefined
-		if (button.state) Object.entries(button.state).forEach(entry => runtime.stateManager.set.apply(null, entry))
+		item.color = 'opacity' in button ? `rgba(${color.concat(button.opacity)})` : undefined
 	}
 
 	const order = [['list'], ['trash'], ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['repeat', 'random', 'intelligent', 'loop'], ['mute', 'unmute'], ['volume'], ['more']].reverse()
@@ -149,32 +150,53 @@ const PlayerBar = context => {
 		return item
 	})
 
+	const update = () => {
+		order.forEach((group, index) => {
+			const target = group.some(name => {
+				const { state } = buttons[name] || {}
+				if (!state) return true
+				return Object.entries(state).every(([key, value]) => runtime.stateManager.get(key) === value)
+			})
+			if (target) {
+				attach(items[index], target)
+			} else {
+				target.hide()
+			}
+		})
+	}
+
 	return {
 		dispose: () => items.forEach(item => item.dispose()),
 		state: state => {
-			if (!(state in buttons)) return
-			if (state.includes('like')) items[buttons.like.index][(api.user.account() && !runtime.stateManager.get('program')) ? 'show' : 'hide']()
-			const { index } = buttons[state]
-			const name = order[index][(order[index].indexOf(state) + 1) % order[index].length]
-			attach(items[index], buttons[name])
+			// if (!(state in buttons)) return
+			// if (state.includes('like')) items[buttons.like.index][(api.user.account() && !runtime.stateManager.get('program')) ? 'show' : 'hide']()
+			// const { index } = buttons[state]
+			// const name = order[index][(order[index].indexOf(state) + 1) % order[index].length]
+			// attach(items[index], buttons[name])
 		},
 		update: text => {
-			items[buttons.list.index].text = text
+			// buttons.list.icon = text
+			// items[buttons.list.index].text = text
 		},
 		volume: state => {
-			attach(items[buttons.mute.index], buttons[state.muted ? 'unmute' : 'mute'])
-			items[buttons.volume.index].color = items[buttons.mute.index].color
-			items[buttons.volume.index].text = parseInt(state.value * 100).toString()
+			// attach(items[buttons.mute.index], buttons[state.muted ? 'unmute' : 'mute'])
+			// items[buttons.volume.index].color = items[buttons.mute.index].color
+			// items[buttons.volume.index].text = parseInt(state.value * 100).toString()
 		},
 		show: radio => {
 			runtime.stateManager.set('track', true)
-			items.forEach(item => item.show())
-			if (radio) ['previous', 'repeat'].map(name => buttons[name].index).forEach(index => items[index].hide())
-			items[buttons['trash'].index][radio ? 'show' : 'hide']()
+			// items.forEach(item => item.show())
+			// if (radio) ['previous', 'repeat'].map(name => buttons[name].index).forEach(index => items[index].hide())
+			// items[buttons['trash'].index][radio ? 'show' : 'hide']()
 		},
 		hide: () => {
 			runtime.stateManager.set('track', false)
-			items.forEach(item => item.hide())
+			// items.forEach(item => item.hide())
+		},
+		color: value => {
+			value = interaction.utility.format.color(value)
+			if (value.length !== 3) return
+			color = value
 		}
 	}
 }
@@ -363,6 +385,9 @@ const DuplexChannel = context => {
 				if (runtime.preferenceReader.get('Popup.appearance') !== 'never') vscode.window.showWarningMessage(message)
 				controller.remove()
 				controller.play()
+			}
+			else if (body.name == 'theme') {
+				runtime.playerBar.color(body.data)
 			}
 		}
 		else if (type == 'command') {
