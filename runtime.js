@@ -336,7 +336,8 @@ const DuplexChannel = context => {
 				const program = song.source.type === 'djradio'
 				const artist = interaction.utility.stringify.artist(song), album = song.album.name
 				const playing = [program ? album : artist, song.name].join(' - ')
-				vscode.window.showInformationMessage(`正在播放: ${playing}`)
+				const message = `正在播放: ${playing}`
+				if (runtime.preferenceReader.get('Popup.appearance') === 'always') vscode.window.showInformationMessage(message)
 				runtime.playerBar.update(playing)
 				runtime.mprisBridge.sync(song)
 				if (song.source.type == 'djradio') api.program.listen(song.id)
@@ -358,7 +359,8 @@ const DuplexChannel = context => {
 				controller.trash(body.data)
 			}
 			else if (body.name == 'error') {
-				vscode.window.showWarningMessage(`无法播放: ${interaction.utility.stringify.song(body.data)}`)
+				const message = `无法播放: ${interaction.utility.stringify.song(body.data)}`
+				if (runtime.preferenceReader.get('Popup.appearance') !== 'never') vscode.window.showWarningMessage(message)
 				controller.remove()
 				controller.play()
 			}

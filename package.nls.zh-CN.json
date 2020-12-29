@@ -44,9 +44,13 @@
     "category.neteasemusic.my": "网易云音乐 我的音乐",
     "category.neteasemusic.discover": "网易云音乐 发现音乐",
     "category.neteasemusic.recommend": "网易云音乐 个性推荐",
+    "description.neteasemusic.popup.appearance": "正在播放提示显示配置",
     "description.neteasemusic.api.ssl": "启用 HTTPS API (若修改了 hosts 文件, 请禁用)",
     "description.neteasemusic.ssl.strict": "启用 SSL 证书检查 (若使用了非信任证书, 请禁用)",
     "description.neteasemusic.cdn.redirect": "启用海外 CDN 重定向 (坐标中国大陆, 请禁用)",
     "description.neteasemusic.pin.auto": "启动插件时自动固定 Webview 标签页",
-    "description.neteasemusic.reset.control": "在命令面板显示重置选项 (如遇致命错误, 请向开发者报告)"
+    "description.neteasemusic.reset.control": "在命令面板显示重置选项 (如遇致命错误, 请向开发者报告)",
+    "enum.neteasemusic.popup.appearance.always": "总是显示",
+    "enum.neteasemusic.popup.appearance.onerror": "仅失败时显示",
+    "enum.neteasemusic.popup.appearance.never": "从不显示"
 }

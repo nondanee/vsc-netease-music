@@ -251,6 +251,18 @@
             "type": "object",
             "title": "%category.neteasemusic%",
             "properties": {
+                "NeteaseMusic.Popup.appearance": {
+                    "type": "string",
+                    "default": "always",
+                    "enum": ["always", "onerror", "never"],
+                    "scope": "machine",
+                    "description": "%description.neteasemusic.popup.appearance%",
+                    "enumDescriptions": [
+                        "%enum.neteasemusic.popup.appearance.always%",
+                        "%enum.neteasemusic.popup.appearance.onerror%",
+                        "%enum.neteasemusic.popup.appearance.never%"
+                    ]
+                },
                 "NeteaseMusic.API.SSL": {
                     "type": "boolean",
                     "default": true,
