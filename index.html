@@ -177,7 +177,7 @@
 		const ready = () => {
 			document.onclick = null
 			document.ontouchend = null
-			postMessage('event', {name: 'ready'})
+			postMessage('event', { name: 'ready' })
 			document.body.innerHTML = 'Please preserve this webview tab'
 		}
 
@@ -185,12 +185,11 @@
 			(new Audio('./silence.mp3')).play()
 			.then(ready)
 			.catch(error => {
-				console.log(error.name, error.message)
+				console.log(error)
 				if (error.name === 'NotAllowedError') {
 					document.onclick = ready
 					document.ontouchend = ready
-				}
-				else {
+				} else {
 					postMessage('echo', `${error.name}: ${error.message}`)
 				}
 			})
