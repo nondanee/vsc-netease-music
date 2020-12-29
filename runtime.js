@@ -185,12 +185,12 @@ const PlayerBar = context => {
 			Object.entries(entries).forEach(([key, value]) => runtime.stateManager.set(key, value))
 			update()
 		},
-		update: text => {
+		text: text => {
 			buttons.list.text = text
 			update()
 		},
-		volume: event => {
-			const { muted, value } = event
+		volume: data => {
+			const { muted, value } = data
 			runtime.stateManager.set('muted', muted)
 			buttons.volume.ghost = muted
 			buttons.volume.text = parseInt(value * 100).toString()
@@ -378,7 +378,7 @@ const DuplexChannel = context => {
 				if (song.source.type == 'djradio') api.program.listen(song.id)
 			}
 			else if (body.name == 'lyric') {
-				runtime.playerBar.update(body.data)
+				runtime.playerBar.text(body.data)
 			}
 			else if (body.name == 'volume') {
 				runtime.playerBar.volume(body.data)
