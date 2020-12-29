@@ -269,6 +269,12 @@
                     "scope": "machine",
                     "description": "%description.neteasemusic.cdn.redirect%"
                 },
+                "NeteaseMusic.PIN.auto": {
+                    "type": "boolean",
+                    "default": false,
+                    "scope": "machine",
+                    "description": "%description.neteasemusic.pin.auto%"
+                },
                 "NeteaseMusic.reset.control": {
                     "type": "boolean",
                     "default": false,

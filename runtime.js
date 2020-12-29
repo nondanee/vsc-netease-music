@@ -455,6 +455,7 @@ const WebviewPanel = context => {
 		fs.readFileSync(vscode.Uri.file(path.join(context.extensionPath, 'index.html')).fsPath, 'utf-8')
 		.replace('<base>', `<base href="${panel.webview.asWebviewUri(vscode.Uri.file(path.join(context.extensionPath, '/')))}">`)
 
+	if (runtime.preferenceReader.get('PIN.auto')) vscode.commands.executeCommand('workbench.action.pinEditor')
 	// panel.webview.onDidReceiveMessage(runtime.duplexChannel.receiveMessage, undefined, context.subscriptions)
 	panel.onDidDispose(() => runtime.event.emit('suspend'), null, context.subscriptions)
 

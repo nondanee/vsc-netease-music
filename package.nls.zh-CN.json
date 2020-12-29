@@ -47,5 +47,6 @@
     "description.neteasemusic.api.ssl": "启用 HTTPS API (若修改了 hosts 文件, 请禁用)",
     "description.neteasemusic.ssl.strict": "启用 SSL 证书检查 (若使用了非信任证书, 请禁用)",
     "description.neteasemusic.cdn.redirect": "启用海外 CDN 重定向 (坐标中国大陆, 请禁用)",
+    "description.neteasemusic.pin.auto": "启动插件时自动固定 Webview 标签页",
     "description.neteasemusic.reset.control": "在命令面板显示重置选项 (如遇致命错误, 请向开发者报告)"
 }
