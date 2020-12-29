@@ -54,25 +54,25 @@ const PlayerBar = context => {
 			command: 'neteasemusic.mode.loop',
 			icon: '$(sync)',
 			title: '播放模式: 循环播放',
-			state: { mode: 0 }
+			state: { mode: 0, radio: false }
 		},
 		random: {
 			command: 'neteasemusic.mode.repeat',
 			icon: '$(pin)',
 			title: '播放模式: 单曲循环',
-			state: { mode: 1 }
+			state: { mode: 1, radio: false }
 		},
 		intelligent: {
 			command: 'neteasemusic.mode.random', // action to intelligent or loop
 			icon: '$(question)',
 			title: '播放模式: 随机播放',
-			state: { mode: 2 }
+			state: { mode: 2, radio: false }
 		},
 		loop: {
 			command: 'neteasemusic.mode.intelligent',
 			icon: '$(pulse)',
 			title: '播放模式: 心动模式',
-			state: { mode: 3 }
+			state: { mode: 3, radio: false }
 		},
 		// */
 		play: {
@@ -97,7 +97,7 @@ const PlayerBar = context => {
 			command: 'neteasemusic.like',
 			icon: '$(heart)',
 			title: '红心',
-			opacity: 0.5,
+			ghost: true,
 			state: { liked: false }
 		},
 		dislike: {
@@ -116,7 +116,7 @@ const PlayerBar = context => {
 			command: 'neteasemusic.unmute',
 			icon: '$(mute)',
 			title: '取消静音',
-			opacity: 0.5,
+			ghost: true,
 			state: { muted: true }
 		},
 		volume: {
@@ -138,7 +138,7 @@ const PlayerBar = context => {
 		item.text = button.icon || button.text || ''
 		item.command = button.command
 		item.tooltip = button.title || undefined
-		item.color = 'opacity' in button ? `rgba(${color.concat(button.opacity)})` : undefined
+		item.color = button.ghost ? `rgba(${color.concat(0.5)})` : undefined
 	}
 
 	const order = [['list'], ['trash'], ['like', 'dislike'], ['previous'], ['play', 'pause'], ['next'], ['repeat', 'random', 'intelligent', 'loop'], ['mute', 'unmute'], ['volume'], ['more']].reverse()
@@ -152,51 +152,64 @@ const PlayerBar = context => {
 
 	const update = () => {
 		order.forEach((group, index) => {
+			const item = items[index]
 			const target = group.some(name => {
 				const { state } = buttons[name] || {}
 				if (!state) return true
 				return Object.entries(state).every(([key, value]) => runtime.stateManager.get(key) === value)
 			})
 			if (target) {
-				attach(items[index], target)
+				attach(item, target)
+				item.show()
 			} else {
-				target.hide()
+				item.hide()
 			}
 		})
+	}
+
+	const translation = {
+		like: { liked: true },
+		dislike: { liked: false },
+		play: { playing: true },
+		pause: { playing: false },
+		loop: { mode: 0 },
+		repeat: { mode: 1 },
+		random: { mode: 2 },
+		intelligent: { mode: 3 },
 	}
 
 	return {
 		dispose: () => items.forEach(item => item.dispose()),
 		state: state => {
-			// if (!(state in buttons)) return
-			// if (state.includes('like')) items[buttons.like.index][(api.user.account() && !runtime.stateManager.get('program')) ? 'show' : 'hide']()
-			// const { index } = buttons[state]
-			// const name = order[index][(order[index].indexOf(state) + 1) % order[index].length]
-			// attach(items[index], buttons[name])
+			const entries = translation[state] || {}
+			Object.entries(entries).forEach(([key, value]) => runtime.stateManager.set(key, value))
+			update()
 		},
 		update: text => {
-			// buttons.list.icon = text
-			// items[buttons.list.index].text = text
+			buttons.list.text = text
+			update()
 		},
-		volume: state => {
-			// attach(items[buttons.mute.index], buttons[state.muted ? 'unmute' : 'mute'])
-			// items[buttons.volume.index].color = items[buttons.mute.index].color
-			// items[buttons.volume.index].text = parseInt(state.value * 100).toString()
+		volume: event => {
+			const { muted, value } = event
+			runtime.stateManager.set('muted', muted)
+			buttons.volume.ghost = muted
+			buttons.volume.text = parseInt(value * 100).toString()
+			update()
 		},
 		show: radio => {
 			runtime.stateManager.set('track', true)
-			// items.forEach(item => item.show())
-			// if (radio) ['previous', 'repeat'].map(name => buttons[name].index).forEach(index => items[index].hide())
-			// items[buttons['trash'].index][radio ? 'show' : 'hide']()
+			runtime.stateManager.set('radio', radio)
+			update()
 		},
 		hide: () => {
 			runtime.stateManager.set('track', false)
-			// items.forEach(item => item.hide())
+			items.forEach(item => item.hide())
 		},
 		color: value => {
 			value = interaction.utility.format.color(value)
 			if (value.length !== 3) return
 			color = value
+			update()
 		}
 	}
 }
@@ -596,3 +609,4 @@ module.exports = runtime
 const api = require('./request.js')
 const controller = require('./controller.js')
 const interaction = require('./interaction.js')
+const { refresh } = require('./request.js')
