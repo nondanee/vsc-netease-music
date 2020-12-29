@@ -112,42 +112,54 @@
 		}
 
 		const receiveMessage = message => {
-			message = typeof(message) === 'object' ? message : JSON.parse(message)
-			const {command, data} = message
-			if (command === 'load') {
-				song = data.song
-				lyric = Lyric(data.lyric)
-				audio.src = `http://127.0.0.1:16363/${song.source.type === 'djradio' ? 'program' : 'song'}/${song.id}`
-				if (data.action) audio.play()
-			}
-			else if (command === 'stop') {
-				song = null
-				lyric = null
-				audio.src = ''
-			}
-			else if (command === 'play') {
-				if (audio.paused) audio.play()
-			}
-			else if (command === 'pause') {
-				if (!audio.paused) audio.pause()
-			}
-			else if (command === 'mute') {
-				if (!audio.muted) audio.muted = true
-			}
-			else if (command === 'unmute') {
-				if (audio.muted) audio.muted = false
-			}
-			else if (command === 'volumeChange') {
-				if (data.value != null) return audio.volume = data.value
-				if (audio.muted) audio.muted = false
-				const step = 0.2
-				const volume = (parseInt(audio.volume / step) + 1) * step
-				audio.volume = volume > 1 ? 0 : volume
-			}
-			else if (command === 'trash') {
-				const data = {id: (song || {}).id, time: parseInt((audio || {}).currentTime)}
-				postMessage('event', {name: 'trash', data})
-			}
+			message = typeof message === 'object' ? message : JSON.parse(message)
+			const { command, data } = message || {}
+
+			switch (command) {
+				case 'load': {
+					song = data.song
+					lyric = Lyric(data.lyric)
+					audio.src = `http://127.0.0.1:16363/${song.source.type === 'djradio' ? 'program' : 'song'}/${song.id}`
+					if (data.action) audio.play()
+					return
+				}
+				case 'stop': {
+					song = null
+					lyric = null
+					audio.src = ''
+					return
+				}
+				case 'play': {
+					if (audio.paused) audio.play()
+					return
+				}
+				case 'pause': {
+					if (!audio.paused) audio.pause()
+					return
+				}
+				case 'mute': {
+					if (!audio.muted) audio.muted = true
+					return
+				}
+				case 'unmute': {
+					if (audio.muted) audio.muted = false
+					return
+				}
+				case 'volumeChange': {
+					if (data.value != null) return audio.volume = data.value
+					if (audio.muted) audio.muted = false
+					const step = 0.2
+					const volume = (parseInt(audio.volume / step) + 1) * step
+					audio.volume = volume > 1 ? 0 : volume
+					return
+				}
+				case 'trash': {
+					const data = {id: (song || {}).id, time: parseInt((audio || {}).currentTime)}
+					postMessage('event', {name: 'trash', data})
+					return
+				}
+				default:
+			}			
 		}
 
 		// const cache = url => {
