@@ -33,6 +33,7 @@
 - 快捷键支持
 - 听歌记录
 - 海外使用
+- 支持 [Remote Development](https://code.visualstudio.com/docs/remote/remote-overview) / [code-server](https://github.com/cdr/code-server)
 
 ## Requirement
 
