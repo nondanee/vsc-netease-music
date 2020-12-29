@@ -27,7 +27,9 @@
 			return timeline.length ? second => (timeline[cursor] && second > timeline[cursor][0]) ? timeline[cursor ++][1].join('  ') : null : null
 		}
 
-		let song = null, lyric = null, mpris = window.navigator.userAgent.includes('Linux')
+		let song = null
+		let lyric = null
+		const mpris = window.navigator.userAgent.includes('Linux')
 
 		const mediaSessionHelper = new Proxy({
 			setMetadata: song => {
@@ -58,37 +60,6 @@
 			}
 		})
 
-		audio.onplay = () => {
-			postMessage('event', {name: 'play'})
-		}
-
-		audio.onpause = () => {
-			postMessage('event', {name: 'pause'})
-		}
-
-		audio.onended = () => {
-			postMessage('event', {name: 'end', data: song})
-		}
-
-		audio.ontimeupdate = () => {
-			const update = lyric ? lyric(audio.currentTime) : null
-			if (update) postMessage('event', {name: 'lyric', data: update})
-		}
-
-		audio.onvolumechange = () => {
-			postMessage('event', {name: 'volume', data: {muted: audio.muted, value: audio.volume}})
-		}
-
-		audio.onloadedmetadata = () => {
-			song.duration = audio.duration
-			if (!mpris) mediaSessionHelper.setMetadata(song)
-			postMessage('event', {name: 'load', data: song})
-		}
-
-		audio.onerror = event => {
-			if (event.target.error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) postMessage('event', {name: 'error', data: song})
-		}
-
 		// const webSocket = new WebSocket('ws://localhost:16363')
 		// webSocket.onmessage = event => receiveMessage(event.data)
 
@@ -110,6 +81,32 @@
 		} else {
 			mediaSessionHelper.enableAction()
 		}
+
+		const audioEventListener = {
+			play: () => postMessage('event', { name: 'play' }),
+			pause: () => postMessage('event', { name: 'pause' }),
+			ended: () => postMessage('event', { name: 'end', data: song }),
+			timeupdate: () => {
+				const update = lyric ? lyric(audio.currentTime) : null
+				if (update) postMessage('event', { name: 'lyric', data: update })
+			},
+			volumechange: () => {
+				const { muted, volume } = audio
+				postMessage('event', { name: 'volume', data: { muted, value: volume } })
+			},
+			loadedmetadata: () => {
+				song.duration = audio.duration
+				if (!mpris) mediaSessionHelper.setMetadata(song)
+				postMessage('event', { name: 'load', data: song})
+			},
+			error: event => {
+				if (event.target.error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+					postMessage('event', { name: 'error', data: song })
+				}
+			},
+		}
+
+		Object.entries(audioEventListener).forEach(entry => audio.addEventListener.apply(audio, entry))
 
 		const receiveMessage = message => {
 			message = typeof message === 'object' ? message : JSON.parse(message)
@@ -154,8 +151,9 @@
 					return
 				}
 				case 'trash': {
-					const data = {id: (song || {}).id, time: parseInt((audio || {}).currentTime)}
-					postMessage('event', {name: 'trash', data})
+					const { id } = song || {}
+					const data = { id, time: parseInt(audio.currentTime)} 
+					postMessage('event', { name: 'trash', data })
 					return
 				}
 				default:
