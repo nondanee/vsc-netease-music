@@ -184,7 +184,15 @@
 			document.body.innerHTML = 'Please preserve this webview tab'
 		}
 
-		const prepare = () =>
+		let previousColor
+		const observer = new MutationObserver((mutations) => {
+			const color = getComputedStyle(document.documentElement).getPropertyValue('--vscode-statusBar-foreground')
+			if (previousColor === color) return
+			postMessage('event', { name: 'theme', data: color })
+			previousColor = color
+		});
+
+		const prepare = () => {
 			(new Audio('./silence.mp3')).play()
 			.then(ready)
 			.catch(error => {
@@ -196,6 +204,8 @@
 					postMessage('echo', `${error.name}: ${error.message}`)
 				}
 			})
+			observer.observe(document.documentElement, { attributeFilter: ['style'] })
+		}
 
 		// webSocket.onopen = prepare
 		window.onload = prepare
