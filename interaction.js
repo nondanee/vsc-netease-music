@@ -43,6 +43,20 @@ const utility = {
 			item.cover = program.coverUrl
 			item.source = source
 			return item
+		},
+		color: value => {
+			value = value || ''
+			if (value[0] === '#') {
+				const collen = (value.length - 1) / 3;
+				const fact = [17, 1, 0.062272][collen - 1];
+				return [
+					Math.round(parseInt(value.substr(1, collen), 16) * fact),
+					Math.round(parseInt(value.substr(1 + collen, collen), 16) * fact),
+					Math.round(parseInt(value.substr(1 + 2 * collen, collen), 16) * fact)
+				]
+			} else {
+				return (value.split('(')[1] || '').split(')')[0].split(',').map(x => +x)
+			}
 		}
 	},
 	lift: {
