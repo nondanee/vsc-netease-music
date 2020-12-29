@@ -34,7 +34,7 @@
 		const postMessage = (type, body) => webSocket.send(JSON.stringify({ type, body }))
 
 		// http
-		const postMessage = (type, body) => fetch('http://localhost:16363/receiver', {method: 'POST', body: JSON.stringify({type, body})})
+		const postMessage = (type, body) => fetch('http://localhost:16363/receiver', { method: 'POST', body: JSON.stringify({ type, body }) })
 		*/
 
 		// webview api
@@ -91,7 +91,7 @@
 			loadedmetadata: () => {
 				song.duration = audio.duration
 				if (!mpris) mediaSessionHelper.setMetadata(song)
-				postMessage('event', { name: 'load', data: song})
+				postMessage('event', { name: 'load', data: song })
 			},
 			error: event => {
 				if (event.target.error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
