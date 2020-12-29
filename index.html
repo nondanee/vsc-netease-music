@@ -31,6 +31,19 @@
 		let lyric = null
 		const mpris = window.navigator.userAgent.includes('Linux')
 
+		/*
+		// websocket
+		const webSocket = new WebSocket('ws://localhost:16363')
+		const postMessage = (type, body) => webSocket.send(JSON.stringify({ type, body }))
+
+		// http
+		const postMessage = (type, body) => fetch('http://localhost:16363/receiver', {method: 'POST', body: JSON.stringify({type, body})})
+		*/
+
+		// webview api
+		const native = acquireVsCodeApi()
+		const postMessage = (type, body) => native.postMessage({ type, body })
+
 		const mediaSessionHelper = new Proxy({
 			setMetadata: song => {
 				navigator.mediaSession.metadata = new MediaMetadata({
@@ -59,22 +72,6 @@
 				} catch (e) { console.warn(e) }
 			}
 		})
-
-		// const webSocket = new WebSocket('ws://localhost:16363')
-		// webSocket.onmessage = event => receiveMessage(event.data)
-
-		// const connect = () => fetch('http://localhost:16363').then(response => response.status === 204 ? connect() : response.json()).catch(() => connect())
-		// const polling = () => connect().then(message => (receiveMessage(message), polling()))
-		// polling()
-
-		// const eventSource = new EventSource('http://localhost:16363/sender')
-		// eventSource.onmessage = event => receiveMessage(event.data)
-		window.onmessage = event => receiveMessage(event.data)
-
-		const native = acquireVsCodeApi()
-		const postMessage = (type, body) => native.postMessage({type, body})
-		// const postMessage = (type, body) => webSocket.send(JSON.stringify({type, body}))
-		// const postMessage = (type, body) => fetch('http://localhost:16363/receiver', {method: 'POST', body: JSON.stringify({type, body})})
 
 		if (mpris) {
 			mediaSessionHelper.disableAction()
@@ -160,17 +157,22 @@
 			}			
 		}
 
-		// const cache = url => {
-		// 	fetch(url)
-		// 	.then(response => response.blob())
-		// 	.then(blob => {
-		// 		if (url != audio.src) return
-		// 		const src = window.URL.createObjectURL(blob), {currentTime} = audio
-		// 		audio.src = src
-		// 		audio.currentTime = currentTime
-		// 		audio.play()
-		// 	})
-		// }
+		/*
+		// websocket
+		webSocket.onmessage = event => receiveMessage(event.data)
+
+		// long polling
+		const connect = () => fetch('http://localhost:16363').then(response => response.status === 204 ? connect() : response.json()).catch(() => connect())
+		const polling = () => connect().then(message => (receiveMessage(message), polling()))
+		polling()
+
+		// sse
+		const eventSource = new EventSource('http://localhost:16363/sender')
+		eventSource.onmessage = event => receiveMessage(event.data)
+		*/
+
+		// webview api
+		window.onmessage = event => receiveMessage(event.data)
 
 		const ready = () => {
 			document.onclick = null
