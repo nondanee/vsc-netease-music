@@ -80,7 +80,7 @@ const api = {
 	program: {
 		detail: id => apiRequest('dj/program/detail', { id }),
 		listen: id => apiRequest('dj/program/listen', { id }),
-		url: id => api.program.detail(id).then(data => api.song.url(data.program.mainTrackId)),
+		url: id => api.program.detail(id).then(data => api.song.url(data.program.mainTrackId)), // cheating?
 		comment: id => apiRequest(`v1/resource/comments/A_DJ_1_${id}`, { rid: `A_DJ_1_${id}`, limit: 50, offset: 0 })
 	},
 	album: {
