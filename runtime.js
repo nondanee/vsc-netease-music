@@ -373,7 +373,7 @@ const DuplexChannel = context => {
 				const playing = [program ? album : artist, song.name].join(' - ')
 				const message = `正在播放: ${playing}`
 				if (runtime.preferenceReader.get('Popup.appearance') === 'always') vscode.window.showInformationMessage(message)
-				runtime.playerBar.update(playing)
+				runtime.playerBar.text(playing)
 				runtime.mprisBridge.sync(song)
 				if (song.source.type == 'djradio') api.program.listen(song.id)
 			}
