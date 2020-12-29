@@ -153,13 +153,13 @@ const PlayerBar = context => {
 	const update = () => {
 		order.forEach((group, index) => {
 			const item = items[index]
-			const target = group.some(name => {
+			const target = group.find(name => {
 				const { state } = buttons[name] || {}
 				if (!state) return true
 				return Object.entries(state).every(([key, value]) => runtime.stateManager.get(key) === value)
 			})
 			if (target) {
-				attach(item, target)
+				attach(item, buttons[target])
 				item.show()
 			} else {
 				item.hide()
