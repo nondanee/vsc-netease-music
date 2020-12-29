@@ -2,7 +2,7 @@
     "name": "vsc-netease-music",
     "displayName": "VSC Netease Music",
     "description": "UNOFFICIAL Netease Music extension for Visual Studio Code",
-    "version": "0.0.42",
+    "version": "0.0.43",
     "icon": "icon.png",
     "publisher": "nondanee",
     "repository": "https://github.com/nondanee/vsc-netease-music.git",
@@ -254,7 +254,11 @@
                 "NeteaseMusic.Popup.appearance": {
                     "type": "string",
                     "default": "always",
-                    "enum": ["always", "onerror", "never"],
+                    "enum": [
+                        "always",
+                        "onerror",
+                        "never"
+                    ],
                     "scope": "machine",
                     "description": "%description.neteasemusic.popup.appearance%",
                     "enumDescriptions": [
