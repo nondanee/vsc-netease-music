@@ -178,11 +178,12 @@ const PlayerBar = context => {
 		intelligent: { mode: 3 },
 	}
 
+	const setState = state => Object.entries(state).forEach(([key, value]) => runtime.stateManager.set(key, value))
+
 	return {
 		dispose: () => items.forEach(item => item.dispose()),
 		state: state => {
-			const entries = translation[state] || {}
-			Object.entries(entries).forEach(([key, value]) => runtime.stateManager.set(key, value))
+			setState(translation[state] || {})
 			update()
 		},
 		text: text => {
@@ -191,18 +192,17 @@ const PlayerBar = context => {
 		},
 		volume: data => {
 			const { muted, value } = data
-			runtime.stateManager.set('muted', muted)
+			setState({ muted })
 			buttons.volume.ghost = muted
 			buttons.volume.text = parseInt(value * 100).toString()
 			update()
 		},
 		show: radio => {
-			runtime.stateManager.set('track', true)
-			runtime.stateManager.set('radio', radio)
+			setState({ track: true, playing: false, radio })
 			update()
 		},
 		hide: () => {
-			runtime.stateManager.set('track', false)
+			setState({ track: false })
 			items.forEach(item => item.hide())
 		},
 		color: value => {
@@ -609,4 +609,3 @@ module.exports = runtime
 const api = require('./request.js')
 const controller = require('./controller.js')
 const interaction = require('./interaction.js')
-const { refresh } = require('./request.js')
