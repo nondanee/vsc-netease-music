@@ -25,9 +25,14 @@
 			return timeline.length ? second => (timeline[cursor] && second > timeline[cursor][0]) ? timeline[cursor ++][1].join('  ') : null : null
 		}
 
+		const mpris = window.navigator.userAgent.includes('Linux')
+
 		let song = null
 		let lyric = null
-		const mpris = window.navigator.userAgent.includes('Linux')
+		let audioProxy = (window.origin || '').startsWith('vscode')
+			? `http://${host}`
+			: `/proxy/${host.split(':')[1]}`
+		fetch(audioProxy).then(response => audioProxy = response.url.replace(/\/+$/, ''))
 
 		/*
 		// websocket
@@ -114,9 +119,7 @@
 					const path = song.source.type === 'djradio'
 						? `program/${song.id}`
 						: `song/${song.id}`
-					audio.src = (window.origin || '').startsWith('vscode')
-						? `http://${host}/${path}`
-						: `/proxy/${host.split(':')[1]}/${path}`
+					audio.src = `${audioProxy}/${path}`
 					if (data.action) audio.play()
 					return
 				}

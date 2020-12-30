@@ -448,7 +448,11 @@ const AssistServer = context => {
 
 	const server = require('http').createServer()
 	.on('request', (req, res) => {
-		if (req.method === 'option') return res.end()
+		if (req.url === '/' || (req.method).toUpperCase() === 'OPTIONS') {
+			res.writeHead(204, { 'access-control-allow-origin': '*' })
+			return res.end()
+		}
+
 		const url = urlParse(req.url)
 		const query = queryParse(url.query)
 		const headers = Object.assign({}, req.headers)
