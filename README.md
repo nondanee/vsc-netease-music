@@ -105,9 +105,11 @@ curl https://gist.githubusercontent.com/nondanee/f157bbbccecfe29e48d87273cd02e21
 
 ## Extension Setting
 
+* `NeteaseMusic.Popup.appearance`: 总是 / 仅失败时 / 从不显示 "正在播放" 提示
 * `NeteaseMusic.API.SSL`: 启用 / 禁用 HTTPS API
 * `NeteaseMusic.SSL.strict`: 启用 / 禁用 SSL 证书检查
 * `NeteaseMusic.CDN.redirect`: 启用 / 禁用海外 CDN 重定向
+* `NeteaseMusic.PIN.auto`: 启用 / 禁用自动固定 Webview 标签页
 
 ## Known Issue
 
