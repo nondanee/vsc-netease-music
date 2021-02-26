@@ -41,6 +41,8 @@
 
 *VS Code for Windows 1.31.0 - 1.35.1 不需替换，1.36.0 后无此待遇*
 
+*VS Code for macOS 1.43+ 替换后闪退[解决方案](https://github.com/nondanee/vsc-netease-music/issues/86#issuecomment-786546931)*
+
 <details><summary>
 <b>Manual Replacement</b>
 </summary>
