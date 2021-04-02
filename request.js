@@ -1,8 +1,14 @@
 const http = require('http')
 const https = require('https')
 const crypto = require('crypto')
-const parse = require('url').parse
+const URL = require('url').URL
 const querystring = require('querystring')
+
+URL.prototype.resolve = function(relative){
+	return new URL(relative, this).toString();
+}
+
+const parse = (url) => new URL(url)
 
 let user = {}
 
@@ -14,7 +20,7 @@ const encrypt = object => {
 
 const request = (method, url, headers, body = null) =>
 	new Promise((resolve, reject) => {
-		(url.startsWith('https://') ? https : http).request(Object.assign(parse(url), { method, headers }))
+		(url.startsWith('https://') ? https : http).request(parse(url), { method, headers })
 		.on('response', response => resolve([201, 301, 302, 303, 307, 308].includes(response.statusCode) ? request(method, parse(url).resolve(response.headers.location), headers, body) : response))
 		.on('error', error => reject(error)).end(body)
 	})

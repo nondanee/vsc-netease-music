@@ -422,7 +422,13 @@ const DuplexChannel = context => {
 }
 
 const AssistServer = context => {
-	const urlParse = require('url').parse
+	const URL = require('url').URL
+	Object.defineProperty(URL.prototype, 'query', {
+		get: function query(){
+			return this.searchParams.toString()
+		}
+	})
+	const urlParse = (url) => new URL(url, url.startsWith('/')?'relative://':'')
 	const queryify = require('querystring').stringify
 	const queryParse = require('querystring').parse
 
